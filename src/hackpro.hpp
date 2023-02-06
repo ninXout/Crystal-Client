@@ -16,9 +16,12 @@
 #include <numbers>
 #include <Geode/utils/fetch.hpp>
 #include <dirent.h>
+#include "amethyst.hpp"
 
 bool purchase = false;
 bool water = false;
+cocos2d::CCScene* gui;
+ImGuiNode* node;
 
 USE_GEODE_NAMESPACE();
 
