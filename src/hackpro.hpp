@@ -4,22 +4,16 @@
 #include "imgui-cocos.hpp"
 #include "HitboxNode.hpp"
 #include "imgui.h"
-#include <Geode/fmod/fmod.hpp>
-#include <Geode/fmod/fmod.h>
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <list>
 #include <algorithm>
 #include <thread>
 #include <chrono>
 #include <numbers>
-#include <Geode/utils/fetch.hpp>
 #include <dirent.h>
 #include "amethyst.hpp"
 
-bool purchase = false;
-bool water = false;
 cocos2d::CCScene* gui;
 ImGuiNode* node;
 
