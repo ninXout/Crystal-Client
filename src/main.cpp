@@ -4,6 +4,43 @@
 // dispatchKeyboardMSG is where the imgui is
 
 class $modify(MainDispatcher, CCKeyboardDispatcher) {
+	void saveMods() {
+		std::ofstream clear("Crystal/modconfig.cmp");
+    	clear << "";
+		clear.close();
+		std::fstream config("Crystal/modconfig.cmp", std::ios::app);
+		for (int s = 0; s < playerHacks.size(); s++) {
+			config << playerBools[s] << '\n';
+		}
+		for (int s = 0; s < guiHacks.size(); s++) {
+			config << guiBools[s] << '\n';
+		}
+		config.close();
+	}
+
+	void loadMods() {
+		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
+		for (int s = 0; s < playerHacks.size(); s++) {
+			std::string playerH;
+			std::getline(config, playerH);
+			if (playerH == "1") {
+				playerBools[s] = true;
+			} else {
+				playerBools[s] = false;
+			}
+		}
+		for (int s = 0; s < guiHacks.size(); s++) {
+			std::string guiH;
+			std::getline(config, guiH);
+			if (guiH == "1") {
+				guiBools[s] = true;
+			} else {
+				guiBools[s] = false;
+			}
+		}
+		config.close();
+	}
+
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
 		auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
 		node = ImGuiNode::create([]() {
@@ -11,7 +48,23 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				ImGuiStyle * style = &ImGui::GetStyle();
 				ImVec4* colours = ImGui::GetStyle().Colors;
 
-DarkColour[0] = (LightColour[0] * 0.5f);
+	if (sameAsAccent) {
+		for (int a = 0; a < 3; a++) {
+			BGColour[a] = LightColour[a];
+		}
+	}
+
+	if (RGBAccent) {
+		LightColour[0] = LightColour[0] + rDir;
+		LightColour[1] = LightColour[1] + gDir;
+		LightColour[2] = LightColour[2] + bDir;
+
+		if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
+		if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
+		if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
+	}
+
+	DarkColour[0] = (LightColour[0] * 0.5f);
 	DarkColour[1] = (LightColour[1] * 0.5f);
 	DarkColour[2] = (LightColour[2] * 0.5f);
 	DarkColour[3] = LightColour[3];
@@ -23,7 +76,7 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 	style->FrameRounding = 4.0f;
 	style->GrabRounding = 4.0f;
 	style->Alpha = 1.f;
-	//style->WindowRounding = 12.f;
+	style->WindowRounding = rounded ? 12.f : 0.f;
 	style->FrameRounding = 4.f;
 	style->ScrollbarSize = 2.f;
 	style->ScrollbarRounding = 12.f;
@@ -32,7 +85,7 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 	colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
 	colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
 	colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
-	colours[ImGuiCol_Border] = RGBAtoIV4(LightColour);
+	colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
 	colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
 	colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
 	colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
@@ -57,6 +110,7 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 					}
 				}
 				ImGui::End();
+				//ImGui::ShowDemoWindow();
 				ImGui::Begin("Display");
 				for (int i = 0; i < guiHacks.size(); i++) {
 					const char* name = guiHacks[i];
@@ -84,6 +138,14 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 					}
 				}
 				ImGui::End();
+				ImGui::Begin("Customization");
+				ImGui::ColorEdit4("Accent Color", LightColour);
+				ImGui::ColorEdit4("Base Color", BGColour);
+				ImGui::Checkbox("Base Color Same As Accent Color", &sameAsAccent);
+				ImGui::Checkbox("RGB Accent Color", &RGBAccent);
+				ImGui::Checkbox("Borders", &borders);
+				ImGui::Checkbox("Rounded Windows", &rounded);
+				ImGui::End();
 				ImGui::Begin("Bypasses");
 				for (int i = 0; i < bypassHacks.size(); i++) {
 					const char* name = bypassHacks[i];
@@ -91,15 +153,9 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 				}
 				ImGui::End();
 				ImGui::Begin("Global");
-				for (int i = 0; i < globalHacks.size(); i++) {
-					const char* name = globalHacks[i];
-					ImGui::Checkbox(name, &globalBools[i]);
-					if (i == 0) ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
-					if (i == 1) {
-						ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
-						if (!classicspeed) CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
-					}
-				}
+				ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
+				ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
+				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
 				ImGui::End();
 				ImGui::Begin("Amethyst [BETA]");
 				ImGui::Checkbox("Record", &record);
@@ -123,8 +179,8 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 				ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
 				ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
 				if (ImGui::Button("Add Keybind")) {
-					//activeKeys.push_back(keyCodes[currentKey]);
-					//activeMods.push_back(currentMod);
+					activeKeys.push_back(currentKey);
+					activeMods.push_back(currentMod);
 				}
 				ImGui::End();
 				ImGui::Begin("Shortcuts");
@@ -150,13 +206,10 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 				ImGui::End();
 			}
 		});
-		cocos2d::CCLayer* layer;
         if (down && key == KEY_Tab) {
             if (!showing) {
-				//loadMods();
 				if (node) {
 					gui = CCScene::create();
-					node->setZOrder(999999);
 					CCSprite* shoplifting = CCSprite::create("shoplifter.jpg");
 					if (shoplifting != nullptr) {
 						shoplifting->setPositionX(500);
@@ -166,15 +219,16 @@ DarkColour[0] = (LightColour[0] * 0.5f);
 					}
 					gui->addChild(node);
 					CCDirector::sharedDirector()->getRunningScene()->addChild(gui);
-					//CCDirector::sharedDirector()->getTouchDispatcher()->decrementForcePrio(2);
+					gui->setZOrder(99999);
+					//CCDirector::sharedDirector()->getTouchDispatcher()->setTouchEnabled(false);
 				}
 				platform->showCursor();
 				showing = true;
 			} else {
+				saveMods();
 				gui->removeFromParent();
-				//saveMods();
 				gui = nullptr;
-				if (PlayLayer::get()) platform->hideCursor();
+				if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
 				showing = false;
 			}
             return true;
@@ -207,8 +261,11 @@ class Patch2 : public Patch {
  		m_address = (void*)address;
  		m_owner = Mod::get();
  	}
+};
 
-	Patch2(char patch, char original, uintptr_t address) : Patch() {
+class Patch3 : public Patch {
+ public:
+ 	Patch3(char patch, char original, uintptr_t address) : Patch() {
  		m_patch = {patch};
  		m_original = {original};
  		m_address = (void*)(base::get() + address);
@@ -218,9 +275,9 @@ class Patch2 : public Patch {
 
 GEODE_API void GEODE_DLL geode_load(Mod* m) {
 	fps_shower_init();
-		Patch2* lol = new Patch2('\xeb', '\x76', base::get() + 0x18D811);
+		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
 		lol->apply();
-		Patch2* lol2 = new Patch2('\xeb', '\x76', base::get() + 0x18D7D9);
+		Patch2* lol2 = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D7D9);
 		lol2->apply();
 
 
@@ -229,16 +286,19 @@ GEODE_API void GEODE_DLL geode_load(Mod* m) {
 		Patch2* lol4 = new Patch2({'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, base::get() + 0x2533f);
 		lol4->apply();
 
-		(new Patch2('\xeb', '\x7c', 0x18bfa))->apply();
-		(new Patch2('\xeb', '\x7c', 0x18f25))->apply();
-		(new Patch2('\xeb', '\x7c', 0x1b991))->apply();
+		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
+
+		(new Patch3('\xeb', '\x7c', 0x18bfa))->apply();
+		(new Patch3('\xeb', '\x7c', 0x18f25))->apply();
+		(new Patch3('\xeb', '\x7c', 0x1b991))->apply();
 
 		(new Patch2({'\x66', '\x0f', '\x1f', '\x44', '\x00', '\x00'}, {'\x66', '\x0f', '\x1f', '\x44', '\x00', '\x00'}, 0x949cd))->apply();
 		(new Patch2({'\x66', '\x0f', '\x1f', '\x44', '\x00', '\x00'}, {'\x66', '\x0f', '\x1f', '\x44', '\x00', '\x00'}, 0x94b1d))->apply();
 
+		// custom object 
 		(new Patch2({'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}, 0x1d67c))->apply();
 		(new Patch2({'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, 0x1d869))->apply();
-
+		// custom objects
 		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
 }
 
@@ -332,6 +392,33 @@ class FPSOverlay : public cocos2d::CCNode {
         }
 		*/
     }
+};
+
+class $modify(MenuLayer) {
+	bool init() {
+		MenuLayer::init();
+		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
+		for (int s = 0; s < playerHacks.size(); s++) {
+			std::string playerH;
+			std::getline(config, playerH);
+			if (playerH == "1") {
+				playerBools[s] = true;
+			} else {
+				playerBools[s] = false;
+			}
+		}
+		for (int s = 0; s < guiHacks.size(); s++) {
+			std::string guiH;
+			std::getline(config, guiH);
+			if (guiH == "1") {
+				guiBools[s] = true;
+			} else {
+				guiBools[s] = false;
+			}
+		}
+		config.close();
+		return true;
+	}
 };
 
 void fps_shower_init() {
@@ -626,7 +713,7 @@ class $modify(EditLevelLayer) {
 class $modify(GameManager) {
 		bool isIconUnlocked(int a, IconType b) {
 			auto icon = GameManager::isIconUnlocked(a,b);
-			if (bypassBools[1]) {
+			if (!bypassBools[1]) {
 				return true;
 			} else {
 				return icon;
@@ -634,7 +721,7 @@ class $modify(GameManager) {
 		} 
 		bool isColorUnlocked(int a, bool b) {
 			auto color = GameManager::isColorUnlocked(a,b);
-			if (bypassBools[1]) {
+			if (!bypassBools[1]) {
 				return true;
 			} else {
 				return color;
@@ -816,6 +903,12 @@ class $(LevelInfoLayer) {
 };
 
 class $modify(PauseLayer) {
+	static PauseLayer* create(bool isPaused) {
+		auto pause = PauseLayer::create(isPaused);
+		pauseZorder = pause->getZOrder();
+		return pause;
+	}
+
 	void keyDown(cocos2d::enumKeyCodes key) {
 		if (key == KEY_Escape) {
 			if (!playerBools[18]) {
@@ -1414,17 +1507,18 @@ class $modify(Main, PlayLayer) {
 			autoKill = false; // so it doesnt loop
 		}
 		if (s_showOnDeath) {
-			if (!turnonHitbox) return;
-			if (!s_drawOnDeath) return;
+			if (!s_drawOnDeath || !playerBools[7]) return;
 			drawer->setVisible(true);
 		}		
 
-		if (m_player1) {
+		if (m_player1 && playerBools[7]) {
 			drawer->drawForPlayer1(m_player1);
 		}
-		if (m_player2) {
+		if (m_player2 && playerBools[7]) {
 			drawer->drawForPlayer2(m_player2);
 		}
+
+		s_showOnDeath = playerBools[6];
 
 		float xp = m_player1->getPositionX();
 
@@ -1440,7 +1534,7 @@ class $modify(Main, PlayLayer) {
 				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
 				if (!obj->m_active) continue;
 
-				drawer->drawForObject(obj);
+				if (playerBools[7]) drawer->drawForObject(obj);
 			}
 		}
 	}
@@ -1732,7 +1826,7 @@ class $modify(Main, PlayLayer) {
 
 		s_showOnDeath = playerBools[6];
 		drawer->m_drawTrail = playerBools[8];
-		s_onlyHitboxes = playerBools[7];
+		s_onlyHitboxes = false;
 		if (s_showOnDeath) s_drawOnDeath = false;
 
 		frame = 0;
@@ -1985,207 +2079,10 @@ class $modify(Main, PlayLayer) {
 };
 
 class $(UILayer) {
-	void customKeybind(int current, cocos2d::enumKeyCodes key) {
-	if (current == 0) {
-		if (current == key_current) customKey = KEY_A;
-		if (current == key_current2) customKey2 = KEY_A;
-		if (current == key_current3) customKey3 = KEY_A;
-		if (current == key_current4) customKey4 = KEY_A;
-		if (current == key_current5) customKey5 = KEY_A;
-	} else if (current == 1) {
-		if (current == key_current) customKey = KEY_B;
-		if (current == key_current2) customKey2 = KEY_B;
-		if (current == key_current3) customKey3 = KEY_B;
-		if (current == key_current4) customKey4 = KEY_B;
-		if (current == key_current5) customKey5 = KEY_B;
-	} else if (current == 2) {
-		if (current == key_current) customKey = KEY_C;
-		if (current == key_current2) customKey2 = KEY_C;
-		if (current == key_current3) customKey3 = KEY_C;
-		if (current == key_current4) customKey4 = KEY_C;
-		if (current == key_current5) customKey5 = KEY_C;
-	} else if (current == 3) {
-		if (current == key_current) customKey = KEY_D;
-		if (current == key_current2) customKey2 = KEY_D;
-		if (current == key_current3) customKey3 = KEY_D;
-		if (current == key_current4) customKey4 = KEY_D;
-		if (current == key_current5) customKey5 = KEY_D;
-	} else if (current == 4) {
-		if (current == key_current) customKey = KEY_E;
-		if (current == key_current2) customKey2 = KEY_E;
-		if (current == key_current3) customKey3 = KEY_E;
-		if (current == key_current4) customKey4 = KEY_E;
-		if (current == key_current5) customKey5 = KEY_E;
-	} else if (current == 5) {
-		if (current == key_current) customKey = KEY_F;
-		if (current == key_current2) customKey2 = KEY_F;
-		if (current == key_current3) customKey3 = KEY_F;
-		if (current == key_current4) customKey4 = KEY_F;
-		if (current == key_current5) customKey5 = KEY_F;
-	} else if (current == 6) {
-		if (current == key_current) customKey = KEY_G;
-		if (current == key_current2) customKey2 = KEY_G;
-		if (current == key_current3) customKey3 = KEY_G;
-		if (current == key_current4) customKey4 = KEY_G;
-		if (current == key_current5) customKey5 = KEY_G;
-	} else if (current == 7) {
-		if (current == key_current) customKey = KEY_H;
-		if (current == key_current2) customKey2 = KEY_H;
-		if (current == key_current3) customKey3 = KEY_H;
-		if (current == key_current4) customKey4 = KEY_H;
-		if (current == key_current5) customKey5 = KEY_H;
-	} else if (current == 8) {
-		if (current == key_current) customKey = KEY_I;
-		if (current == key_current2) customKey2 = KEY_I;
-		if (current == key_current3) customKey3 = KEY_I;
-		if (current == key_current4) customKey4 = KEY_I;
-		if (current == key_current5) customKey5 = KEY_I;
-	} else if (current == 9) {
-		if (current == key_current) customKey = KEY_J;
-		if (current == key_current2) customKey2 = KEY_J;
-		if (current == key_current3) customKey3 = KEY_J;
-		if (current == key_current4) customKey4 = KEY_J;
-		if (current == key_current5) customKey5 = KEY_J;
-	} else if (current == 10) {
-		if (current == key_current) customKey = KEY_K;
-		if (current == key_current2) customKey2 = KEY_K;
-		if (current == key_current3) customKey3 = KEY_K;
-		if (current == key_current4) customKey4 = KEY_K;
-		if (current == key_current5) customKey5 = KEY_K;
-	} else if (current == 11) {
-		if (current == key_current) customKey = KEY_L;
-		if (current == key_current2) customKey2 = KEY_L;
-		if (current == key_current3) customKey3 = KEY_L;
-		if (current == key_current4) customKey4 = KEY_L;
-		if (current == key_current5) customKey5 = KEY_L;
-	} else if (current == 12) {
-		if (current == key_current) customKey = KEY_M;
-		if (current == key_current2) customKey2 = KEY_M;
-		if (current == key_current3) customKey3 = KEY_M;
-		if (current == key_current4) customKey4 = KEY_M;
-		if (current == key_current5) customKey5 = KEY_M;
-	} else if (current == 13) {
-		if (current == key_current) customKey = KEY_N;
-		if (current == key_current2) customKey2 = KEY_N;
-		if (current == key_current3) customKey3 = KEY_N;
-		if (current == key_current4) customKey4 = KEY_N;
-		if (current == key_current5) customKey5 = KEY_N;
-	} else if (current == 14) {
-		if (current == key_current) customKey = KEY_O;
-		if (current == key_current2) customKey2 = KEY_O;
-		if (current == key_current3) customKey3 = KEY_O;
-		if (current == key_current4) customKey4 = KEY_O;
-		if (current == key_current5) customKey5 = KEY_O;
-	} else if (current == 15) {
-		if (current == key_current) customKey = KEY_P;
-		if (current == key_current2) customKey2 = KEY_P;
-		if (current == key_current3) customKey3 = KEY_P;
-		if (current == key_current4) customKey4 = KEY_P;
-		if (current == key_current5) customKey5 = KEY_P;
-	} else if (current == 16) {
-		if (current == key_current) customKey = KEY_Q;
-		if (current == key_current2) customKey2 = KEY_Q;
-		if (current == key_current3) customKey3 = KEY_Q;
-		if (current == key_current4) customKey4 = KEY_Q;
-		if (current == key_current5) customKey5 = KEY_Q;
-	} else if (current == 17) {
-		if (current == key_current) customKey = KEY_R;
-		if (current == key_current2) customKey2 = KEY_R;
-		if (current == key_current3) customKey3 = KEY_R;
-		if (current == key_current4) customKey4 = KEY_R;
-		if (current == key_current5) customKey5 = KEY_R;
-	} else if (current == 18) {
-		if (current == key_current) customKey = KEY_S;
-		if (current == key_current2) customKey2 = KEY_S;
-		if (current == key_current3) customKey3 = KEY_S;
-		if (current == key_current4) customKey4 = KEY_S;
-		if (current == key_current5) customKey5 = KEY_S;
-	} else if (current == 19) {
-		if (current == key_current) customKey = KEY_T;
-		if (current == key_current2) customKey2 = KEY_T;
-		if (current == key_current3) customKey3 = KEY_T;
-		if (current == key_current4) customKey4 = KEY_T;
-		if (current == key_current5) customKey5 = KEY_T;
-	} else if (current == 20) {
-		if (current == key_current) customKey = KEY_U;
-		if (current == key_current2) customKey2 = KEY_U;
-		if (current == key_current3) customKey3 = KEY_U;
-		if (current == key_current4) customKey4 = KEY_U;
-		if (current == key_current5) customKey5 = KEY_U;
-	} else if (current == 21) {
-		if (current == key_current) customKey = KEY_V;
-		if (current == key_current2) customKey2 = KEY_V;
-		if (current == key_current3) customKey3 = KEY_V;
-		if (current == key_current4) customKey4 = KEY_V;
-		if (current == key_current5) customKey5 = KEY_V;
-	} else if (current == 22) {
-		if (current == key_current) customKey = KEY_W;
-		if (current == key_current2) customKey2 = KEY_W;
-		if (current == key_current3) customKey3 = KEY_W;
-		if (current == key_current4) customKey4 = KEY_W;
-		if (current == key_current5) customKey5 = KEY_W;
-	} else if (current == 23) {
-		if (current == key_current) customKey = KEY_X;
-		if (current == key_current2) customKey2 = KEY_X;
-		if (current == key_current3) customKey3 = KEY_X;
-		if (current == key_current4) customKey4 = KEY_X;
-		if (current == key_current5) customKey5 = KEY_X;
-	} else if (current == 24) {
-		if (current == key_current) customKey = KEY_Y;
-		if (current == key_current2) customKey2 = KEY_Y;
-		if (current == key_current3) customKey3 = KEY_Y;
-		if (current == key_current4) customKey4 = KEY_Y;
-		if (current == key_current5) customKey5 = KEY_Y;
-	} else if (current == 25) {
-		if (current == key_current) customKey = KEY_Z;
-		if (current == key_current2) customKey2 = KEY_Z;
-		if (current == key_current3) customKey3 = KEY_Z;
-		if (current == key_current4) customKey4 = KEY_Z;
-		if (current == key_current5) customKey5 = KEY_Z;
-	} else if (current == 26) {
-		if (current == key_current) customKey = KEY_Left;
-		if (current == key_current2) customKey2 = KEY_Left;
-		if (current == key_current3) customKey3 = KEY_Left;
-		if (current == key_current4) customKey4 = KEY_Left;
-		if (current == key_current5) customKey5 = KEY_Left;
-	} else if (current == 27) {
-		if (current == key_current) customKey = KEY_Right;
-		if (current == key_current2) customKey2 = KEY_Right;
-		if (current == key_current3) customKey3 = KEY_Right;
-		if (current == key_current4) customKey4 = KEY_Right;
-		if (current == key_current5) customKey5 = KEY_Right;
-	} else if (current == 28) {
-		if (current == key_current) customKey = KEY_One;
-		if (current == key_current2) customKey2 = KEY_One;
-		if (current == key_current3) customKey3 = KEY_One;
-		if (current == key_current4) customKey4 = KEY_One;
-		if (current == key_current5) customKey5 = KEY_One;
-	} else if (current == 29) {
-		if (current == key_current) customKey = KEY_Two;
-		if (current == key_current2) customKey2 = KEY_Two;
-		if (current == key_current3) customKey3 = KEY_Two;
-		if (current == key_current4) customKey4 = KEY_Two;
-		if (current == key_current5) customKey5 = KEY_Two;
-	} else if (current == 30) {
-		if (current == key_current) customKey = KEY_Three;
-		if (current == key_current2) customKey2 = KEY_Three;
-		if (current == key_current3) customKey3 = KEY_Three;
-		if (current == key_current4) customKey4 = KEY_Three;
-		if (current == key_current5) customKey5 = KEY_Three;
-	} else if (current == 31) {
-		if (current == key_current) customKey = KEY_Four;
-		if (current == key_current2) customKey2 = KEY_Four;
-		if (current == key_current3) customKey3 = KEY_Four;
-		if (current == key_current4) customKey4 = KEY_Four;
-		if (current == key_current5) customKey5 = KEY_Four;
-	} else if (current == 32) {
-		if (current == key_current) customKey = KEY_Five;
-		if (current == key_current2) customKey2 = KEY_Five;
-		if (current == key_current3) customKey3 = KEY_Five;
-		if (current == key_current4) customKey4 = KEY_Five;
-		if (current == key_current5) customKey5 = KEY_Five;
+
+	cocos2d::enumKeyCodes modToKey(int index) {
+		return keyCodes[index];
 	}
-}
 
 	void customMod(int current) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
@@ -2226,6 +2123,7 @@ class $(UILayer) {
 
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
+		/*
 		customKeybind(key_current, customKey);
 		customKeybind(key_current2, customKey2);
 		customKeybind(key_current3, customKey3);
@@ -2248,6 +2146,15 @@ class $(UILayer) {
 			customMod(mod_current5);
 		} else {
 			UILayer::keyDown(kc);
+		}
+		*/
+
+		UILayer::keyDown(kc);
+
+		int newIndex = activeKeys[0];
+		if (kc == KEY_A) {
+			int index = activeMods[0];
+			playerBools[index] = true;
 		}
 	}
 };

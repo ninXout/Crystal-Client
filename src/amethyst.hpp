@@ -62,8 +62,8 @@ bool showedMacroComplete = false;
 static char macroName[30] = "";
 
 // ImGui
-float BGColour[4] = { 31.0f, 31.0f, 31.0f, 1.0f };
-float LightColour[4] = { 20.0f, 121.0f, 245.0f, 1.0f };
+float BGColour[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+float LightColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 float DarkColour[4];
 float VeryLightColour[4];
 bool savedBtnPressed = false;
@@ -77,9 +77,9 @@ int maxFrame = 0;
 bool SelectMacro = false;
 
 ImVec4 RGBAtoIV4(float rgb[4]) {
-	float newr = rgb[0] / 255.0f;
-	float newg = rgb[1] / 255.0f;
-	float newb = rgb[2] / 255.0f;
+	float newr = rgb[0];
+	float newg = rgb[1];
+	float newb = rgb[2];
 	float newa = rgb[3];
 	return ImVec4(newr, newg, newb, newa);
 }

@@ -29,6 +29,13 @@ CCLabelBMFont* g_startPosText;
 bool g_toReset;
 
 int completepos;
+int pauseZorder;
+
+// Customization
+bool sameAsAccent;
+bool RGBAccent;
+bool borders;
+bool rounded;
 
 // Checkpoint Switcher
 bool cpswitch;
@@ -86,7 +93,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
 "Rainbow Wave Trail", //playerBools[4]
 "Same Color Dual", //playerBools[5]
 "Show Hitboxes on Death", //playerBools[6]
-"Show only Hitboxes", //playerBools[7]
+"Show Hitboxes", //playerBools[7]
 "Show Hitbox trail", //playerBools[8]
 "Show Hitboxes in Editor", //playerBools[9]
 "Disable Death Effect", //playerBools[10]
@@ -408,8 +415,8 @@ const char* modbindings[10];
 
 std::vector<std::pair<cocos2d::enumKeyCodes, int>> bindvector;
 
-std::vector<cocos2d::enumKeyCodes> activeKeys;
-std::vector<int> activeMods;
+std::vector<unsigned int> activeKeys;
+std::vector<unsigned int> activeMods;
 
 static int currentKey;
 static int currentMod;
