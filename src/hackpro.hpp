@@ -4,23 +4,25 @@
 #include "imgui-cocos.hpp"
 #include "HitboxNode.hpp"
 #include "imgui.h"
+#include <Geode/fmod/fmod.hpp>
+#include <Geode/fmod/fmod.h>
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <filesystem>
+#include <list>
 #include <algorithm>
 #include <thread>
 #include <chrono>
 #include <numbers>
+#include <Geode/utils/fetch.hpp>
 #include <dirent.h>
-#include "amethyst.hpp"
 
-cocos2d::CCScene* gui;
-ImGuiNode* node;
+bool purchase = false;
+bool water = false;
+int framing;
 
 USE_GEODE_NAMESPACE();
-
-using namespace tulip;
-using namespace geode::cocos;
 
 // StartPos Switcher
 std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
@@ -29,13 +31,6 @@ CCLabelBMFont* g_startPosText;
 bool g_toReset;
 
 int completepos;
-int pauseZorder;
-
-// Customization
-bool sameAsAccent;
-bool RGBAccent;
-bool borders;
-bool rounded;
 
 // Checkpoint Switcher
 bool cpswitch;
@@ -72,115 +67,17 @@ std::vector<GameObject*> g_activated_objects_p2; // amazing
 std::vector<std::pair<size_t, size_t>> g_orbCheckpoints;
 bool practiceOrb;
 
-// Smart Start Pos
-std::vector<GameObject*> gravityPortals;
-std::vector<GameObject*> gamemodePortals;
-std::vector<GameObject*> mirrorPortals;
-std::vector<GameObject*> miniPortals;
-std::vector<GameObject*> dualPortals;
-std::vector<GameObject*> speedChanges;
-std::vector<StartPosObject*> SPs;
-std::vector<bool> willFlip;
-
-bool hack;
-
 // The Hacks
-std::vector<const char*> playerHacks = { // player hacks comments are wrong
-"Noclip Player 1", //playerBools[0]
-"Noclip Player 2", //playerBools[1]
-"Rainbow Icon P1", //playerBools[2]
-"Rainbow Icon P2", //playerBools[3]
-"Rainbow Wave Trail", //playerBools[4]
-"Same Color Dual", //playerBools[5]
-"Show Hitboxes on Death", //playerBools[6]
-"Show Hitboxes", //playerBools[7]
-"Show Hitbox trail", //playerBools[8]
-"Show Hitboxes in Editor", //playerBools[9]
-"Disable Death Effect", //playerBools[10]
-"Disable Particles", //playerBools[11]
-"Disable Progressbar", //playerBools[12]
-"Accurate Percentage", //playerBools[13]
-"No Wave Pulse", //playerBools[14]
-"Hide Attempts", //playerBools[15]
-"Hide Attempts in Practice Mode", //playerBools[16]
-"Practice Music Hack", //playerBools[17]
-"Ignore ESC", //playerBools[18]
-"Confirm Quit", //playerBools[19]
-"Auto LDM", //playerBools[20]
-"Instant Death Respawn", //playerBools[21]
-"Flipped Dual Controls", //playerBools[22]
-"Mirrored Dual Controls", //playerBools[23]
-"StartPos Switcher", //playerBools[24]
-"Respawn Bug Fix", //playerBools[25]
-"Practice Orb Bugfix", //playerBools[26]
-"Checkpoint Switcher", //playerBools[27]
-"Solid Wave Trail",//playerBools[28]
-"Frame Stepper", //playerBools[29]
-"Load from Last Checkpoint", //playerBools[30]
-"Auto Reset", //playerBools[31]
-"Invisible Player", //playerBools[32]
-"No Trail", //playerBools[33]
-"No Glow", //playerBools[34]
-"No Spikes", //playerBools[35]
-"No Mirror", //playerBools[36]
-"Force Dont Fade", //playerBools[37]
-"Force Dont Enter", //playerBools[38]
-"Layout Mode", //playerBools[39]
-"AutoClicker", //playerBools[40]
-"Smart StartPos" //playerBools[41]
-};
-bool playerBools[45] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
-std::vector<const char*> globalHacks = { 
-    "FPS Bypass",
-    "Speedhack",
-    "Safe Mode",
-    "No Transition",
-    "No Rotation",
-    "Mute on Unfocus",
-};
-bool globalBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
-std::vector<const char*> bypassHacks = { 
-    "Anticheat Bypass", //d
-    "Unlock All", //d
-    "Object Limit Bypass", //d
-    "Custom Object Object Limit Bypass", //d
-    "Custom Object Limit Bypass", //d
-    "Verify Bypass", //d
-    "Copy Bypass", //d
-    "Slider Bypass", //d
-    "Editor Zoom Bypass", //d
-    "Instant Complete", //d
-};
-bool bypassBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
-std::vector<const char*> guiHacks = { 
-    "Custom Message", //d (still need text input)
-    "FPS Display", //d
-    "CPS and Clicks", //d
-    "Jumps", //d
-    "Cheat Indicator", //d
-    "Last Death", //d
-    "Attempts Display", //d
-    "Best Run", //d
-    "Run From", //d
-    "Noclip Accuracy", //d (still need reset accuracy)
-    "Noclip Deaths", //d
-    "Total Attempts", //d
-    "Level Name and ID", //d
-    "Hide ID", //d
-    "Show Author", //d
-};
-bool guiBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
-
 float speedhack = 1;
 bool noclip;
-bool deathEffect;
-bool particles;
-bool progressBar;
-bool accpercentage;
+bool deathEffect = true;
+bool particles = true;
+bool progressBar = true;
+bool accpercentage = true;
 bool nopulse;
 float pulse = 2;
-bool freecopy;
-bool unlockall;
+bool freecopy = true;
+bool unlockall = true;
 bool hideatts;
 bool hidepracatts;
 bool safe;
@@ -342,90 +239,34 @@ cocos2d::ccColor3B secondary;
 cocos2d::ccColor3B primary;
 
 // Amethyst
-bool record;
+bool recording;
 bool replay;
-bool frameAccuracy;
+bool amethyst;
 char macroname[25];
-std::vector<float> xpos;
-std::vector<float> ypos;
-std::vector<float> rot;
-std::vector<bool> push;
+std::vector<float> push;
+std::vector<float> rel;
+std::vector<float> pos;
+std::vector<float> relpos;
+int pushIterate = 1;
+int releaseIterate = 1;
+int posIterate = 1;
 bool clickBot;
+bool smoothFrames;
 bool pushing;
+int macrowait;
+std::filesystem::path macroPath = std::filesystem::current_path() / "Crystal" / "Amethyst" / "Macros";
+const char* macrosList[] = { "None", "Empty", "Empty", "Empty", "Empty", "Empty", "Empty", "Empty", "Empty", "Empty" };
+std::vector<std::string> macroVector;
+static int macro_current_idx = 0;
+double yAccelP1;
+double yAccelP2;
 
 int theme = 1;
 
 // Keybindings
-std::vector<const char*> bindMods = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint" };
-std::vector<const char*> bindKeys = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Backspace", "Tab", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape", "Space" };
-std::vector<cocos2d::enumKeyCodes> keyCodes = {
-        KEY_A,
-        KEY_B,
-        KEY_C,
-        KEY_D,
-        KEY_E,
-        KEY_F,
-        KEY_G,
-        KEY_H,
-        KEY_I,
-        KEY_J,
-        KEY_K,
-        KEY_L,
-        KEY_M,
-        KEY_N,
-        KEY_O,
-        KEY_P,
-        KEY_Q,
-        KEY_R,
-        KEY_S,
-        KEY_T,
-        KEY_U,
-        KEY_V,
-        KEY_W,
-        KEY_X,
-        KEY_Y,
-        KEY_Z,
-        KEY_ArrowUp,
-        KEY_ArrowDown,
-        KEY_ArrowLeft,
-        KEY_ArrowRight,
-        KEY_Zero,
-        KEY_One,
-        KEY_Two,
-        KEY_Three,
-        KEY_Four,
-        KEY_Five,
-        KEY_Six,
-        KEY_Seven,
-        KEY_Eight,
-        KEY_Nine,
-        KEY_Backspace,
-        KEY_Tab,
-        KEY_Enter,
-        KEY_Shift,
-        KEY_Control,
-        KEY_Alt,
-        KEY_CapsLock,
-        KEY_Escape,
-        KEY_Space
-};
-
-const char* keybindings[48];
-const char* modbindings[10];
-
-std::vector<std::pair<cocos2d::enumKeyCodes, int>> bindvector;
-
-std::vector<unsigned int> activeKeys;
-std::vector<unsigned int> activeMods;
-
-static int currentKey;
-static int currentMod;
-static ImGuiComboFlags flags = 0;
-const char* preview = "Pick A Keybind";
-
 int keybinds;
 
-const char* keys[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Left Arrow", "Right Arrow", "Up Arrow", "Down Arrow", "1", "2", "3", "4", "5" };
+const char* keys[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Left Arrow", "Right Arrow", "1", "2", "3", "4", "5" };
 const char* mods[] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint" };
 static int key_current;
 static int mod_current;

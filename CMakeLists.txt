@@ -30,6 +30,8 @@ target_link_libraries(CrystalClient imgui-cocos)
 
 target_link_libraries(CrystalClient "-framework OpenGL")
 
+target_link_libraries(CrystalClient libfmod.dylib)
+
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 
 create_geode_file(${PROJECT_NAME})

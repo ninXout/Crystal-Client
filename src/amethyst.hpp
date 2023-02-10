@@ -1,5 +1,3 @@
-#include <variant>
-
 int frame = 0;
 bool inLevel = false;
 bool mouse1Down = false;
@@ -62,8 +60,8 @@ bool showedMacroComplete = false;
 static char macroName[30] = "";
 
 // ImGui
-float BGColour[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
-float LightColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+float BGColour[4] = { 31.0f, 31.0f, 31.0f, 1.0f };
+float LightColour[4] = { 222.0f, 1.0f, 72.0f, 1.0f };
 float DarkColour[4];
 float VeryLightColour[4];
 bool savedBtnPressed = false;
@@ -75,14 +73,6 @@ int keybind = 0;
 bool rewinding = false;
 int maxFrame = 0;
 bool SelectMacro = false;
-
-ImVec4 RGBAtoIV4(float rgb[4]) {
-	float newr = rgb[0];
-	float newg = rgb[1];
-	float newb = rgb[2];
-	float newa = rgb[3];
-	return ImVec4(newr, newg, newb, newa);
-}
 
 std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<double>, std::deque<int>>> Player1Data = {
 	{"Xpos", std::deque<float>{}},
