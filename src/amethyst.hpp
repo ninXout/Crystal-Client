@@ -1,6 +1,6 @@
 #include <variant>
 
-int frame = 0;
+//int frame = 0;
 bool inLevel = false;
 bool mouse1Down = false;
 bool mouse2Down = false;

@@ -1,5 +1,24 @@
 #include <Geode/Geode.hpp>
-#include <Geode/Modify.hpp>
+#include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
+#include <Geode/modify/CCLayerColor.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/AchievementNotifier.hpp>
+#include <Geode/modify/EditLevelLayer.hpp>
+#include <Geode/modify/GameManager.hpp>
+#include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/GameSoundManager.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/modify/GJGameLevel.hpp>
+#include <Geode/modify/HardStreak.hpp>
+#include <Geode/modify/LevelInfoLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/CCScheduler.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/CCDirector.hpp>
+#include <Geode/modify/UILayer.hpp>
 #include <vector>
 #include "imgui-cocos.hpp"
 #include "HitboxNode.hpp"
@@ -57,6 +76,7 @@ bool lenient;
 float killaccuracy;
 bool finished;
 bool resetaccuracy;
+bool would_die;
 
 // Noclip Deaths
 static int noclip_deaths = 0;
@@ -81,6 +101,8 @@ std::vector<GameObject*> dualPortals;
 std::vector<GameObject*> speedChanges;
 std::vector<StartPosObject*> SPs;
 std::vector<bool> willFlip;
+
+//uint16_t unicode = (uint16_t)H;
 
 bool hack;
 
@@ -127,7 +149,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
 "Force Dont Enter", //playerBools[38]
 "Layout Mode", //playerBools[39]
 "AutoClicker", //playerBools[40]
-"Smart StartPos" //playerBools[41]
+"Smart StartPos", //playerBools[41]
+"Practice Bug Fix", //playerBools[42]
 };
 bool playerBools[45] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 std::vector<const char*> globalHacks = { 
@@ -136,7 +159,8 @@ std::vector<const char*> globalHacks = {
     "Safe Mode",
     "No Transition",
     "No Rotation",
-    "Mute on Unfocus",
+    "Auto Safe Mode",
+    "Auto Deafen",
 };
 bool globalBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 std::vector<const char*> bypassHacks = { 
@@ -168,8 +192,47 @@ std::vector<const char*> guiHacks = {
     "Level Name and ID", //d
     "Hide ID", //d
     "Show Author", //d
+    "Macro Status", //d
 };
 bool guiBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
+
+const char* item_names[13] = {
+    "Custom Message", //d (still need text input)
+    "CPS and Clicks", //d
+    "Jumps", //d
+    "Cheat Indicator", //d
+    "Last Death", //d
+    "Attempts Display", //d
+    "Best Run", //d
+    "Run From", //d
+    "Noclip Accuracy", //d (still need reset accuracy)
+    "Noclip Deaths", //d
+    "Total Attempts", //d
+    "Level Name and ID", //d
+    "Macro Status", //d
+};
+std::vector<int> guiReorderInt = { 
+    1, //d (still need text input)
+    2, //d
+    3, //d
+    4, //d
+    5, //d
+    6, //d
+    7, //d
+    8, //d
+    9, //d
+    10, //d
+    11, //d
+    12, //d
+    13, //d
+};
+const char* newGuiReorder[14] = {};
+
+bool drawDivide;
+int FRAME_COUNTER;
+int DRAW_DIVIDE = 1;
+bool DRAW_SCENE;
+
 
 float speedhack = 1;
 bool noclip;
@@ -288,7 +351,7 @@ cocos2d::_ccColor3B colInverse;
 int waitframe;
 
 // Display
-int leftDisplay;
+int leftDisplay = -1;
 
 bool attempts;
 CCLabelBMFont* g_atts;
@@ -346,10 +409,26 @@ bool record;
 bool replay;
 bool frameAccuracy;
 char macroname[25];
+int frame;
+std::vector<int> pushes;
+std::vector<float> Pxpos;
+std::vector<float> Pypos;
+std::vector<float> Paccel;
+std::vector<int> releases;
+std::vector<float> Rxpos;
+std::vector<float> Rypos;
+std::vector<float> Raccel;
 std::vector<float> xpos;
 std::vector<float> ypos;
-std::vector<float> rot;
-std::vector<bool> push;
+std::vector<float> accel;
+std::vector<int> CPoffset;
+std::vector<float> CPaccel;
+std::vector<float> CProt;
+int offset;
+int pushIt;
+int releaseIt;
+int posIt;
+float yAccel;
 bool clickBot;
 bool pushing;
 

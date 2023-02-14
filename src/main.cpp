@@ -9,17 +9,33 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
     	clear << "";
 		clear.close();
 		std::fstream config("Crystal/modconfig.cmp", std::ios::app);
+		config << LightColour[0] << '\n';
+		config << LightColour[1] << '\n';
+		config << LightColour[2] << '\n';
+		config << LightColour[3] << '\n';
 		for (int s = 0; s < playerHacks.size(); s++) {
 			config << playerBools[s] << '\n';
 		}
 		for (int s = 0; s < guiHacks.size(); s++) {
 			config << guiBools[s] << '\n';
 		}
+		for (int s = 0; s < bypassHacks.size(); s++) {
+			config << bypassBools[s] << '\n';
+		}
 		config.close();
 	}
 
 	void loadMods() {
 		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
+		std::string color;
+		std::getline(config, color);
+		LightColour[0] = std::stof(color);
+		std::getline(config, color);
+		LightColour[1] = std::stof(color);
+		std::getline(config, color);
+		LightColour[2] = std::stof(color);
+		std::getline(config, color);
+		LightColour[3] = std::stof(color);
 		for (int s = 0; s < playerHacks.size(); s++) {
 			std::string playerH;
 			std::getline(config, playerH);
@@ -36,6 +52,15 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				guiBools[s] = true;
 			} else {
 				guiBools[s] = false;
+			}
+		}
+		for (int s = 0; s < bypassHacks.size(); s++) {
+			std::string bypassH;
+			std::getline(config, bypassH);
+			if (bypassH == "1") {
+				bypassBools[s] = true;
+			} else {
+				bypassBools[s] = false;
 			}
 		}
 		config.close();
@@ -112,6 +137,31 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				ImGui::End();
 				//ImGui::ShowDemoWindow();
 				ImGui::Begin("Display");
+				if (ImGui::TreeNode("Order of Displays")) {
+						for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
+						{
+							const char* item = item_names[n];
+							ImGui::Selectable(item);
+
+							if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+							{
+								int n_next = n + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
+								if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
+								{
+									item_names[n] = item_names[n_next];
+									int tempig = guiReorderInt[n];
+									guiReorderInt[n] = guiReorderInt[n_next];
+									item_names[n_next] = item;
+									//guiReorderInt[n_next] = guiReorderInt[std::distance(item_names, std::find(item_names, item_names + 13, item))];
+									guiReorderInt[n_next] = tempig;
+									std::string log = std::to_string(guiReorderInt[2]);
+									log::info(log);
+									ImGui::ResetMouseDragDelta();
+								}
+							}
+						}
+					ImGui::TreePop();
+				}
 				for (int i = 0; i < guiHacks.size(); i++) {
 					const char* name = guiHacks[i];
 					if (i != 9 && i != 2) ImGui::Checkbox(name, &guiBools[i]);
@@ -156,17 +206,109 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
 				ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
 				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
+				cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
+				ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
 				ImGui::End();
 				ImGui::Begin("Amethyst [BETA]");
 				ImGui::Checkbox("Record", &record);
 				ImGui::Checkbox("Replay", &replay);
-				ImGui::Checkbox("Frame Accuracy", &frameAccuracy);
+				ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
+				if (ImGui::Button("Save Macro")) {
+					std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+					std::fstream myfile(filename.c_str(), std::ios::app);
+					myfile << xpos.size();
+					myfile << "\n";
+					for (float xpos : xpos)
+					{
+						myfile << std::setprecision(6) << std::fixed << xpos;
+						myfile << "\n";
+					}
+					myfile << ypos.size();
+					myfile << "\n";
+					for (float xpos : ypos)
+					{
+						myfile << std::setprecision(6) << std::fixed << xpos;
+						myfile << "\n";
+					}
+					myfile << accel.size();
+					myfile << "\n";
+					for (float xpos : accel)
+					{
+						myfile << std::setprecision(6) << std::fixed << xpos;
+						myfile << "\n";
+					}
+					myfile << Pxpos.size();
+					myfile << "\n";
+					for (float xpos : Pxpos)
+					{
+						myfile << std::setprecision(6) << std::fixed << xpos;
+						myfile << "\n";
+					}
+					myfile << Rxpos.size();
+					myfile << "\n";
+					for (float xpos : Rxpos)
+					{
+						myfile << std::setprecision(6) << std::fixed << xpos;
+						myfile << "\n";
+					}
+				}
+				if (ImGui::Button("Load Macro")) {
+					std::string line;
+					std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+					std::fstream file;
+					file.open(filename, std::ios::in);
+					if (file.is_open()) {
+						getline(file, line);
+						int len;
+						len = stoi(line);
+						for (int lineno = 1; lineno <= len; lineno++) {
+							getline(file, line);
+							xpos.insert(xpos.end(), stof(line));
+						}
+						getline(file, line);
+						len = stoi(line);
+						for (int lineno = 1; lineno <= len; lineno++) {
+							getline(file, line);
+							ypos.insert(ypos.end(), stof(line));
+						}
+						getline(file, line);
+						len = stoi(line);
+						for (int lineno = 1; lineno <= len; lineno++) {
+							getline(file, line);
+							accel.insert(accel.end(), stof(line));
+						}
+						getline(file, line);
+						len = stoi(line);
+						for (int lineno = 1; lineno <= len; lineno++) {
+							getline(file, line);
+							Pxpos.insert(Pxpos.end(), stof(line));
+						}
+						getline(file, line);
+						len = stoi(line);
+						for (int lineno = 1; lineno <= len; lineno++) {
+							getline(file, line);
+							Rxpos.insert(Rxpos.end(), stof(line));
+						}
+						file.close();
+					}
+				}
+				//ImGui::Checkbox("Frame Accuracy", &frameAccuracy);
 				ImGui::Checkbox("ClickBot", &clickBot);
 				if (ImGui::Button("Clear Macro")) {
+					pushes.clear();
+					releases.clear();
+					Pxpos.clear();
+					Pypos.clear();
+					Paccel.clear();
+					Rxpos.clear();
+					Rypos.clear();
+					Raccel.clear();
 					xpos.clear();
 					ypos.clear();
-					rot.clear();
-					push.clear();
+					accel.clear();
+					CPoffset.clear();
+					CPaccel.clear();
+					CProt.clear();
 				}
 				ImGui::End();
 				ImGui::Begin("Keybinds");
@@ -302,7 +444,6 @@ GEODE_API void GEODE_DLL geode_load(Mod* m) {
 		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
 }
 
-
 class FPSOverlay : public cocos2d::CCNode {
  protected:
     static inline FPSOverlay* s_sharedState = 0;
@@ -397,6 +538,9 @@ class FPSOverlay : public cocos2d::CCNode {
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
+		auto dispatcher = reinterpret_cast<MainDispatcher*>(AppDelegate::get());
+		dispatcher->loadMods();
+		/*
 		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
 		for (int s = 0; s < playerHacks.size(); s++) {
 			std::string playerH;
@@ -417,6 +561,7 @@ class $modify(MenuLayer) {
 			}
 		}
 		config.close();
+		*/
 		return true;
 	}
 };
@@ -825,6 +970,11 @@ class $modify(GJBaseGameLayer) {
 		pushing = true;
 		if (b) mouse1Down = true;
 	    if (!b) mouse2Down = true;
+		if (record) {
+			Pxpos.insert(Pxpos.end(), m_player1->getPositionX());
+			Pypos.insert(Pypos.end(), m_player1->getPositionY());
+			Paccel.insert(Paccel.end(), yAccel);
+		}
 		if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::pushButton(i,true);
 			if (b) GJBaseGameLayer::pushButton(i,false);
@@ -834,6 +984,7 @@ class $modify(GJBaseGameLayer) {
 		} else {
 			GJBaseGameLayer::pushButton(i,b);
 		}
+		if (record) pushes.insert(pushes.end(), frame);
 		clickscount++;
 	}
 
@@ -841,6 +992,11 @@ class $modify(GJBaseGameLayer) {
 		pushing = false;
 		if (b) mouse1Down = false;
 	    if (!b) mouse2Down = false;
+		if (record) {
+			Rxpos.insert(Rxpos.end(), m_player1->getPositionX());
+			Rypos.insert(Rypos.end(), m_player1->getPositionY());
+			Raccel.insert(Raccel.end(), yAccel);
+		}
         if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::releaseButton(i,true);
 			if (b) GJBaseGameLayer::releaseButton(i,false);
@@ -850,6 +1006,7 @@ class $modify(GJBaseGameLayer) {
 		} else {
 			GJBaseGameLayer::releaseButton(i,b);
 		}
+		if (record) releases.insert(releases.end(), frame);
 	}
 
 	void bumpPlayer(PlayerObject* player, GameObject* object) {
@@ -884,7 +1041,7 @@ class $modify(HardStreak) {
 	}
 };
 
-class $(LevelInfoLayer) {
+class $modify(LevelInfoLayer) {
 	static LevelInfoLayer* create(GJGameLevel* g) {
 		if (bypassBools[6]) {
 			g->m_passwordSeed = 20; // it can be anything
@@ -988,15 +1145,18 @@ class $modify(PlayerObject) {
 
 class $modify(CCScheduler) {
 	void update(float f3) {
-		if (applybypass) {
-			cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
-		}
 		//if (!classicspeed) CCScheduler::update(f3 * speedhack);
 		CCScheduler::update(f3);
 		if (shouldQuit && PlayLayer::get()) {
 			PlayLayer::get()->PlayLayer::onQuit();
 			shouldQuit = false;
 		}
+		//CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+
+    	//CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) 7, true);
+
+    	//CGEventPost (kCGHIDEventTap, evt);
+    	//CFRelease (evt); CFRelease (src);
 	}
 };
 
@@ -1133,13 +1293,34 @@ class $modify(Main, PlayLayer) {
         if (s_showOnDeath) s_drawOnDeath = false;
         drawer->clearQueue();
 		PlayLayer::resetLevel();
-	if (!m_isPracticeMode) {
-		frame = 0;
-		maxFrame = 0;
-	}
-	else {
+		if (m_isPracticeMode && record) {
+			if (CPoffset.size() == 0) CPoffset.push_back(0);
+			frame = CPoffset.back();
 
-	}
+			while (xpos.back() >= m_player1->getPositionX() && xpos.size() > 0) {
+				xpos.pop_back();
+				ypos.pop_back();
+				accel.pop_back();
+			}
+
+			while (Pxpos.back() >= m_player1->getPositionX() && pushes.size() > 0) {
+				pushes.pop_back();
+				Pxpos.pop_back();
+			}
+
+			while (Rxpos.back() >= m_player1->getPositionX() && releases.size() > 0) {
+				releases.pop_back();
+				Rxpos.pop_back();
+			}
+
+			yAccel = CPaccel.back();
+			GJBaseGameLayer::get()->m_player1->setRotation(CProt.back());
+		} else {
+			frame = 0;
+			offset = 0;
+			pushIt = releaseIt = posIt = 0;
+			GJBaseGameLayer::get()->releaseButton(1,true);
+		}
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
         	g_activated_objects_p2.clear();
@@ -1193,9 +1374,10 @@ class $modify(Main, PlayLayer) {
 		if (g == m_antiCheatObject) {
 			return PlayLayer::destroyPlayer(p,g);
 		}
-		if (frames>20 && guiBools[9]) {
-			noclipped_frames++;
-			if ((100*(1.0 - (noclipped_frames/(m_time * 500)))) <= killaccuracy) {
+		would_die = true;
+		if (guiBools[9]) {
+			auto accu = (float)(frames-noclipped_frames) / (float)frames;
+			if (accu * 100 <= killaccuracy) {
 				if (!resetaccuracy) {
 					PlayLayer::destroyPlayer(p, g);
 				} else {
@@ -1244,7 +1426,6 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void checkCollisions(PlayerObject* p, float g) {
-			frames++;
 
 		if (bypassBools[0]) {
 			m_antiCheatPassed = true;
@@ -1258,66 +1439,40 @@ class $modify(Main, PlayLayer) {
 			auto p1 = GJBaseGameLayer::get()->m_player1;
 			auto p2 = GJBaseGameLayer::get()->m_player2;
 
-			if (p1->getPositionX() == 0) { 
-				frame = 0;
-			}
-			else { 
-				frame++;
-			}
+			if (record) frame++;
 
-		if (frame > maxFrame) { maxFrame = frame; }
+		yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
 
-		if (replay) {
-			if (std::get<std::deque<float>>(Player1Data["Xpos"]).back() < p1->getPositionX()) {
-				frame -= 4;
-				//p->setPositionX(std::get<std::deque<float>>(Player1Data["Xpos"]).back());
-			}
-			if (frame != 0) {
-					if (frameAccuracy) {
-						p1->setPositionX(xpos[frame - 1]);
-						p1->setPositionY(ypos[frame - 1]);
-						p1->setRotation(rot[frame - 1]);
-					}
-					if (push[frame] && !mouse1Down) { 
-						GJBaseGameLayer::get()->pushButton(1, true); 
-						if (!m_isDead && clickBot) GameSoundManager::sharedManager()->playEffect("Crystal/Amethyst/ClickBot/3.ogg", 1, 1, 1);
-						mouse1Down = true;
-					}
-					if (!push[frame] && mouse1Down) { 
-						GJBaseGameLayer::get()->releaseButton(1, true); 
-						//if (!m_isDead && clickBot) GameSoundManager::sharedManager()->playEffect("Crystal/Amethyst/ClickBot/3rel.ogg", 1, 1, 1);
-						mouse1Down = false; 
-					}
-					/*
-					p2->setPositionX(std::get<std::deque<float>>(Player2Data["Xpos"])[(frame - 1)]);
-					p2->setPositionY(std::get<std::deque<float>>(Player2Data["Ypos"])[(frame - 1)]);
-					p2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"])[(frame - 1)]);
-					if (std::get<std::deque<bool>>(Player2Data["Pushed"])[(frame)] && !mouse2Down) { 
-						GJBaseGameLayer::get()->pushButton(1, false); 
-						//if (!m_isDead && clickBot) GameSoundManager::sharedManager()->playEffect("Crystal/Amethyst/ClickBot/3.ogg", 1, 1, 1);
-						mouse2Down = true;
-					}
-					if (!std::get<std::deque<bool>>(Player2Data["Pushed"])[(frame)] && mouse2Down) { 
-						GJBaseGameLayer::get()->releaseButton(1, false); 
-						//if (!m_isDead && clickBot) GameSoundManager::sharedManager()->playEffect("Crystal/Amethyst/ClickBot/3rel.ogg", 1, 1, 1);
-						mouse2Down = false; 
-					}
-					*/
-			}
-		}
-		//double yAcc = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(this) + 0x760));
 		if (record) {
-			if (frame > 0) {
-					macroSpeed = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
-					xpos.insert(xpos.end(), p1->getPositionX());
-					ypos.insert(ypos.end(), p1->getPositionY());
-					rot.insert(rot.end(), p1->getRotation());
-					push.insert(push.end(), mouse1Down);
-					//std::get<std::deque<double>>(Player1Data["Yvelo"]).insert(std::get<std::deque<double>>(Player1Data["Yvelo"]).end(), yAcc);
-					//std::get<std::deque<float>>(Player2Data["Xpos"]).insert(std::get<std::deque<float>>(Player2Data["Xpos"]).end(), p2->getPositionX());
-					//std::get<std::deque<float>>(Player2Data["Ypos"]).insert(std::get<std::deque<float>>(Player2Data["Ypos"]).end(), p2->getPositionY());
-					//std::get<std::deque<float>>(Player2Data["Rotation"]).insert(std::get<std::deque<float>>(Player2Data["Rotation"]).end(), p2->getRotation());
-					//std::get<std::deque<bool>>(Player2Data["Pushed"]).insert(std::get<std::deque<bool>>(Player2Data["Pushed"]).end(), mouse2Down);
+			xpos.push_back(m_player1->getPositionX());
+			ypos.push_back(m_player1->getPositionY());
+			accel.push_back(yAccel);
+		}
+
+		if (replay && xpos.size() > 0 && xpos[frame - 1] < xpos.back()) {
+			for (int p = 0; p < 100; p++) {
+				if (frame == 0) {
+					frame++;
+					break;
+				}
+				if (xpos[frame - 1] < m_player1->getPositionX()) {
+					frame++;
+					//GJBaseGameLayer::get()->m_player1->setPositionX(xpos[frame]);
+					GJBaseGameLayer::get()->m_player1->setPositionY(ypos[frame - 1]);
+					yAccel = accel[frame - 1];
+					if (Pxpos[pushIt] <= m_player1->getPositionX()) {
+						GJBaseGameLayer::get()->pushButton(1, true);
+						std::string status = "Playing: " + std::to_string(pushIt + 1) + "/" + std::to_string(pushes.size());
+						if (guiBools[15] && pushIt <= pushes.size()) g_macro->setString(status.c_str());
+						pushIt++;
+					}
+					if (Rxpos[releaseIt] <= m_player1->getPositionX()) {
+						GJBaseGameLayer::get()->releaseButton(1, true);
+						releaseIt++;
+					}
+				} else {
+					break;
+				}
 			}
 		}
 
@@ -1343,7 +1498,8 @@ class $modify(Main, PlayLayer) {
 
 			if (guiBools[9] && !finished) {
 				char ok[20];
-				sprintf(ok, "%.2f%%", 100*(1.0 - (noclipped_frames/(m_time * 500))));
+				auto accu = (float)(frames - noclipped_frames) / (float)frames;
+				sprintf(ok, "%.2f%%", accu * 100);
 				reinterpret_cast<CCLabelBMFont*>(getChildByTag(31403))->setString(ok);
 			}
 	}
@@ -1377,6 +1533,13 @@ class $modify(Main, PlayLayer) {
 			g += rainbowspeed; // a good rotation
 		col = getRainbow(0);
 		colInverse = getRainbow(180);
+
+		frames += f4;
+
+		if (would_die) {
+			noclipped_frames += f4;
+			would_die = false;
+		}
 
 		if (m_player1) {
 			if (playerBools[2]) m_player1->setColor(col);
@@ -1542,12 +1705,18 @@ class $modify(Main, PlayLayer) {
 	void markCheckpoint() {
 		if (playerBools[26]) g_orbCheckpoints.push_back({g_activated_objects.size(), g_activated_objects_p2.size()});
 		PlayLayer::markCheckpoint();
+		CPoffset.push_back(frame);
+		CPaccel.push_back(yAccel);
+		CProt.push_back(GJBaseGameLayer::get()->m_player1->getRotation());
 		std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	}
 
 	void removeLastCheckpoint() {
 		if (playerBools[26]) g_orbCheckpoints.pop_back();
 		PlayLayer::removeLastCheckpoint();
+		CPoffset.pop_back();
+		CPaccel.pop_back();
+		CProt.pop_back();
 		if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	}
 
@@ -1808,7 +1977,7 @@ class $modify(Main, PlayLayer) {
 		if (guiBools[9]) {
 			text = CCLabelBMFont::create("100%", "bigFont.fnt");
 		}
-		if (macroStatus) {
+		if (guiBools[15]) {
 			g_macro = CCLabelBMFont::create("Playing: 0/0", "bigFont.fnt");
 		}
 		if (pausecountdown) {
@@ -1913,10 +2082,9 @@ class $modify(Main, PlayLayer) {
 			percentYpos = m_percentLabel->getPositionY();
 			percentScale = m_percentLabel->getScale();
 			percentOpac = m_percentLabel->getOpacity();
-		if (m_isTestMode) leftDisplay = 1;
+		if (m_isTestMode) leftDisplay = 0;
 		if (guiBools[0]) {
-			leftDisplay++;
-			setAnchoredPosition(g_message, leftDisplay);
+			setAnchoredPosition(g_message, guiReorderInt[0] + leftDisplay);
 			//g_tatts->setPosition(5 , corner - 55);
 			g_message->setScale(0.4);
 			g_message->setAnchorPoint({0, 0.5});
@@ -1924,8 +2092,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_message, 1001);
 		}
 		if (guiBools[4]) {
-			leftDisplay++;
-			setAnchoredPosition(g_cheating, leftDisplay);
+			setAnchoredPosition(g_cheating, guiReorderInt[4] + leftDisplay);
 			//g_cheating->setPosition(5 , corner - 10);
 			g_cheating->setScale(0.4);
 			g_cheating->setAnchorPoint({0, 0.5});
@@ -1933,8 +2100,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_cheating, 1001);
 		}
 		if (guiBools[8]) {
-			leftDisplay++;
-			setAnchoredPosition(g_run, leftDisplay);
+			setAnchoredPosition(g_run, guiReorderInt[8] + leftDisplay);
 			//g_run->setPosition(5 , corner - 70);
 			g_run->setScale(0.4);
 			g_run->setAnchorPoint({0, 0.5});
@@ -1947,8 +2113,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_run, 1000);
 		}
 		if (guiBools[3]) {
-			leftDisplay++;
-			setAnchoredPosition(g_jumps, leftDisplay);
+			setAnchoredPosition(g_jumps, guiReorderInt[3] + leftDisplay);
 			//g_tatts->setPosition(5 , corner - 55);
 			g_jumps->setScale(0.4);
 			g_jumps->setAnchorPoint({0, 0.5});
@@ -1958,8 +2123,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_jumps, 1001);
 		}
 		if (guiBools[11]) {
-			leftDisplay++;
-			setAnchoredPosition(g_tatts, leftDisplay);
+			setAnchoredPosition(g_tatts, guiReorderInt[11] + leftDisplay);
 			//g_tatts->setPosition(5 , corner - 55);
 			g_tatts->setScale(0.4);
 			g_tatts->setAnchorPoint({0, 0.5});
@@ -1969,8 +2133,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_tatts, 1001);
 		}
 		if (guiBools[5]) {
-			leftDisplay++;
-			setAnchoredPosition(g_death, leftDisplay);
+			setAnchoredPosition(g_death, guiReorderInt[5] + leftDisplay);
 			//g_death->setPosition(5 , corner - 130);
 			g_death->setScale(0.4);
 			g_death->setAnchorPoint({0, 0.5});
@@ -1983,8 +2146,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_death, 1000);
 		}
 		if (guiBools[10]) {
-			leftDisplay++;
-			setAnchoredPosition(font, leftDisplay);
+			setAnchoredPosition(font, guiReorderInt[10] + leftDisplay);
 			//g_tatts->setPosition(5 , corner - 160);
 			font->setScale(0.4);
 			font->setAnchorPoint({0, 0.5});
@@ -1992,8 +2154,7 @@ class $modify(Main, PlayLayer) {
 			addChild(font, 1001);
 		}
 		if (guiBools[6]) {
-			leftDisplay++;
-			setAnchoredPosition(g_atts, leftDisplay);
+			setAnchoredPosition(g_atts, guiReorderInt[6] + leftDisplay);
 			//g_atts->setPosition(5 , corner - 40);
 			g_atts->setScale(0.4);
 			g_atts->setAnchorPoint({0, 0.5});
@@ -2006,8 +2167,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_atts, 1000);
 		}
 		if (guiBools[7]) {
-			leftDisplay++;
-			setAnchoredPosition(g_bestRun, leftDisplay);
+			setAnchoredPosition(g_bestRun, guiReorderInt[7] + leftDisplay);
 			//g_bestRun->setPosition(5 , corner - 85);
 			g_bestRun->setScale(0.4);
 			g_bestRun->setAnchorPoint({0, 0.5});
@@ -2020,8 +2180,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_bestRun, 1001);
 		}
 		if (guiBools[12]) {
-			leftDisplay++;
-			setAnchoredPosition(g_levelInfo, leftDisplay);
+			setAnchoredPosition(g_levelInfo, guiReorderInt[12] + leftDisplay);
 			std::string display;
 			g_levelInfo->setScale(0.4);
 			g_levelInfo->setAnchorPoint({0, 0.5});
@@ -2045,8 +2204,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_levelInfo, 1001);
 		}
 		if (guiBools[2]) {
-			leftDisplay++;
-			setAnchoredPosition(g_clicks, leftDisplay);
+			setAnchoredPosition(g_clicks, guiReorderInt[2] + leftDisplay);
 			//g_clicks->setPosition(5 , corner - 115);
 			g_clicks->setScale(0.4);
 			g_clicks->setAnchorPoint({0, 0.5});
@@ -2056,8 +2214,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_clicks, 1001);
 		}
 		if (guiBools[9]) {
-			leftDisplay++;
-			setAnchoredPosition(text, leftDisplay);
+			setAnchoredPosition(text, guiReorderInt[9] + leftDisplay);
 			//text->setPosition(5 , corner - 145);
 			text->setAnchorPoint({0, 0.5});
 			text->setTag(31403);
@@ -2065,6 +2222,16 @@ class $modify(Main, PlayLayer) {
 			text->setOpacity(100);
 			addChild(text, 1000);
 			frames = noclipped_frames = 0;
+		}
+		if (guiBools[15]) {
+			setAnchoredPosition(g_macro, guiReorderInt[15] + leftDisplay);
+			//text->setPosition(5 , corner - 145);
+			g_macro->setAnchorPoint({0, 0.5});
+			g_macro->setScale(0.4);
+			g_macro->setOpacity(100);
+			std::string status = "Playing: 0/" + std::to_string(pushes.size());
+			g_macro->setString(status.c_str());
+			addChild(g_macro, 1000);
 		}
 		if (pausecountdown) {
 			g_pauseCount->setPosition({ CCDirector::sharedDirector()->getWinSize().width / 2, CCDirector::sharedDirector()->getWinSize().height - 175 });
@@ -2078,8 +2245,29 @@ class $modify(Main, PlayLayer) {
 	}
 };
 
-class $(UILayer) {
+class $modify(CCDirector) {
+	void drawScene() {
+	if (!drawDivide) {
+		return CCDirector::drawScene();
+	}
 
+	FRAME_COUNTER++;
+
+	// run full scene draw (glClear, visit) each time the counter is full
+	if (FRAME_COUNTER >= DRAW_DIVIDE) {
+		FRAME_COUNTER = 0;
+		return CCDirector::drawScene();
+	}
+
+	if (!this->isPaused()) {
+		this->getScheduler()->update(
+			this->getDeltaTime()
+		);
+	}
+	}
+};
+
+class $(UILayer) {
 	cocos2d::enumKeyCodes modToKey(int index) {
 		return keyCodes[index];
 	}
@@ -2123,38 +2311,10 @@ class $(UILayer) {
 
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
-		/*
-		customKeybind(key_current, customKey);
-		customKeybind(key_current2, customKey2);
-		customKeybind(key_current3, customKey3);
-		customKeybind(key_current4, customKey4);
-		customKeybind(key_current5, customKey5);
-		if (kc == KEY_F) {
-			if (playerBools[29]) {
-				stepready = true;
-				stepready = false;
-			}
-		} else if (kc == customKey && keybinds >= 1) {
-			customMod(mod_current);
-		} else if (kc == customKey2 && keybinds >= 2) {
-			customMod(mod_current2);
-		} else if (kc == customKey3 && keybinds >= 3) {
-			customMod(mod_current3);
-		} else if (kc == customKey4 && keybinds >= 4) {
-			customMod(mod_current4);
-		} else if (kc == customKey5 && keybinds >= 5) {
-			customMod(mod_current5);
+		if (kc == KEY_R) {
+			PlayLayer::get()->resetLevel();
 		} else {
 			UILayer::keyDown(kc);
-		}
-		*/
-
-		UILayer::keyDown(kc);
-
-		int newIndex = activeKeys[0];
-		if (kc == KEY_A) {
-			int index = activeMods[0];
-			playerBools[index] = true;
 		}
 	}
 };
