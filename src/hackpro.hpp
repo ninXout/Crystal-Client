@@ -19,6 +19,9 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/CCDirector.hpp>
 #include <Geode/modify/UILayer.hpp>
+#include <Geode/modify/ObjectToolbox.hpp>
+#include <Geode/modify/LevelTools.hpp>
+#include <Geode/Enums.hpp>
 #include <vector>
 #include "imgui-cocos.hpp"
 #include "HitboxNode.hpp"
@@ -40,6 +43,30 @@ USE_GEODE_NAMESPACE();
 
 using namespace tulip;
 using namespace geode::cocos;
+
+// Main Functions
+class CrystalMods {
+    public:
+        bool isOpen;
+
+        CrystalMods() : isOpen(false) {}
+
+        static CrystalMods* newCrystal();
+
+        static auto& get() {
+            static CrystalMods instance;
+            return instance;
+        }
+
+        CrystalMods(const CrystalMods&) = delete;
+
+        void loadMods();
+        void saveMods();
+        void arrangeText(int arrayLength);
+        void openMenu();
+        void closeMenu();
+        void setAnchoredPosition(CCNode* label, int anchorPos);
+};
 
 // StartPos Switcher
 std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
@@ -105,6 +132,7 @@ std::vector<bool> willFlip;
 //uint16_t unicode = (uint16_t)H;
 
 bool hack;
+int cl = 0;
 
 // The Hacks
 std::vector<const char*> playerHacks = { // player hacks comments are wrong
@@ -151,6 +179,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
 "AutoClicker", //playerBools[40]
 "Smart StartPos", //playerBools[41]
 "Practice Bug Fix", //playerBools[42]
+"Hide Pause Menu", //playerBools[43]
 };
 bool playerBools[45] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 std::vector<const char*> globalHacks = { 
@@ -174,6 +203,7 @@ std::vector<const char*> bypassHacks = {
     "Slider Bypass", //d
     "Editor Zoom Bypass", //d
     "Instant Complete", //d
+    "Load Failed Bypass", //d
 };
 bool bypassBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 std::vector<const char*> guiHacks = { 
@@ -232,6 +262,7 @@ bool drawDivide;
 int FRAME_COUNTER;
 int DRAW_DIVIDE = 1;
 bool DRAW_SCENE;
+float gridSize = 30;
 
 
 float speedhack = 1;
