@@ -71,37 +71,6 @@ void CrystalMods::setAnchoredPosition(CCNode* label, int anchorPos) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
 	label->setPosition(5, corner - anchorY);
-	/*
-	if (anchorPos == 1) {
-		label->setPosition(5, corner - 10);
-	} else if (anchorPos == 2) {
-		label->setPosition(5, corner - 25);
-	} else if (anchorPos == 3) {
-		label->setPosition(5, corner - 40);
-	} else if (anchorPos == 4) {
-		label->setPosition(5, corner - 55);
-	} else if (anchorPos == 5) {
-		label->setPosition(5, corner - 70);
-	} else if (anchorPos == 6) {
-		label->setPosition(5, corner - 85);
-	} else if (anchorPos == 7) {
-		label->setPosition(5, corner - 100);
-	} else if (anchorPos == 8) {
-		label->setPosition(5, corner - 115);
-	} else if (anchorPos == 9) {
-		label->setPosition(5, corner - 130);
-	} else if (anchorPos == 10) {
-		label->setPosition(5, corner - 145);
-	} else if (anchorPos == 11) {
-		label->setPosition(5, corner - 160);
-	} else if (anchorPos == 12) {
-		label->setPosition(5, corner - 175);
-	} else if (anchorPos == 13) {
-		label->setPosition(5, corner - 190);
-	} else if (anchorPos == 14) {
-		label->setPosition(5, corner - 205);
-	}
-	*/
 }
 
 void CrystalMods::arrangeText(int arrayLength) {
@@ -144,6 +113,65 @@ void CrystalMods::arrangeText(int arrayLength) {
 	if (guiBools[15]) {
 		setAnchoredPosition(g_macro, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Macro Status")));
 	}
+}
+
+void CrystalMods::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+  float fC = fV * fS; // Chroma
+  float fHPrime = fmod(fH / 60.0, 6);
+  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+  float fM = fV - fC;
+  
+  if(0 <= fHPrime && fHPrime < 1) {
+    fR = fC;
+    fG = fX;
+    fB = 0;
+  } else if(1 <= fHPrime && fHPrime < 2) {
+    fR = fX;
+    fG = fC;
+    fB = 0;
+  } else if(2 <= fHPrime && fHPrime < 3) {
+    fR = 0;
+    fG = fC;
+    fB = fX;
+  } else if(3 <= fHPrime && fHPrime < 4) {
+    fR = 0;
+    fG = fX;
+    fB = fC;
+  } else if(4 <= fHPrime && fHPrime < 5) {
+    fR = fX;
+    fG = 0;
+    fB = fC;
+  } else if(5 <= fHPrime && fHPrime < 6) {
+    fR = fC;
+    fG = 0;
+    fB = fX;
+  } else {
+    fR = 0;
+    fG = 0;
+    fB = 0;
+  }
+  
+  fR += fM;
+  fG += fM;
+  fB += fM;
+}
+
+cocos2d::_ccColor3B CrystalMods::getRainbow(float offset) {
+	float R;
+	float G;
+	float B;
+
+	float hue = fmod(g + offset, 360);
+	//geode::log << hue;
+	float sat = 1;
+	float vc = 1;
+	HSVtoRGB(R, G, B, hue, sat, vc);
+
+	cocos2d::_ccColor3B out;
+	out.r = R*255;
+	out.g = G*255;
+	out.b = B*255;
+	return out;
 }
 
 class $modify(MainDispatcher, CCKeyboardDispatcher) {
@@ -430,7 +458,6 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				ImGui::End();
 			}
 		});
-		//EditorUI::get()->updateGridNodeSize();
         if (down && key == KEY_Tab) {
             if (!CrystalMods::get().isOpen) {
 				if (node) {
@@ -640,67 +667,6 @@ void fps_shower_init() {
 			FPSOverlay::sharedState()->setVisible(false);
 		}
 	});
-}
-
-void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
-  float fC = fV * fS; // Chroma
-  float fHPrime = fmod(fH / 60.0, 6);
-  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-  float fM = fV - fC;
-  
-  if(0 <= fHPrime && fHPrime < 1) {
-    fR = fC;
-    fG = fX;
-    fB = 0;
-  } else if(1 <= fHPrime && fHPrime < 2) {
-    fR = fX;
-    fG = fC;
-    fB = 0;
-  } else if(2 <= fHPrime && fHPrime < 3) {
-    fR = 0;
-    fG = fC;
-    fB = fX;
-  } else if(3 <= fHPrime && fHPrime < 4) {
-    fR = 0;
-    fG = fX;
-    fB = fC;
-  } else if(4 <= fHPrime && fHPrime < 5) {
-    fR = fX;
-    fG = 0;
-    fB = fC;
-  } else if(5 <= fHPrime && fHPrime < 6) {
-    fR = fC;
-    fG = 0;
-    fB = fX;
-  } else {
-    fR = 0;
-    fG = 0;
-    fB = 0;
-  }
-  
-  fR += fM;
-  fG += fM;
-  fB += fM;
-}
-
-float g = 0;
-
-cocos2d::_ccColor3B getRainbow(float offset) {
-	float R;
-	float G;
-	float B;
-
-	float hue = fmod(g + offset, 360);
-	//geode::log << hue;
-	float sat = 1;
-	float vc = 1;
-	HSVtoRGB(R, G, B, hue, sat, vc);
-
-	cocos2d::_ccColor3B out;
-	out.r = R*255;
-	out.g = G*255;
-	out.b = B*255;
-	return out;
 }
 
 class $modify(CCLayerColor) {
@@ -1239,6 +1205,12 @@ class $modify(CCScheduler) {
 			DrawGridLayer::get()->m_activeGridNodeSize = gridSize;
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
+		if (RGBAccent) {
+			if (CrystalMods::get().g >= 360)
+				CrystalMods::get().g = 0;
+			else
+				CrystalMods::get().g += rainbowspeed;
+		}
 		//CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
     	//CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) 7, true);
@@ -1615,12 +1587,12 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void update(float f4) {
-		if (g >= 360) // mod 360
-			g = 0;
+		if (CrystalMods::get().g >= 360)
+			CrystalMods::get().g = 0;
 		else
-			g += rainbowspeed; // a good rotation
-		col = getRainbow(0);
-		colInverse = getRainbow(180);
+			CrystalMods::get().g += rainbowspeed;
+		col = CrystalMods::get().getRainbow(0);
+		colInverse = CrystalMods::get().getRainbow(180);
 
 		frames += f4;
 

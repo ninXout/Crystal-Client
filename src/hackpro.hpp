@@ -60,13 +60,21 @@ class CrystalMods {
 
         CrystalMods(const CrystalMods&) = delete;
 
+        float g = 0;
+
         void loadMods();
         void saveMods();
         void arrangeText(int arrayLength);
         void openMenu();
         void closeMenu();
         void setAnchoredPosition(CCNode* label, int anchorPos);
+        void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
+        cocos2d::_ccColor3B getRainbow(float offset);
 };
+
+float rDir = -0.05;
+float gDir = 0.05;
+float bDir = -0.05;
 
 // StartPos Switcher
 std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
