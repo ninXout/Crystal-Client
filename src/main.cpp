@@ -3,127 +3,236 @@
 // hackpro.hpp is where all the bools for the hacks are
 // dispatchKeyboardMSG is where the imgui is
 
+void CrystalMods::saveMods() {
+    std::ofstream clear("Crystal/modconfig.cmp");
+    clear << "";
+    clear.close();
+    std::fstream config("Crystal/modconfig.cmp", std::ios::app);
+    config << LightColour[0] << '\n';
+    config << LightColour[1] << '\n';
+    config << LightColour[2] << '\n';
+    config << LightColour[3] << '\n';
+    for (int s = 0; s < playerHacks.size(); s++) {
+        config << playerBools[s] << '\n';
+    }
+    for (int s = 0; s < guiHacks.size(); s++) {
+        config << guiBools[s] << '\n';
+    }
+    for (int s = 0; s < bypassHacks.size(); s++) {
+        config << bypassBools[s] << '\n';
+    }
+    config.close();
+}
+
+void CrystalMods::loadMods() {
+    std::fstream config("Crystal/modconfig.cmp", std::ios::in);
+    std::string color;
+	if (config.is_open()) {
+		    std::getline(config, color);
+			LightColour[0] = std::stof(color);
+			std::getline(config, color);
+			LightColour[1] = std::stof(color);
+			std::getline(config, color);
+			LightColour[2] = std::stof(color);
+			std::getline(config, color);
+			LightColour[3] = std::stof(color);
+			for (int s = 0; s < playerHacks.size(); s++) {
+				std::string playerH;
+				std::getline(config, playerH);
+				if (playerH == "1") {
+					playerBools[s] = true;
+				} else {
+					playerBools[s] = false;
+				}
+			}
+			for (int s = 0; s < guiHacks.size(); s++) {
+				std::string guiH;
+				std::getline(config, guiH);
+				if (guiH == "1") {
+					guiBools[s] = true;
+				} else {
+					guiBools[s] = false;
+				}
+			}
+			for (int s = 0; s < bypassHacks.size(); s++) {
+				std::string bypassH;
+				std::getline(config, bypassH);
+				if (bypassH == "1") {
+					bypassBools[s] = true;
+				} else {
+					bypassBools[s] = false;
+				}
+			}
+	}
+    config.close();
+}
+
+void CrystalMods::setAnchoredPosition(CCNode* label, int anchorPos) {
+	auto corner = CCDirector::sharedDirector()->getScreenTop();
+	int anchorY = ((anchorPos - 1) * 15) + 10;
+	label->setPosition(5, corner - anchorY);
+}
+
+void CrystalMods::arrangeText(int arrayLength) {
+	if (guiBools[0]) {
+		setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message")));
+	}
+	if (guiBools[4]) {
+		setAnchoredPosition(g_cheating, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Cheat Indicator")));
+	}
+	if (guiBools[8]) {
+		setAnchoredPosition(g_run, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Run From")));
+	}
+	if (guiBools[3]) {
+		setAnchoredPosition(g_jumps, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Jumps")));
+	}
+	if (guiBools[11]) {
+		setAnchoredPosition(g_tatts, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Total Attempts")));
+	}
+	if (guiBools[5]) {
+		setAnchoredPosition(g_death, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Last Death")));
+	}
+	if (guiBools[10]) {
+		setAnchoredPosition(font, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Noclip Deaths")));
+	}
+	if (guiBools[6]) {
+		setAnchoredPosition(g_atts, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Attempts Display")));
+	}
+	if (guiBools[7]) {
+		setAnchoredPosition(g_bestRun, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Best Run")));
+	}
+	if (guiBools[12]) {
+		setAnchoredPosition(g_levelInfo, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Level Name and ID")));
+	}
+	if (guiBools[2]) {
+		setAnchoredPosition(g_clicks, std::distance(item_names, std::find(item_names, item_names + arrayLength, "CPS and Clicks")));
+	}
+	if (guiBools[9]) {
+		setAnchoredPosition(text, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Noclip Accuracy")));
+	}
+	if (guiBools[15]) {
+		setAnchoredPosition(g_macro, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Macro Status")));
+	}
+}
+
+void CrystalMods::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+  float fC = fV * fS; // Chroma
+  float fHPrime = fmod(fH / 60.0, 6);
+  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+  float fM = fV - fC;
+  
+  if(0 <= fHPrime && fHPrime < 1) {
+    fR = fC;
+    fG = fX;
+    fB = 0;
+  } else if(1 <= fHPrime && fHPrime < 2) {
+    fR = fX;
+    fG = fC;
+    fB = 0;
+  } else if(2 <= fHPrime && fHPrime < 3) {
+    fR = 0;
+    fG = fC;
+    fB = fX;
+  } else if(3 <= fHPrime && fHPrime < 4) {
+    fR = 0;
+    fG = fX;
+    fB = fC;
+  } else if(4 <= fHPrime && fHPrime < 5) {
+    fR = fX;
+    fG = 0;
+    fB = fC;
+  } else if(5 <= fHPrime && fHPrime < 6) {
+    fR = fC;
+    fG = 0;
+    fB = fX;
+  } else {
+    fR = 0;
+    fG = 0;
+    fB = 0;
+  }
+  
+  fR += fM;
+  fG += fM;
+  fB += fM;
+}
+
+cocos2d::_ccColor3B CrystalMods::getRainbow(float offset) {
+	float R;
+	float G;
+	float B;
+
+	float hue = fmod(g + offset, 360);
+	float sat = 1;
+	float vc = 1;
+	HSVtoRGB(R, G, B, hue, sat, vc);
+
+	cocos2d::_ccColor3B out;
+	out.r = R*255;
+	out.g = G*255;
+	out.b = B*255;
+	return out;
+}
+
 class $modify(MainDispatcher, CCKeyboardDispatcher) {
-	void saveMods() {
-		std::ofstream clear("Crystal/modconfig.cmp");
-    	clear << "";
-		clear.close();
-		std::fstream config("Crystal/modconfig.cmp", std::ios::app);
-		config << LightColour[0] << '\n';
-		config << LightColour[1] << '\n';
-		config << LightColour[2] << '\n';
-		config << LightColour[3] << '\n';
-		for (int s = 0; s < playerHacks.size(); s++) {
-			config << playerBools[s] << '\n';
-		}
-		for (int s = 0; s < guiHacks.size(); s++) {
-			config << guiBools[s] << '\n';
-		}
-		for (int s = 0; s < bypassHacks.size(); s++) {
-			config << bypassBools[s] << '\n';
-		}
-		config.close();
-	}
-
-	void loadMods() {
-		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
-		std::string color;
-		std::getline(config, color);
-		LightColour[0] = std::stof(color);
-		std::getline(config, color);
-		LightColour[1] = std::stof(color);
-		std::getline(config, color);
-		LightColour[2] = std::stof(color);
-		std::getline(config, color);
-		LightColour[3] = std::stof(color);
-		for (int s = 0; s < playerHacks.size(); s++) {
-			std::string playerH;
-			std::getline(config, playerH);
-			if (playerH == "1") {
-				playerBools[s] = true;
-			} else {
-				playerBools[s] = false;
-			}
-		}
-		for (int s = 0; s < guiHacks.size(); s++) {
-			std::string guiH;
-			std::getline(config, guiH);
-			if (guiH == "1") {
-				guiBools[s] = true;
-			} else {
-				guiBools[s] = false;
-			}
-		}
-		for (int s = 0; s < bypassHacks.size(); s++) {
-			std::string bypassH;
-			std::getline(config, bypassH);
-			if (bypassH == "1") {
-				bypassBools[s] = true;
-			} else {
-				bypassBools[s] = false;
-			}
-		}
-		config.close();
-	}
-
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
 		auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
+
 		node = ImGuiNode::create([]() {
-			if (showing) {
+			if (CrystalMods::get().isOpen) {
 				ImGuiStyle * style = &ImGui::GetStyle();
 				ImVec4* colours = ImGui::GetStyle().Colors;
 
-	if (sameAsAccent) {
-		for (int a = 0; a < 3; a++) {
-			BGColour[a] = LightColour[a];
-		}
-	}
+			if (sameAsAccent) {
+				for (int a = 0; a < 3; a++) {
+					BGColour[a] = LightColour[a];
+				}
+			}
 
-	if (RGBAccent) {
-		LightColour[0] = LightColour[0] + rDir;
-		LightColour[1] = LightColour[1] + gDir;
-		LightColour[2] = LightColour[2] + bDir;
+			if (RGBAccent) {
+				LightColour[0] = LightColour[0] + rDir;
+				LightColour[1] = LightColour[1] + gDir;
+				LightColour[2] = LightColour[2] + bDir;
 
-		if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
-		if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
-		if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
-	}
+				if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
+				if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
+				if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
+			}
 
-	DarkColour[0] = (LightColour[0] * 0.5f);
-	DarkColour[1] = (LightColour[1] * 0.5f);
-	DarkColour[2] = (LightColour[2] * 0.5f);
-	DarkColour[3] = LightColour[3];
-	VeryLightColour[0] = (LightColour[0] * 1.5f);
-	VeryLightColour[1] = (LightColour[1] * 1.5f);
-	VeryLightColour[2] = (LightColour[2] * 1.5f);
-	VeryLightColour[3] = LightColour[3];
+			DarkColour[0] = (LightColour[0] * 0.5f);
+			DarkColour[1] = (LightColour[1] * 0.5f);
+			DarkColour[2] = (LightColour[2] * 0.5f);
+			DarkColour[3] = LightColour[3];
+			VeryLightColour[0] = (LightColour[0] * 1.5f);
+			VeryLightColour[1] = (LightColour[1] * 1.5f);
+			VeryLightColour[2] = (LightColour[2] * 1.5f);
+			VeryLightColour[3] = LightColour[3];
 
-	style->FrameRounding = 4.0f;
-	style->GrabRounding = 4.0f;
-	style->Alpha = 1.f;
-	style->WindowRounding = rounded ? 12.f : 0.f;
-	style->FrameRounding = 4.f;
-	style->ScrollbarSize = 2.f;
-	style->ScrollbarRounding = 12.f;
-	style->PopupRounding = 4.f;
-	style->WindowBorderSize = 1.5f;
-	colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
-	colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
-	colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
-	colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
-	colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
-	colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
-	colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
-	colours[ImGuiCol_PlotHistogram] = RGBAtoIV4(LightColour);
-	colours[ImGuiCol_Button] = RGBAtoIV4(LightColour);
-	colours[ImGuiCol_ButtonHovered] = RGBAtoIV4(VeryLightColour);
-	colours[ImGuiCol_Header] = RGBAtoIV4(DarkColour);
-	colours[ImGuiCol_HeaderHovered] = RGBAtoIV4(LightColour);
-	colours[ImGuiCol_HeaderActive] = RGBAtoIV4(VeryLightColour);
-	colours[ImGuiCol_SliderGrab] = RGBAtoIV4(LightColour);
-	colours[ImGuiCol_SliderGrabActive] = RGBAtoIV4(VeryLightColour);
-	colours[ImGuiCol_CheckMark] = RGBAtoIV4(VeryLightColour);
-
+			style->FrameRounding = 4.0f;
+			style->GrabRounding = 4.0f;
+			style->Alpha = 1.f;
+			style->WindowRounding = rounded ? 12.f : 0.f;
+			style->FrameRounding = 4.f;
+			style->ScrollbarSize = 2.f;
+			style->ScrollbarRounding = 12.f;
+			style->PopupRounding = 4.f;
+			style->WindowBorderSize = 1.5f;
+			colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
+			colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
+			colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
+			colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
+			colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
+			colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
+			colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
+			colours[ImGuiCol_PlotHistogram] = RGBAtoIV4(LightColour);
+			colours[ImGuiCol_Button] = RGBAtoIV4(LightColour);
+			colours[ImGuiCol_ButtonHovered] = RGBAtoIV4(VeryLightColour);
+			colours[ImGuiCol_Header] = RGBAtoIV4(DarkColour);
+			colours[ImGuiCol_HeaderHovered] = RGBAtoIV4(LightColour);
+			colours[ImGuiCol_HeaderActive] = RGBAtoIV4(VeryLightColour);
+			colours[ImGuiCol_SliderGrab] = RGBAtoIV4(LightColour);
+			colours[ImGuiCol_SliderGrabActive] = RGBAtoIV4(VeryLightColour);
+			colours[ImGuiCol_CheckMark] = RGBAtoIV4(VeryLightColour);
+				ImGui::PushFont(m_defaultFont);
 				ImGui::Begin("General");
 				for (int i = 0; i < playerHacks.size(); i++) {
 					const char* name = playerHacks[i];
@@ -149,13 +258,13 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 								if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
 								{
 									item_names[n] = item_names[n_next];
-									int tempig = guiReorderInt[n];
-									guiReorderInt[n] = guiReorderInt[n_next];
+									//int tempig = guiReorderInt[n];
+									//guiReorderInt[n] = guiReorderInt[n_next];
 									item_names[n_next] = item;
 									//guiReorderInt[n_next] = guiReorderInt[std::distance(item_names, std::find(item_names, item_names + 13, item))];
-									guiReorderInt[n_next] = tempig;
-									std::string log = std::to_string(guiReorderInt[2]);
-									log::info(log);
+									//guiReorderInt[n_next] = tempig;
+									//std::string log = std::to_string(guiReorderInt[2]);
+									//log::info(log);
 									ImGui::ResetMouseDragDelta();
 								}
 							}
@@ -197,6 +306,7 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 				ImGui::Checkbox("Rounded Windows", &rounded);
 				ImGui::End();
 				ImGui::Begin("Bypasses");
+				ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
 				for (int i = 0; i < bypassHacks.size(); i++) {
 					const char* name = bypassHacks[i];
 					ImGui::Checkbox(name, &bypassBools[i]);
@@ -346,10 +456,11 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 					if (PlayLayer::get()) PlayLayer::get()->resetLevel();
 				}
 				ImGui::End();
+				ImGui::PopFont();
 			}
 		});
         if (down && key == KEY_Tab) {
-            if (!showing) {
+            if (!CrystalMods::get().isOpen) {
 				if (node) {
 					gui = CCScene::create();
 					CCSprite* shoplifting = CCSprite::create("shoplifter.jpg");
@@ -365,16 +476,26 @@ class $modify(MainDispatcher, CCKeyboardDispatcher) {
 					//CCDirector::sharedDirector()->getTouchDispatcher()->setTouchEnabled(false);
 				}
 				platform->showCursor();
-				showing = true;
+				CrystalMods::get().isOpen = true;
 			} else {
-				saveMods();
+				CrystalMods::get().saveMods();
 				gui->removeFromParent();
 				gui = nullptr;
-				if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
-				showing = false;
+				if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
+					platform->hideCursor();
+					CrystalMods::get().arrangeText(13);
+				}
+				CrystalMods::get().isOpen = false;
 			}
             return true;
         };
+		
+		if (playerBools[29] && down && PlayLayer::get() && key == KEY_F) {
+			shouldUpdate = true;
+			PlayLayer::get()->update(1.0 / 60.0);
+			shouldUpdate = false;
+			return true;
+		}
 		
 		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
 	};
@@ -394,7 +515,7 @@ CCNode* getChildByFnRecursive(CCNode* node, std::function<bool(CCNode*)> fn) {
 
     return nullptr;
 }
-
+/*
 class Patch2 : public Patch {
  public:
  	Patch2(byte_array patch, byte_array original, uintptr_t address) : Patch() {
@@ -443,7 +564,7 @@ GEODE_API void GEODE_DLL geode_load(Mod* m) {
 		// custom objects
 		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
 }
-
+*/
 class FPSOverlay : public cocos2d::CCNode {
  protected:
     static inline FPSOverlay* s_sharedState = 0;
@@ -538,30 +659,8 @@ class FPSOverlay : public cocos2d::CCNode {
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
-		auto dispatcher = reinterpret_cast<MainDispatcher*>(AppDelegate::get());
-		dispatcher->loadMods();
-		/*
-		std::fstream config("Crystal/modconfig.cmp", std::ios::in);
-		for (int s = 0; s < playerHacks.size(); s++) {
-			std::string playerH;
-			std::getline(config, playerH);
-			if (playerH == "1") {
-				playerBools[s] = true;
-			} else {
-				playerBools[s] = false;
-			}
-		}
-		for (int s = 0; s < guiHacks.size(); s++) {
-			std::string guiH;
-			std::getline(config, guiH);
-			if (guiH == "1") {
-				guiBools[s] = true;
-			} else {
-				guiBools[s] = false;
-			}
-		}
-		config.close();
-		*/
+		CrystalMods::get().loadMods();
+		if (bypassBools[10]) cl = 0;
 		return true;
 	}
 };
@@ -576,67 +675,6 @@ void fps_shower_init() {
 			FPSOverlay::sharedState()->setVisible(false);
 		}
 	});
-}
-
-void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
-  float fC = fV * fS; // Chroma
-  float fHPrime = fmod(fH / 60.0, 6);
-  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-  float fM = fV - fC;
-  
-  if(0 <= fHPrime && fHPrime < 1) {
-    fR = fC;
-    fG = fX;
-    fB = 0;
-  } else if(1 <= fHPrime && fHPrime < 2) {
-    fR = fX;
-    fG = fC;
-    fB = 0;
-  } else if(2 <= fHPrime && fHPrime < 3) {
-    fR = 0;
-    fG = fC;
-    fB = fX;
-  } else if(3 <= fHPrime && fHPrime < 4) {
-    fR = 0;
-    fG = fX;
-    fB = fC;
-  } else if(4 <= fHPrime && fHPrime < 5) {
-    fR = fX;
-    fG = 0;
-    fB = fC;
-  } else if(5 <= fHPrime && fHPrime < 6) {
-    fR = fC;
-    fG = 0;
-    fB = fX;
-  } else {
-    fR = 0;
-    fG = 0;
-    fB = 0;
-  }
-  
-  fR += fM;
-  fG += fM;
-  fB += fM;
-}
-
-float g = 0;
-
-cocos2d::_ccColor3B getRainbow(float offset) {
-	float R;
-	float G;
-	float B;
-
-	float hue = fmod(g + offset, 360);
-	//geode::log << hue;
-	float sat = 1;
-	float vc = 1;
-	HSVtoRGB(R, G, B, hue, sat, vc);
-
-	cocos2d::_ccColor3B out;
-	out.r = R*255;
-	out.g = G*255;
-	out.b = B*255;
-	return out;
 }
 
 class $modify(CCLayerColor) {
@@ -833,8 +871,8 @@ class $modify(EditorUI) {
 
 class $modify(AchievementNotifier) {
     void willSwitchToScene(cocos2d::CCScene* newScene) {
-		if (showing) {
-			showing = false;
+		if (CrystalMods::get().isOpen) {
+			CrystalMods::get().isOpen = false;
 			gui->removeFromParent();
 		}
 
@@ -845,12 +883,13 @@ class $modify(AchievementNotifier) {
 class $modify(EditLevelLayer) {
 	static EditLevelLayer* create(GJGameLevel* ok) {
 		if (bypassBools[5]) {
-			ok->m_isVerifiedRand = 11;
-			ok->m_isVerifiedSeed = 10;
+			//ok->m_isVerifiedRand = 11;
+			//ok->m_isVerifiedSeed = 10;
 		}	
 		if (playerBools[20]) {
 			ok->m_lowDetailModeToggled = true;
 		} 
+		if (bypassBools[10]) cl = 1;
 		return EditLevelLayer::create(ok);
 	}
 };
@@ -944,6 +983,12 @@ class $(MyGameObject, GameObject) {
 	}
 };
 
+class $modify(LevelTools) {
+	static bool verifyLevelIntegrity(gd::string mg, int de) {
+		if (bypassBools[10]) return true;
+		return LevelTools::verifyLevelIntegrity(mg, de);
+	}
+};
 
 class $modify(GameSoundManager) {
   	void playBackgroundMusic(gd::string song, bool b1, bool b2) {
@@ -1044,8 +1089,8 @@ class $modify(HardStreak) {
 class $modify(LevelInfoLayer) {
 	static LevelInfoLayer* create(GJGameLevel* g) {
 		if (bypassBools[6]) {
-			g->m_passwordSeed = 20; // it can be anything
-			g->m_passwordRand = g->m_passwordSeed + 1;
+			//g->m_passwordSeed = 20; // it can be anything
+			//g->m_passwordRand = g->m_passwordSeed + 1;
 		}
 
 		if (playerBools[20]) {
@@ -1055,6 +1100,8 @@ class $modify(LevelInfoLayer) {
 		//getNONGs();
 		//findsong = std::to_string(level->m_songID);
 
+		if (bypassBools[10]) cl = 0;
+
 		return LevelInfoLayer::create(g);
 	}
 };
@@ -1062,7 +1109,18 @@ class $modify(LevelInfoLayer) {
 class $modify(PauseLayer) {
 	static PauseLayer* create(bool isPaused) {
 		auto pause = PauseLayer::create(isPaused);
-		pauseZorder = pause->getZOrder();
+		if (playerBools[43]) pause->setVisible(false);
+		PauseLayer* fcuk;
+		if (cl != 1 && bypassBools[10]) {
+			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
+			auto menu = CCMenu::create();
+			auto editorClick = CCMenuItemSpriteExtra::create(editorSprite, fcuk, menu_selector(PauseLayer::goEdit));
+				menu->addChild(editorClick);
+				menu->setPosition({22.750f, 92.5f});
+				menu->setScale(0.768f);
+				menu->setAnchorPoint({0.5f, 0.5f});
+			pause->addChild(menu, 0);
+		}
 		return pause;
 	}
 
@@ -1150,6 +1208,16 @@ class $modify(CCScheduler) {
 		if (shouldQuit && PlayLayer::get()) {
 			PlayLayer::get()->PlayLayer::onQuit();
 			shouldQuit = false;
+		}
+		if (DrawGridLayer::get()) {
+			DrawGridLayer::get()->m_activeGridNodeSize = gridSize;
+			DrawGridLayer::get()->m_gridSize = gridSize;
+		}
+		if (RGBAccent) {
+			if (CrystalMods::get().g >= 360)
+				CrystalMods::get().g = 0;
+			else
+				CrystalMods::get().g += rainbowspeed;
 		}
 		//CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
@@ -1319,7 +1387,7 @@ class $modify(Main, PlayLayer) {
 			frame = 0;
 			offset = 0;
 			pushIt = releaseIt = posIt = 0;
-			GJBaseGameLayer::get()->releaseButton(1,true);
+			//GJBaseGameLayer::get()->releaseButton(1,true);
 		}
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
@@ -1527,12 +1595,12 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void update(float f4) {
-		if (g >= 360) // mod 360
-			g = 0;
+		if (CrystalMods::get().g >= 360)
+			CrystalMods::get().g = 0;
 		else
-			g += rainbowspeed; // a good rotation
-		col = getRainbow(0);
-		colInverse = getRainbow(180);
+			CrystalMods::get().g += rainbowspeed;
+		col = CrystalMods::get().getRainbow(0);
+		colInverse = CrystalMods::get().getRainbow(180);
 
 		frames += f4;
 
@@ -1652,11 +1720,7 @@ class $modify(Main, PlayLayer) {
 
 			PlayLayer::update(time);
 		} else {
-			if (playerBools[29]) {
-				if (stepready) {
-					PlayLayer::update(f4);
-				}
-			} else {
+			if (!playerBools[29] || (playerBools[29] && shouldUpdate)) {
 				if (classicspeed) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
@@ -1779,39 +1843,6 @@ class $modify(Main, PlayLayer) {
 		}
 	}
 
-	void setAnchoredPosition(CCNode* label, int anchorPos) {
-		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		if (anchorPos == 1) {
-			label->setPosition(5, corner - 10);
-		} else if (anchorPos == 2) {
-			label->setPosition(5, corner - 25);
-		} else if (anchorPos == 3) {
-			label->setPosition(5, corner - 40);
-		} else if (anchorPos == 4) {
-			label->setPosition(5, corner - 55);
-		} else if (anchorPos == 5) {
-			label->setPosition(5, corner - 70);
-		} else if (anchorPos == 6) {
-			label->setPosition(5, corner - 85);
-		} else if (anchorPos == 7) {
-			label->setPosition(5, corner - 100);
-		} else if (anchorPos == 8) {
-			label->setPosition(5, corner - 115);
-		} else if (anchorPos == 9) {
-			label->setPosition(5, corner - 130);
-		} else if (anchorPos == 10) {
-			label->setPosition(5, corner - 145);
-		} else if (anchorPos == 11) {
-			label->setPosition(5, corner - 160);
-		} else if (anchorPos == 12) {
-			label->setPosition(5, corner - 175);
-		} else if (anchorPos == 13) {
-			label->setPosition(5, corner - 190);
-		} else if (anchorPos == 14) {
-			label->setPosition(5, corner - 205);
-		}
-	}
-
 	void startGame() {
 		PlayLayer::startGame();
 		if (guiBools[1]) {
@@ -1825,7 +1856,6 @@ class $modify(Main, PlayLayer) {
 		if (playerBools[41]) {
 			//willFlip.resize(gravityPortals.size());
 			for (StartPosObject* startPos : SPs) {
-			geode::log::info("started");
 		for (int i = 0; i < gravityPortals.size(); i++)
 		{
 			if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
@@ -1833,17 +1863,15 @@ class $modify(Main, PlayLayer) {
 			if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
 				willFlip.push_back(gravityPortals[i]->m_objectID == 11);
 		}
-		geode::log::info("gravity");
-		startPos->m_levelSettings->m_startDual = GJBaseGameLayer::get()->m_levelSettings->m_startDual;
+		//startPos->m_levelSettings->m_startDual = GJBaseGameLayer::get()->m_levelSettings->m_startDual;
 		for (int i = 0; i < dualPortals.size(); i++)
 		{
 			if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
 				break;
-			//if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-				//startPos->m_levelSettings->m_startDual = (dualPortals[i]->m_objectID == 286);
+			if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+				startPos->m_levelSettings->m_startDual = (dualPortals[i]->m_objectID == 286);
 		}
-		geode::log::info("dual");
-		startPos->m_levelSettings->m_startMode = GJBaseGameLayer::get()->m_levelSettings->m_startMode;
+		//startPos->m_levelSettings->m_startMode = GJBaseGameLayer::get()->m_levelSettings->m_startMode;
 		for (size_t i = 0; i < gamemodePortals.size(); i++)
 		{
 			if (gamemodePortals[i]->getPositionX() - 10 > startPos->getPositionX())
@@ -1876,18 +1904,16 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		geode::log::info("gamemode");
-		startPos->m_levelSettings->m_startMini = GJBaseGameLayer::get()->m_levelSettings->m_startMini;
+		//startPos->m_levelSettings->m_startMini = GJBaseGameLayer::get()->m_levelSettings->m_startMini;
 		for (size_t i = 0; i < miniPortals.size(); i++)
 		{
 			if (miniPortals[i]->getPositionX() - 10 > startPos->getPositionX())
 				break;
-			//if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-				//startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
+			if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+				startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
 		}
-		geode::log::info("mini");
 
-		startPos->m_levelSettings->m_startSpeed = GJBaseGameLayer::get()->m_levelSettings->m_startSpeed;
+		//startPos->m_levelSettings->m_startSpeed = GJBaseGameLayer::get()->m_levelSettings->m_startSpeed;
 		for (size_t i = 0; i < speedChanges.size(); i++)
 		{
 			if (speedChanges[i]->getPositionX() - 50 > startPos->getPositionX())
@@ -1914,7 +1940,6 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		geode::log::info("done");
 	}
 		}
 	}
@@ -1985,8 +2010,7 @@ class $modify(Main, PlayLayer) {
 		}
         drawer = HitboxNode::create();
 
-			PlayLayer::init(gl);
-
+		PlayLayer::init(gl);
 		setupSmartSP();
 
         m_objectLayer->addChild(drawer, 32);
@@ -2084,7 +2108,7 @@ class $modify(Main, PlayLayer) {
 			percentOpac = m_percentLabel->getOpacity();
 		if (m_isTestMode) leftDisplay = 0;
 		if (guiBools[0]) {
-			setAnchoredPosition(g_message, guiReorderInt[0] + leftDisplay);
+			//setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + 13, "Custom Message")));
 			//g_tatts->setPosition(5 , corner - 55);
 			g_message->setScale(0.4);
 			g_message->setAnchorPoint({0, 0.5});
@@ -2092,7 +2116,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_message, 1001);
 		}
 		if (guiBools[4]) {
-			setAnchoredPosition(g_cheating, guiReorderInt[4] + leftDisplay);
+			//setAnchoredPosition(g_cheating, std::distance(item_names, std::find(item_names, item_names + 13, "Cheat Indicator")));
 			//g_cheating->setPosition(5 , corner - 10);
 			g_cheating->setScale(0.4);
 			g_cheating->setAnchorPoint({0, 0.5});
@@ -2100,7 +2124,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_cheating, 1001);
 		}
 		if (guiBools[8]) {
-			setAnchoredPosition(g_run, guiReorderInt[8] + leftDisplay);
+			//setAnchoredPosition(g_run, std::distance(item_names, std::find(item_names, item_names + 13, "Run From")));
 			//g_run->setPosition(5 , corner - 70);
 			g_run->setScale(0.4);
 			g_run->setAnchorPoint({0, 0.5});
@@ -2113,7 +2137,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_run, 1000);
 		}
 		if (guiBools[3]) {
-			setAnchoredPosition(g_jumps, guiReorderInt[3] + leftDisplay);
+			//setAnchoredPosition(g_jumps, std::distance(item_names, std::find(item_names, item_names + 13, "Jumps")));
 			//g_tatts->setPosition(5 , corner - 55);
 			g_jumps->setScale(0.4);
 			g_jumps->setAnchorPoint({0, 0.5});
@@ -2123,7 +2147,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_jumps, 1001);
 		}
 		if (guiBools[11]) {
-			setAnchoredPosition(g_tatts, guiReorderInt[11] + leftDisplay);
+			//setAnchoredPosition(g_tatts, std::distance(item_names, std::find(item_names, item_names + 13, "Total Attempts")));
 			//g_tatts->setPosition(5 , corner - 55);
 			g_tatts->setScale(0.4);
 			g_tatts->setAnchorPoint({0, 0.5});
@@ -2133,7 +2157,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_tatts, 1001);
 		}
 		if (guiBools[5]) {
-			setAnchoredPosition(g_death, guiReorderInt[5] + leftDisplay);
+			//setAnchoredPosition(g_death, std::distance(item_names, std::find(item_names, item_names + 13, "Last Death")));
 			//g_death->setPosition(5 , corner - 130);
 			g_death->setScale(0.4);
 			g_death->setAnchorPoint({0, 0.5});
@@ -2146,7 +2170,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_death, 1000);
 		}
 		if (guiBools[10]) {
-			setAnchoredPosition(font, guiReorderInt[10] + leftDisplay);
+			//setAnchoredPosition(font, std::distance(item_names, std::find(item_names, item_names + 13, "Noclip Deaths")));
 			//g_tatts->setPosition(5 , corner - 160);
 			font->setScale(0.4);
 			font->setAnchorPoint({0, 0.5});
@@ -2154,7 +2178,7 @@ class $modify(Main, PlayLayer) {
 			addChild(font, 1001);
 		}
 		if (guiBools[6]) {
-			setAnchoredPosition(g_atts, guiReorderInt[6] + leftDisplay);
+			//setAnchoredPosition(g_atts, std::distance(item_names, std::find(item_names, item_names + 13, "Attempts Display")));
 			//g_atts->setPosition(5 , corner - 40);
 			g_atts->setScale(0.4);
 			g_atts->setAnchorPoint({0, 0.5});
@@ -2167,7 +2191,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_atts, 1000);
 		}
 		if (guiBools[7]) {
-			setAnchoredPosition(g_bestRun, guiReorderInt[7] + leftDisplay);
+			//setAnchoredPosition(g_bestRun, std::distance(item_names, std::find(item_names, item_names + 13, "Best Run")));
 			//g_bestRun->setPosition(5 , corner - 85);
 			g_bestRun->setScale(0.4);
 			g_bestRun->setAnchorPoint({0, 0.5});
@@ -2180,7 +2204,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_bestRun, 1001);
 		}
 		if (guiBools[12]) {
-			setAnchoredPosition(g_levelInfo, guiReorderInt[12] + leftDisplay);
+			//setAnchoredPosition(g_levelInfo, std::distance(item_names, std::find(item_names, item_names + 13, "Level Name and ID")));
 			std::string display;
 			g_levelInfo->setScale(0.4);
 			g_levelInfo->setAnchorPoint({0, 0.5});
@@ -2204,7 +2228,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_levelInfo, 1001);
 		}
 		if (guiBools[2]) {
-			setAnchoredPosition(g_clicks, guiReorderInt[2] + leftDisplay);
+			//setAnchoredPosition(g_clicks, std::distance(item_names, std::find(item_names, item_names + 13, "CPS and Clicks")));
 			//g_clicks->setPosition(5 , corner - 115);
 			g_clicks->setScale(0.4);
 			g_clicks->setAnchorPoint({0, 0.5});
@@ -2214,7 +2238,7 @@ class $modify(Main, PlayLayer) {
 			addChild(g_clicks, 1001);
 		}
 		if (guiBools[9]) {
-			setAnchoredPosition(text, guiReorderInt[9] + leftDisplay);
+			//setAnchoredPosition(text, std::distance(item_names, std::find(item_names, item_names + 13, "Noclip Accuracy")));
 			//text->setPosition(5 , corner - 145);
 			text->setAnchorPoint({0, 0.5});
 			text->setTag(31403);
@@ -2224,7 +2248,7 @@ class $modify(Main, PlayLayer) {
 			frames = noclipped_frames = 0;
 		}
 		if (guiBools[15]) {
-			setAnchoredPosition(g_macro, guiReorderInt[15] + leftDisplay);
+			//setAnchoredPosition(g_macro, std::distance(item_names, std::find(item_names, item_names + 13, "Macro Status")));
 			//text->setPosition(5 , corner - 145);
 			g_macro->setAnchorPoint({0, 0.5});
 			g_macro->setScale(0.4);
@@ -2239,6 +2263,7 @@ class $modify(Main, PlayLayer) {
 			g_pauseCount->setOpacity(0);
 			addChild(g_pauseCount, 1000);
 		}
+		CrystalMods::get().arrangeText(13);
 		secondary = m_player2->getColor();
 		primary = m_player1->getColor();
 		return true;
@@ -2247,7 +2272,7 @@ class $modify(Main, PlayLayer) {
 
 class $modify(CCDirector) {
 	void drawScene() {
-	if (!drawDivide) {
+	if (drawDivide) {
 		return CCDirector::drawScene();
 	}
 
@@ -2263,6 +2288,10 @@ class $modify(CCDirector) {
 		this->getScheduler()->update(
 			this->getDeltaTime()
 		);
+	}
+
+	if (m_pNextScene) {
+		setNextScene();
 	}
 	}
 };

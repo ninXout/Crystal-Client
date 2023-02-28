@@ -31,9 +31,6 @@ bool ClicksExist = false;
 // RGB Menu
 bool EnableRGBMenu = false;
 bool EnableRGBMenuPrev = false;
-int rDir = -1;
-int gDir = 1;
-int bDir = -1;
 
 // Menu Keybind
 bool waitForFirstClick = false;
