@@ -23,7 +23,6 @@
 #include <Geode/modify/LevelTools.hpp>
 #include <Geode/Enums.hpp>
 #include <vector>
-#include "imgui-cocos.hpp"
 #include "HitboxNode.hpp"
 #include "imgui.h"
 #include <fstream>
@@ -37,44 +36,22 @@
 #include "amethyst.hpp"
 
 cocos2d::CCScene* gui;
-ImGuiNode* node;
 
 USE_GEODE_NAMESPACE();
 
 using namespace tulip;
 using namespace geode::cocos;
 
-// Main Functions
-class CrystalMods {
-    public:
-        bool isOpen;
-
-        CrystalMods() : isOpen(false) {}
-
-        static CrystalMods* newCrystal();
-
-        static auto& get() {
-            static CrystalMods instance;
-            return instance;
-        }
-
-        CrystalMods(const CrystalMods&) = delete;
-
-        float g = 0;
-
-        void loadMods();
-        void saveMods();
-        void arrangeText(int arrayLength);
-        void openMenu();
-        void closeMenu();
-        void setAnchoredPosition(CCNode* label, int anchorPos);
-        void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
-        cocos2d::_ccColor3B getRainbow(float offset);
-};
-
 float rDir = -0.05;
 float gDir = 0.05;
 float bDir = -0.05;
+
+ImFont* m_defaultFont  = nullptr;
+ImFont* m_smallFont    = nullptr;
+ImFont* m_monoFont     = nullptr;
+ImFont* m_boxFont      = nullptr;
+
+bool hasSetupFonts = false;
 
 // StartPos Switcher
 std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
@@ -271,6 +248,8 @@ int FRAME_COUNTER;
 int DRAW_DIVIDE = 1;
 bool DRAW_SCENE;
 float gridSize = 30;
+
+bool shouldUpdate = false;
 
 
 float speedhack = 1;

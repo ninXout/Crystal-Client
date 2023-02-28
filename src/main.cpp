@@ -1,9 +1,314 @@
+#include "platform/platform.hpp"
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
+#include <Geode/modify/AchievementNotifier.hpp>
+#include <Geode/modify/CCDirector.hpp>
+#include "CrystalClient.hpp"
+#include <imgui.h>
+#include "ImGui.hpp"
 #include "hackpro.hpp"
+
+USE_GEODE_NAMESPACE();
 
 // hackpro.hpp is where all the bools for the hacks are
 // dispatchKeyboardMSG is where the imgui is
 
-void CrystalMods::saveMods() {
+void CrystalClient::toggle() {
+    auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
+    if (!m_visible) {
+        platform->showCursor();
+    }
+    if (m_visible) {
+        if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
+			platform->hideCursor();
+			CrystalClient::get()->arrangeText(13);
+		}
+    }
+    this->show(!m_visible);
+}
+
+void applyTheme(std::string const& name) {
+    ImGuiStyle * style = &ImGui::GetStyle();
+    ImVec4* colours = ImGui::GetStyle().Colors;
+
+    if (sameAsAccent) {
+        for (int a = 0; a < 3; a++) {
+            BGColour[a] = LightColour[a];
+        }
+    }
+
+    if (RGBAccent) {
+        LightColour[0] = LightColour[0] + rDir;
+        LightColour[1] = LightColour[1] + gDir;
+        LightColour[2] = LightColour[2] + bDir;
+
+        if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
+        if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
+        if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
+    }
+
+    DarkColour[0] = (LightColour[0] * 0.5f);
+    DarkColour[1] = (LightColour[1] * 0.5f);
+    DarkColour[2] = (LightColour[2] * 0.5f);
+    DarkColour[3] = LightColour[3];
+    VeryLightColour[0] = (LightColour[0] * 1.5f);
+    VeryLightColour[1] = (LightColour[1] * 1.5f);
+    VeryLightColour[2] = (LightColour[2] * 1.5f);
+    VeryLightColour[3] = LightColour[3];
+
+    style->FrameRounding = 4.0f;
+    style->GrabRounding = 4.0f;
+    style->Alpha = 1.f;
+    style->WindowRounding = rounded ? 12.f : 0.f;
+    style->FrameRounding = 4.f;
+    style->ScrollbarSize = 2.f;
+    style->ScrollbarRounding = 12.f;
+    style->PopupRounding = 4.f;
+    style->WindowBorderSize = 1.5f;
+    colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
+    colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
+    colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
+    colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
+    colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
+    colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
+    colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
+    colours[ImGuiCol_PlotHistogram] = RGBAtoIV4(LightColour);
+    colours[ImGuiCol_Button] = RGBAtoIV4(LightColour);
+    colours[ImGuiCol_ButtonHovered] = RGBAtoIV4(VeryLightColour);
+    colours[ImGuiCol_Header] = RGBAtoIV4(DarkColour);
+    colours[ImGuiCol_HeaderHovered] = RGBAtoIV4(LightColour);
+    colours[ImGuiCol_HeaderActive] = RGBAtoIV4(VeryLightColour);
+    colours[ImGuiCol_SliderGrab] = RGBAtoIV4(LightColour);
+    colours[ImGuiCol_SliderGrabActive] = RGBAtoIV4(VeryLightColour);
+    colours[ImGuiCol_CheckMark] = RGBAtoIV4(VeryLightColour);
+}
+
+void CrystalClient::drawPages() {
+    ImGui::Begin("General");
+    for (int i = 0; i < playerHacks.size(); i++) {
+        const char* name = playerHacks[i];
+        ImGui::Checkbox(name, &playerBools[i]);
+        if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
+        if (i == 40) {
+            ImGui::SliderInt("Push Frames", &clickPush, 1, 20);
+            ImGui::SliderInt("Release Frames", &clickRel, 1, 20);
+        }
+    }
+    ImGui::End();
+    //ImGui::ShowDemoWindow();
+    ImGui::Begin("Display");
+    if (ImGui::TreeNode("Order of Displays")) {
+            for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
+            {
+                const char* item = item_names[n];
+                ImGui::Selectable(item);
+
+                if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+                {
+                    int n_next = n + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
+                    if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
+                    {
+                        item_names[n] = item_names[n_next];
+                        //int tempig = guiReorderInt[n];
+                        //guiReorderInt[n] = guiReorderInt[n_next];
+                        item_names[n_next] = item;
+                        //guiReorderInt[n_next] = guiReorderInt[std::distance(item_names, std::find(item_names, item_names + 13, item))];
+                        //guiReorderInt[n_next] = tempig;
+                        //std::string log = std::to_string(guiReorderInt[2]);
+                        //log::info(log);
+                        ImGui::ResetMouseDragDelta();
+                    }
+                }
+            }
+        ImGui::TreePop();
+    }
+    for (int i = 0; i < guiHacks.size(); i++) {
+        const char* name = guiHacks[i];
+        if (i != 9 && i != 2) ImGui::Checkbox(name, &guiBools[i]);
+        if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
+        if (i == 2) {
+            if (ImGui::TreeNode("CPS and Clicks"))
+            {
+                ImGui::Checkbox("CPS and Clicks", &guiBools[i]);
+                ImGui::Checkbox("Reset clicks each attempt", &clickreset);
+                ImGui::Separator();
+                ImGui::TreePop();
+            }
+        }
+        if (i == 9) {
+            if (ImGui::TreeNode("Noclip Accuracy"))
+            {
+                ImGui::Checkbox("Noclip Accuracy", &guiBools[i]);
+                ImGui::Checkbox("Increased Leniency", &lenient);
+                ImGui::InputFloat("Kill at Accuracy", &killaccuracy, 0.00f, 99.99f, "%.2f");
+                ImGui::Checkbox("Reset at Accuracy", &resetaccuracy);
+                ImGui::Separator();
+                ImGui::TreePop();
+            }
+        }
+    }
+    ImGui::End();
+    ImGui::Begin("Customization");
+    ImGui::ColorEdit4("Accent Color", LightColour);
+    ImGui::ColorEdit4("Base Color", BGColour);
+    ImGui::Checkbox("Base Color Same As Accent Color", &sameAsAccent);
+    ImGui::Checkbox("RGB Accent Color", &RGBAccent);
+    ImGui::Checkbox("Borders", &borders);
+    ImGui::Checkbox("Rounded Windows", &rounded);
+    ImGui::End();
+    ImGui::Begin("Bypasses");
+    ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
+    for (int i = 0; i < bypassHacks.size(); i++) {
+        const char* name = bypassHacks[i];
+        ImGui::Checkbox(name, &bypassBools[i]);
+    }
+    ImGui::End();
+    ImGui::Begin("Global");
+    ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
+    ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
+    CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
+    cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
+    ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
+    ImGui::End();
+    ImGui::Begin("Amethyst [BETA]");
+    ImGui::Checkbox("Record", &record);
+    ImGui::Checkbox("Replay", &replay);
+    ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
+    if (ImGui::Button("Save Macro")) {
+        std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+        std::fstream myfile(filename.c_str(), std::ios::app);
+        myfile << xpos.size();
+        myfile << "\n";
+        for (float xpos : xpos)
+        {
+            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << "\n";
+        }
+        myfile << ypos.size();
+        myfile << "\n";
+        for (float xpos : ypos)
+        {
+            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << "\n";
+        }
+        myfile << accel.size();
+        myfile << "\n";
+        for (float xpos : accel)
+        {
+            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << "\n";
+        }
+        myfile << Pxpos.size();
+        myfile << "\n";
+        for (float xpos : Pxpos)
+        {
+            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << "\n";
+        }
+        myfile << Rxpos.size();
+        myfile << "\n";
+        for (float xpos : Rxpos)
+        {
+            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << "\n";
+        }
+    }
+    if (ImGui::Button("Load Macro")) {
+        std::string line;
+        std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+        std::fstream file;
+        file.open(filename, std::ios::in);
+        if (file.is_open()) {
+            getline(file, line);
+            int len;
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                xpos.insert(xpos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                ypos.insert(ypos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                accel.insert(accel.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                Pxpos.insert(Pxpos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                Rxpos.insert(Rxpos.end(), stof(line));
+            }
+            file.close();
+        }
+    }
+    //ImGui::Checkbox("Frame Accuracy", &frameAccuracy);
+    ImGui::Checkbox("ClickBot", &clickBot);
+    if (ImGui::Button("Clear Macro")) {
+        pushes.clear();
+        releases.clear();
+        Pxpos.clear();
+        Pypos.clear();
+        Paccel.clear();
+        Rxpos.clear();
+        Rypos.clear();
+        Raccel.clear();
+        xpos.clear();
+        ypos.clear();
+        accel.clear();
+        CPoffset.clear();
+        CPaccel.clear();
+        CProt.clear();
+    }
+    ImGui::End();
+    ImGui::Begin("Keybinds");
+    for (int n = 0; n < bindKeys.size(); n++) {
+        keybindings[n] = bindKeys[n];
+    }
+    for (int n = 0; n < playerHacks.size(); n++) {
+        modbindings[n] = playerHacks[n];
+    }
+    ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
+    ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
+    if (ImGui::Button("Add Keybind")) {
+        activeKeys.push_back(currentKey);
+        activeMods.push_back(currentMod);
+    }
+    ImGui::End();
+    ImGui::Begin("Shortcuts");
+    ImGui::Checkbox("Enable NONG Loader", &EnableNONGLoader);
+    if (ImGui::Button("Open Songs Folder")) {
+        system("open ~/Library/Caches");
+    }
+    if (ImGui::Button("Open Crystal Folder")) {
+        system("open Crystal");
+    }
+    if (ImGui::Button("Open Resources Folder")) {
+        system("open Resources");
+    }
+    if (ImGui::Button("Open GD Settings")) {
+        OptionsLayer::addToCurrentScene(false);
+    }
+    if (ImGui::Button("Toggle Practice Mode")) {
+        if (PlayLayer::get()) PlayLayer::get()->togglePracticeMode(PlayLayer::get()->m_isPracticeMode == false);
+    }
+    if (ImGui::Button("Restart Level")) {
+        if (PlayLayer::get()) PlayLayer::get()->resetLevel();
+    }
+    ImGui::End();
+}
+
+void CrystalClient::saveMods() {
     std::ofstream clear("Crystal/modconfig.cmp");
     clear << "";
     clear.close();
@@ -24,7 +329,7 @@ void CrystalMods::saveMods() {
     config.close();
 }
 
-void CrystalMods::loadMods() {
+void CrystalClient::loadMods() {
     std::fstream config("Crystal/modconfig.cmp", std::ios::in);
     std::string color;
 	if (config.is_open()) {
@@ -67,13 +372,13 @@ void CrystalMods::loadMods() {
     config.close();
 }
 
-void CrystalMods::setAnchoredPosition(CCNode* label, int anchorPos) {
+void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
 	label->setPosition(5, corner - anchorY);
 }
 
-void CrystalMods::arrangeText(int arrayLength) {
+void CrystalClient::arrangeText(int arrayLength) {
 	if (guiBools[0]) {
 		setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message")));
 	}
@@ -115,7 +420,7 @@ void CrystalMods::arrangeText(int arrayLength) {
 	}
 }
 
-void CrystalMods::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
   float fC = fV * fS; // Chroma
   float fHPrime = fmod(fH / 60.0, 6);
   float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
@@ -156,13 +461,12 @@ void CrystalMods::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS
   fB += fM;
 }
 
-cocos2d::_ccColor3B CrystalMods::getRainbow(float offset) {
+cocos2d::_ccColor3B CrystalClient::getRainbow(float offset) {
 	float R;
 	float G;
 	float B;
 
 	float hue = fmod(g + offset, 360);
-	//geode::log << hue;
 	float sat = 1;
 	float vc = 1;
 	HSVtoRGB(R, G, B, hue, sat, vc);
@@ -174,324 +478,42 @@ cocos2d::_ccColor3B CrystalMods::getRainbow(float offset) {
 	return out;
 }
 
-class $modify(MainDispatcher, CCKeyboardDispatcher) {
+class $modify(CCKeyboardDispatcher) {
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
-		auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
-		node = ImGuiNode::create([]() {
-			if (CrystalMods::get().isOpen) {
-				ImGuiStyle * style = &ImGui::GetStyle();
-				ImVec4* colours = ImGui::GetStyle().Colors;
-
-			if (sameAsAccent) {
-				for (int a = 0; a < 3; a++) {
-					BGColour[a] = LightColour[a];
-				}
-			}
-
-			if (RGBAccent) {
-				LightColour[0] = LightColour[0] + rDir;
-				LightColour[1] = LightColour[1] + gDir;
-				LightColour[2] = LightColour[2] + bDir;
-
-				if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
-				if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
-				if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
-			}
-
-			DarkColour[0] = (LightColour[0] * 0.5f);
-			DarkColour[1] = (LightColour[1] * 0.5f);
-			DarkColour[2] = (LightColour[2] * 0.5f);
-			DarkColour[3] = LightColour[3];
-			VeryLightColour[0] = (LightColour[0] * 1.5f);
-			VeryLightColour[1] = (LightColour[1] * 1.5f);
-			VeryLightColour[2] = (LightColour[2] * 1.5f);
-			VeryLightColour[3] = LightColour[3];
-
-			style->FrameRounding = 4.0f;
-			style->GrabRounding = 4.0f;
-			style->Alpha = 1.f;
-			style->WindowRounding = rounded ? 12.f : 0.f;
-			style->FrameRounding = 4.f;
-			style->ScrollbarSize = 2.f;
-			style->ScrollbarRounding = 12.f;
-			style->PopupRounding = 4.f;
-			style->WindowBorderSize = 1.5f;
-			colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
-			colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
-			colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
-			colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
-			colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
-			colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
-			colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
-			colours[ImGuiCol_PlotHistogram] = RGBAtoIV4(LightColour);
-			colours[ImGuiCol_Button] = RGBAtoIV4(LightColour);
-			colours[ImGuiCol_ButtonHovered] = RGBAtoIV4(VeryLightColour);
-			colours[ImGuiCol_Header] = RGBAtoIV4(DarkColour);
-			colours[ImGuiCol_HeaderHovered] = RGBAtoIV4(LightColour);
-			colours[ImGuiCol_HeaderActive] = RGBAtoIV4(VeryLightColour);
-			colours[ImGuiCol_SliderGrab] = RGBAtoIV4(LightColour);
-			colours[ImGuiCol_SliderGrabActive] = RGBAtoIV4(VeryLightColour);
-			colours[ImGuiCol_CheckMark] = RGBAtoIV4(VeryLightColour);
-
-				ImGui::Begin("General");
-				for (int i = 0; i < playerHacks.size(); i++) {
-					const char* name = playerHacks[i];
-					ImGui::Checkbox(name, &playerBools[i]);
-					if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
-					if (i == 40) {
-						ImGui::SliderInt("Push Frames", &clickPush, 1, 20);
-						ImGui::SliderInt("Release Frames", &clickRel, 1, 20);
-					}
-				}
-				ImGui::End();
-				//ImGui::ShowDemoWindow();
-				ImGui::Begin("Display");
-				if (ImGui::TreeNode("Order of Displays")) {
-						for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
-						{
-							const char* item = item_names[n];
-							ImGui::Selectable(item);
-
-							if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
-							{
-								int n_next = n + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
-								if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
-								{
-									item_names[n] = item_names[n_next];
-									//int tempig = guiReorderInt[n];
-									//guiReorderInt[n] = guiReorderInt[n_next];
-									item_names[n_next] = item;
-									//guiReorderInt[n_next] = guiReorderInt[std::distance(item_names, std::find(item_names, item_names + 13, item))];
-									//guiReorderInt[n_next] = tempig;
-									//std::string log = std::to_string(guiReorderInt[2]);
-									//log::info(log);
-									ImGui::ResetMouseDragDelta();
-								}
-							}
-						}
-					ImGui::TreePop();
-				}
-				for (int i = 0; i < guiHacks.size(); i++) {
-					const char* name = guiHacks[i];
-					if (i != 9 && i != 2) ImGui::Checkbox(name, &guiBools[i]);
-					if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
-					if (i == 2) {
-						if (ImGui::TreeNode("CPS and Clicks"))
-    					{
-							ImGui::Checkbox("CPS and Clicks", &guiBools[i]);
-							ImGui::Checkbox("Reset clicks each attempt", &clickreset);
-        					ImGui::Separator();
-        					ImGui::TreePop();
-    					}
-					}
-					if (i == 9) {
-						if (ImGui::TreeNode("Noclip Accuracy"))
-    					{
-							ImGui::Checkbox("Noclip Accuracy", &guiBools[i]);
-							ImGui::Checkbox("Increased Leniency", &lenient);
-							ImGui::InputFloat("Kill at Accuracy", &killaccuracy, 0.00f, 99.99f, "%.2f");
-							ImGui::Checkbox("Reset at Accuracy", &resetaccuracy);
-        					ImGui::Separator();
-        					ImGui::TreePop();
-    					}
-					}
-				}
-				ImGui::End();
-				ImGui::Begin("Customization");
-				ImGui::ColorEdit4("Accent Color", LightColour);
-				ImGui::ColorEdit4("Base Color", BGColour);
-				ImGui::Checkbox("Base Color Same As Accent Color", &sameAsAccent);
-				ImGui::Checkbox("RGB Accent Color", &RGBAccent);
-				ImGui::Checkbox("Borders", &borders);
-				ImGui::Checkbox("Rounded Windows", &rounded);
-				ImGui::End();
-				ImGui::Begin("Bypasses");
-				ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
-				for (int i = 0; i < bypassHacks.size(); i++) {
-					const char* name = bypassHacks[i];
-					ImGui::Checkbox(name, &bypassBools[i]);
-				}
-				ImGui::End();
-				ImGui::Begin("Global");
-				ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
-				ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
-				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
-				cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
-				ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
-				ImGui::End();
-				ImGui::Begin("Amethyst [BETA]");
-				ImGui::Checkbox("Record", &record);
-				ImGui::Checkbox("Replay", &replay);
-				ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
-				if (ImGui::Button("Save Macro")) {
-					std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
-					std::fstream myfile(filename.c_str(), std::ios::app);
-					myfile << xpos.size();
-					myfile << "\n";
-					for (float xpos : xpos)
-					{
-						myfile << std::setprecision(6) << std::fixed << xpos;
-						myfile << "\n";
-					}
-					myfile << ypos.size();
-					myfile << "\n";
-					for (float xpos : ypos)
-					{
-						myfile << std::setprecision(6) << std::fixed << xpos;
-						myfile << "\n";
-					}
-					myfile << accel.size();
-					myfile << "\n";
-					for (float xpos : accel)
-					{
-						myfile << std::setprecision(6) << std::fixed << xpos;
-						myfile << "\n";
-					}
-					myfile << Pxpos.size();
-					myfile << "\n";
-					for (float xpos : Pxpos)
-					{
-						myfile << std::setprecision(6) << std::fixed << xpos;
-						myfile << "\n";
-					}
-					myfile << Rxpos.size();
-					myfile << "\n";
-					for (float xpos : Rxpos)
-					{
-						myfile << std::setprecision(6) << std::fixed << xpos;
-						myfile << "\n";
-					}
-				}
-				if (ImGui::Button("Load Macro")) {
-					std::string line;
-					std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
-					std::fstream file;
-					file.open(filename, std::ios::in);
-					if (file.is_open()) {
-						getline(file, line);
-						int len;
-						len = stoi(line);
-						for (int lineno = 1; lineno <= len; lineno++) {
-							getline(file, line);
-							xpos.insert(xpos.end(), stof(line));
-						}
-						getline(file, line);
-						len = stoi(line);
-						for (int lineno = 1; lineno <= len; lineno++) {
-							getline(file, line);
-							ypos.insert(ypos.end(), stof(line));
-						}
-						getline(file, line);
-						len = stoi(line);
-						for (int lineno = 1; lineno <= len; lineno++) {
-							getline(file, line);
-							accel.insert(accel.end(), stof(line));
-						}
-						getline(file, line);
-						len = stoi(line);
-						for (int lineno = 1; lineno <= len; lineno++) {
-							getline(file, line);
-							Pxpos.insert(Pxpos.end(), stof(line));
-						}
-						getline(file, line);
-						len = stoi(line);
-						for (int lineno = 1; lineno <= len; lineno++) {
-							getline(file, line);
-							Rxpos.insert(Rxpos.end(), stof(line));
-						}
-						file.close();
-					}
-				}
-				//ImGui::Checkbox("Frame Accuracy", &frameAccuracy);
-				ImGui::Checkbox("ClickBot", &clickBot);
-				if (ImGui::Button("Clear Macro")) {
-					pushes.clear();
-					releases.clear();
-					Pxpos.clear();
-					Pypos.clear();
-					Paccel.clear();
-					Rxpos.clear();
-					Rypos.clear();
-					Raccel.clear();
-					xpos.clear();
-					ypos.clear();
-					accel.clear();
-					CPoffset.clear();
-					CPaccel.clear();
-					CProt.clear();
-				}
-				ImGui::End();
-				ImGui::Begin("Keybinds");
-				for (int n = 0; n < bindKeys.size(); n++) {
-					keybindings[n] = bindKeys[n];
-				}
-        		for (int n = 0; n < playerHacks.size(); n++) {
-					modbindings[n] = playerHacks[n];
-				}
-				ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
-				ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
-				if (ImGui::Button("Add Keybind")) {
-					activeKeys.push_back(currentKey);
-					activeMods.push_back(currentMod);
-				}
-				ImGui::End();
-				ImGui::Begin("Shortcuts");
-				ImGui::Checkbox("Enable NONG Loader", &EnableNONGLoader);
-				if (ImGui::Button("Open Songs Folder")) {
-					system("open ~/Library/Caches");
-				}
-				if (ImGui::Button("Open Crystal Folder")) {
-					system("open Crystal");
-				}
-				if (ImGui::Button("Open Resources Folder")) {
-					system("open Resources");
-				}
-				if (ImGui::Button("Open GD Settings")) {
-					OptionsLayer::addToCurrentScene(false);
-				}
-				if (ImGui::Button("Toggle Practice Mode")) {
-					if (PlayLayer::get()) PlayLayer::get()->togglePracticeMode(PlayLayer::get()->m_isPracticeMode == false);
-				}
-				if (ImGui::Button("Restart Level")) {
-					if (PlayLayer::get()) PlayLayer::get()->resetLevel();
-				}
-				ImGui::End();
-			}
-		});
         if (down && key == KEY_Tab) {
-            if (!CrystalMods::get().isOpen) {
-				if (node) {
-					gui = CCScene::create();
-					CCSprite* shoplifting = CCSprite::create("shoplifter.jpg");
-					if (shoplifting != nullptr) {
-						shoplifting->setPositionX(500);
-						shoplifting->setPositionY(50);
-						shoplifting->setScale(0.5);
-						gui->addChild(shoplifting);
-					}
-					gui->addChild(node);
-					CCDirector::sharedDirector()->getRunningScene()->addChild(gui);
-					gui->setZOrder(99999);
-					//CCDirector::sharedDirector()->getTouchDispatcher()->setTouchEnabled(false);
-				}
-				platform->showCursor();
-				CrystalMods::get().isOpen = true;
-			} else {
-				CrystalMods::get().saveMods();
-				gui->removeFromParent();
-				gui = nullptr;
-				if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
-					platform->hideCursor();
-					CrystalMods::get().arrangeText(13);
-				}
-				CrystalMods::get().isOpen = false;
-			}
+            CrystalClient::get()->toggle();
             return true;
-        };
-		
-		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
-	};
+        }
+        return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
+    }
 };
+
+class $modify(AchievementNotifier) {
+    void willSwitchToScene(CCScene* scene) {
+        AchievementNotifier::willSwitchToScene(scene);
+        CrystalClient::get()->sceneChanged();
+    }
+};
+
+class $modify(CCDirector) {
+    void drawScene() {
+        CrystalClient::get()->setup();
+
+        static GLRenderCtx* gdTexture = nullptr;
+
+        if (shouldUpdateGDRenderBuffer()) {
+            if (gdTexture) {
+                delete gdTexture;
+                gdTexture = nullptr;
+            }
+            shouldUpdateGDRenderBuffer() = false;
+        }
+        CCDirector::drawScene();
+
+        CrystalClient::get()->render(gdTexture);
+    }
+};
+
 
 CCNode* getChildByFnRecursive(CCNode* node, std::function<bool(CCNode*)> fn) {
     if (fn(node)) return node;
@@ -507,7 +529,7 @@ CCNode* getChildByFnRecursive(CCNode* node, std::function<bool(CCNode*)> fn) {
 
     return nullptr;
 }
-
+/*
 class Patch2 : public Patch {
  public:
  	Patch2(byte_array patch, byte_array original, uintptr_t address) : Patch() {
@@ -527,9 +549,10 @@ class Patch3 : public Patch {
  		m_owner = Mod::get();
  	}
 };
-
+*/
 GEODE_API void GEODE_DLL geode_load(Mod* m) {
 	fps_shower_init();
+    /*
 		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
 		lol->apply();
 		Patch2* lol2 = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D7D9);
@@ -555,6 +578,7 @@ GEODE_API void GEODE_DLL geode_load(Mod* m) {
 		(new Patch2({'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, 0x1d869))->apply();
 		// custom objects
 		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
+        */
 }
 
 class FPSOverlay : public cocos2d::CCNode {
@@ -629,29 +653,13 @@ class FPSOverlay : public cocos2d::CCNode {
 		}
 
 		previous_frame = now;
-/*
-    	++m_frames;
-        m_accumulate += dt;
-
-        if (m_accumulate > m_resetInterval) {
-            float framerate = m_frames / m_accumulate;
-            framerate = round(framerate * 10) / 10;
-            m_frames = 0;
-            m_accumulate = 0;
-            
-            std::stringstream stream;
-        	stream << framerate << " FPS";
-            m_label->setString(stream.str().c_str());
-            m_backdrop->setContentSize(getBackdropSize());
-        }
-		*/
     }
 };
 
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
-		CrystalMods::get().loadMods();
+		CrystalClient::get()->loadMods();
 		if (bypassBools[10]) cl = 0;
 		return true;
 	}
@@ -859,17 +867,6 @@ class $modify(EditorUI) {
 			EditorUI::zoomOut(sender);
 		}
 	}
-};
-
-class $modify(AchievementNotifier) {
-    void willSwitchToScene(cocos2d::CCScene* newScene) {
-		if (CrystalMods::get().isOpen) {
-			CrystalMods::get().isOpen = false;
-			gui->removeFromParent();
-		}
-
-        AchievementNotifier::willSwitchToScene(newScene);
-    }
 };
 
 class $modify(EditLevelLayer) {
@@ -1081,8 +1078,8 @@ class $modify(HardStreak) {
 class $modify(LevelInfoLayer) {
 	static LevelInfoLayer* create(GJGameLevel* g) {
 		if (bypassBools[6]) {
-			g->m_passwordSeed = 20; // it can be anything
-			g->m_passwordRand = g->m_passwordSeed + 1;
+			//g->m_passwordSeed = 20; // it can be anything
+			//g->m_passwordRand = g->m_passwordSeed + 1;
 		}
 
 		if (playerBools[20]) {
@@ -1206,10 +1203,10 @@ class $modify(CCScheduler) {
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
 		if (RGBAccent) {
-			if (CrystalMods::get().g >= 360)
-				CrystalMods::get().g = 0;
+			if (CrystalClient::get()->g >= 360)
+				CrystalClient::get()->g = 0;
 			else
-				CrystalMods::get().g += rainbowspeed;
+				CrystalClient::get()->g += rainbowspeed;
 		}
 		//CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
@@ -1379,7 +1376,7 @@ class $modify(Main, PlayLayer) {
 			frame = 0;
 			offset = 0;
 			pushIt = releaseIt = posIt = 0;
-			GJBaseGameLayer::get()->releaseButton(1,true);
+			//GJBaseGameLayer::get()->releaseButton(1,true);
 		}
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
@@ -1587,12 +1584,12 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void update(float f4) {
-		if (CrystalMods::get().g >= 360)
-			CrystalMods::get().g = 0;
+		if (CrystalClient::get()->g >= 360)
+			CrystalClient::get()->g = 0;
 		else
-			CrystalMods::get().g += rainbowspeed;
-		col = CrystalMods::get().getRainbow(0);
-		colInverse = CrystalMods::get().getRainbow(180);
+			CrystalClient::get()->g += rainbowspeed;
+		col = CrystalClient::get()->getRainbow(0);
+		colInverse = CrystalClient::get()->getRainbow(180);
 
 		frames += f4;
 
@@ -1712,11 +1709,7 @@ class $modify(Main, PlayLayer) {
 
 			PlayLayer::update(time);
 		} else {
-			if (playerBools[29]) {
-				if (stepready) {
-					PlayLayer::update(f4);
-				}
-			} else {
+			if (!playerBools[29] || (playerBools[29] && shouldUpdate)) {
 				if (classicspeed) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
@@ -1852,7 +1845,6 @@ class $modify(Main, PlayLayer) {
 		if (playerBools[41]) {
 			//willFlip.resize(gravityPortals.size());
 			for (StartPosObject* startPos : SPs) {
-			geode::log::info("started");
 		for (int i = 0; i < gravityPortals.size(); i++)
 		{
 			if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
@@ -1860,7 +1852,6 @@ class $modify(Main, PlayLayer) {
 			if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
 				willFlip.push_back(gravityPortals[i]->m_objectID == 11);
 		}
-		geode::log::info("gravity");
 		//startPos->m_levelSettings->m_startDual = GJBaseGameLayer::get()->m_levelSettings->m_startDual;
 		for (int i = 0; i < dualPortals.size(); i++)
 		{
@@ -1869,7 +1860,6 @@ class $modify(Main, PlayLayer) {
 			if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
 				startPos->m_levelSettings->m_startDual = (dualPortals[i]->m_objectID == 286);
 		}
-		geode::log::info("dual");
 		//startPos->m_levelSettings->m_startMode = GJBaseGameLayer::get()->m_levelSettings->m_startMode;
 		for (size_t i = 0; i < gamemodePortals.size(); i++)
 		{
@@ -1903,7 +1893,6 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		geode::log::info("gamemode");
 		//startPos->m_levelSettings->m_startMini = GJBaseGameLayer::get()->m_levelSettings->m_startMini;
 		for (size_t i = 0; i < miniPortals.size(); i++)
 		{
@@ -1912,7 +1901,6 @@ class $modify(Main, PlayLayer) {
 			if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
 				startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
 		}
-		geode::log::info("mini");
 
 		//startPos->m_levelSettings->m_startSpeed = GJBaseGameLayer::get()->m_levelSettings->m_startSpeed;
 		for (size_t i = 0; i < speedChanges.size(); i++)
@@ -1941,7 +1929,6 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		geode::log::info("done");
 	}
 		}
 	}
@@ -2265,7 +2252,7 @@ class $modify(Main, PlayLayer) {
 			g_pauseCount->setOpacity(0);
 			addChild(g_pauseCount, 1000);
 		}
-		CrystalMods::get().arrangeText(13);
+		CrystalClient::get()->arrangeText(13);
 		secondary = m_player2->getColor();
 		primary = m_player1->getColor();
 		return true;
