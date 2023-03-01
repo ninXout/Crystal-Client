@@ -7,7 +7,7 @@
 
 using namespace cocos2d;
 
-// based off https://github.com/matcool/gd-imgui-cocos
+// most if not all taken from https://github.com/geode-sdk/DevTools
 
 static void drawTriangle(const std::array<CCPoint, 3>& poli, const std::array<ccColor4F, 3>& colors, const std::array<CCPoint, 3>& uvs) {
     auto* shader = CCShaderCache::sharedShaderCache()->programForKey(kCCShader_PositionTextureColor);
@@ -261,8 +261,6 @@ class $modify(CCTouchDispatcher) {
                     io.AddMouseButtonEvent(0, false);
                 }
             }
-
-            // TODO: dragging out of gd makes it click in imgui
             if (!didGDSwallow) {
                 if (type == TouchMessageType::Began || type == TouchMessageType::Moved) {
                     io.AddMouseButtonEvent(0, true);
@@ -285,18 +283,17 @@ class $modify(CCIMEDispatcher) {
     void dispatchInsertText(const char* text, int len) {
         auto& io = ImGui::GetIO();
         if (!io.WantCaptureKeyboard) {
-            //CCIMEDispatcher::dispatchInsertText(text, len);
+            CCIMEDispatcher::dispatchInsertText(text, len);
         }
         std::string str(text, len);
-        io.AddInputCharactersUTF8(text);
+        io.AddInputCharactersUTF8(str.c_str());
     }
 
     void dispatchDeleteBackward() {
         auto& io = ImGui::GetIO();
         if (!io.WantCaptureKeyboard) {
-            //CCIMEDispatcher::dispatchDeleteBackward();
+            CCIMEDispatcher::dispatchDeleteBackward();
         }
-        // is this really how youre supposed to do this
         io.AddKeyEvent(ImGuiKey_Backspace, true);
         io.AddKeyEvent(ImGuiKey_Backspace, false);
     }

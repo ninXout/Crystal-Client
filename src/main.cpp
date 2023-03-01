@@ -3,6 +3,7 @@
 #include <Geode/modify/AchievementNotifier.hpp>
 #include <Geode/modify/CCDirector.hpp>
 #include "CrystalClient.hpp"
+#include "Hacks.hpp"
 #include <imgui.h>
 #include "ImGui.hpp"
 #include "hackpro.hpp"
@@ -10,7 +11,18 @@
 USE_GEODE_NAMESPACE();
 
 // hackpro.hpp is where all the bools for the hacks are
-// dispatchKeyboardMSG is where the imgui is
+
+/*
+
+	Some Documentation (because this code is awful to read as of rn):
+	CrystalClient::toggle turns off and on the menu
+	CrystalClient::applyTheme makes the colors and shapes work
+	CrystalClient::drawPages is where the imgui is
+	CrystalClient::saveMods and CrystalClient::loadMods are self explanatory
+	CrystalClient::arrangeText rearranges the display text correctly
+	
+
+*/
 
 void CrystalClient::toggle() {
     auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
@@ -18,6 +30,7 @@ void CrystalClient::toggle() {
         platform->showCursor();
     }
     if (m_visible) {
+		CrystalClient::get()->saveMods();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
 			platform->hideCursor();
 			CrystalClient::get()->arrangeText(13);
@@ -26,7 +39,7 @@ void CrystalClient::toggle() {
     this->show(!m_visible);
 }
 
-void applyTheme(std::string const& name) {
+void CrystalClient::applyTheme(std::string const& name) {
     ImGuiStyle * style = &ImGui::GetStyle();
     ImVec4* colours = ImGui::GetStyle().Colors;
 
@@ -171,47 +184,74 @@ void CrystalClient::drawPages() {
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]");
     ImGui::Checkbox("Record", &record);
+	ImGui::SameLine();
     ImGui::Checkbox("Replay", &replay);
+	ImGui::Checkbox("ClickBot", &clickBot);
+	ImGui::SameLine();
+	ImGui::Checkbox("Delta Lock", &deltaLock);
+    ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
     if (ImGui::Button("Save Macro")) {
         std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
         std::fstream myfile(filename.c_str(), std::ios::app);
-        myfile << xpos.size();
+        myfile << pushes.size();
         myfile << "\n";
-        for (float xpos : xpos)
+        for (float val : pushes)
         {
-            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << std::setprecision(6) << std::fixed << val;
             myfile << "\n";
         }
-        myfile << ypos.size();
+        myfile << releases.size();
         myfile << "\n";
-        for (float xpos : ypos)
+        for (float val : releases)
         {
-            myfile << std::setprecision(6) << std::fixed << xpos;
-            myfile << "\n";
-        }
-        myfile << accel.size();
-        myfile << "\n";
-        for (float xpos : accel)
-        {
-            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << std::setprecision(6) << std::fixed << val;
             myfile << "\n";
         }
         myfile << Pxpos.size();
         myfile << "\n";
-        for (float xpos : Pxpos)
+        for (float val : Pxpos)
         {
-            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << std::setprecision(6) << std::fixed << val;
             myfile << "\n";
         }
-        myfile << Rxpos.size();
+        myfile << Pypos.size();
         myfile << "\n";
-        for (float xpos : Rxpos)
+        for (float val : Pypos)
         {
-            myfile << std::setprecision(6) << std::fixed << xpos;
+            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << "\n";
+        }
+        myfile << Paccel.size();
+        myfile << "\n";
+        for (float val : Paccel)
+        {
+            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << "\n";
+        }
+		myfile << Rxpos.size();
+        myfile << "\n";
+        for (float val : Rxpos)
+        {
+            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << "\n";
+        }
+        myfile << Rypos.size();
+        myfile << "\n";
+        for (float val : Rypos)
+        {
+            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << "\n";
+        }
+        myfile << Raccel.size();
+        myfile << "\n";
+        for (float val : Raccel)
+        {
+            myfile << std::setprecision(6) << std::fixed << val;
             myfile << "\n";
         }
     }
+	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
         std::string line;
         std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
@@ -223,19 +263,13 @@ void CrystalClient::drawPages() {
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
                 getline(file, line);
-                xpos.insert(xpos.end(), stof(line));
+                pushes.insert(pushes.end(), stof(line));
             }
             getline(file, line);
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
                 getline(file, line);
-                ypos.insert(ypos.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                accel.insert(accel.end(), stof(line));
+                releases.insert(releases.end(), stof(line));
             }
             getline(file, line);
             len = stoi(line);
@@ -247,13 +281,36 @@ void CrystalClient::drawPages() {
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
                 getline(file, line);
+                Pypos.insert(Pypos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                Paccel.insert(Paccel.end(), stof(line));
+            }
+			getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
                 Rxpos.insert(Rxpos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                Rypos.insert(Rypos.end(), stof(line));
+            }
+            getline(file, line);
+            len = stoi(line);
+            for (int lineno = 1; lineno <= len; lineno++) {
+                getline(file, line);
+                Raccel.insert(Raccel.end(), stof(line));
             }
             file.close();
         }
     }
-    //ImGui::Checkbox("Frame Accuracy", &frameAccuracy);
-    ImGui::Checkbox("ClickBot", &clickBot);
+    ImGui::SameLine();
     if (ImGui::Button("Clear Macro")) {
         pushes.clear();
         releases.clear();
@@ -298,12 +355,6 @@ void CrystalClient::drawPages() {
     }
     if (ImGui::Button("Open GD Settings")) {
         OptionsLayer::addToCurrentScene(false);
-    }
-    if (ImGui::Button("Toggle Practice Mode")) {
-        if (PlayLayer::get()) PlayLayer::get()->togglePracticeMode(PlayLayer::get()->m_isPracticeMode == false);
-    }
-    if (ImGui::Button("Restart Level")) {
-        if (PlayLayer::get()) PlayLayer::get()->resetLevel();
     }
     ImGui::End();
 }
@@ -1008,6 +1059,13 @@ class $modify(GJBaseGameLayer) {
 			Pxpos.insert(Pxpos.end(), m_player1->getPositionX());
 			Pypos.insert(Pypos.end(), m_player1->getPositionY());
 			Paccel.insert(Paccel.end(), yAccel);
+			auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
+			auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
+
+			if (!clickInPush) {
+				pushes.insert(pushes.end(), frame);
+			}
+			if (clickInRelease) releases.remove(frame);
 		}
 		if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::pushButton(i,true);
@@ -1018,7 +1076,6 @@ class $modify(GJBaseGameLayer) {
 		} else {
 			GJBaseGameLayer::pushButton(i,b);
 		}
-		if (record) pushes.insert(pushes.end(), frame);
 		clickscount++;
 	}
 
@@ -1030,6 +1087,13 @@ class $modify(GJBaseGameLayer) {
 			Rxpos.insert(Rxpos.end(), m_player1->getPositionX());
 			Rypos.insert(Rypos.end(), m_player1->getPositionY());
 			Raccel.insert(Raccel.end(), yAccel);
+			auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
+			auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
+
+			if (!clickInRelease) {
+				releases.insert(releases.end(), frame);
+			}
+			if (clickInPush) pushes.remove(frame);
 		}
         if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::releaseButton(i,true);
@@ -1040,7 +1104,6 @@ class $modify(GJBaseGameLayer) {
 		} else {
 			GJBaseGameLayer::releaseButton(i,b);
 		}
-		if (record) releases.insert(releases.end(), frame);
 	}
 
 	void bumpPlayer(PlayerObject* player, GameObject* object) {
@@ -1352,31 +1415,41 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::resetLevel();
 		if (m_isPracticeMode && record) {
 			if (CPoffset.size() == 0) CPoffset.push_back(0);
-			frame = CPoffset.back();
+			offset = CPoffset.back();
 
-			while (xpos.back() >= m_player1->getPositionX() && xpos.size() > 0) {
-				xpos.pop_back();
-				ypos.pop_back();
-				accel.pop_back();
-			}
+			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = CPxpos.back();
 
-			while (Pxpos.back() >= m_player1->getPositionX() && pushes.size() > 0) {
-				pushes.pop_back();
+			frame = (int)(m_time * 60) + offset;
+
+			while (pushes.back() >= frame && pushes.size() != 0) {
 				Pxpos.pop_back();
+				Pypos.pop_back();
+				Paccel.pop_back();
+				pushes.pop_back();
 			}
 
-			while (Rxpos.back() >= m_player1->getPositionX() && releases.size() > 0) {
-				releases.pop_back();
+			while (releases.back() >= frame && releases.size() != 0) {
 				Rxpos.pop_back();
+				Rypos.pop_back();
+				Raccel.pop_back();
+				releases.pop_back();
 			}
 
-			yAccel = CPaccel.back();
+			if (pushing) {
+				auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
+				auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
+				if (!clickInPush) pushes.insert(pushes.end(), frame);
+				if (clickInRelease) releases.remove(frame);
+			}
+
+			mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = CPaccel.back();
+			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = CPypos.back();
 			GJBaseGameLayer::get()->m_player1->setRotation(CProt.back());
 		} else {
 			frame = 0;
 			offset = 0;
 			pushIt = releaseIt = posIt = 0;
-			//GJBaseGameLayer::get()->releaseButton(1,true);
+			//GJBaseGameLayer::get()->releaseButton(1, true);
 		}
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
@@ -1493,46 +1566,6 @@ class $modify(Main, PlayLayer) {
 		if (bypassBools[9]) GJBaseGameLayer::get()->m_player1->setPositionY(1050);
 		if (bypassBools[9]) GJBaseGameLayer::get()->m_player1->setPositionX(m_levelLength - 200);
 
-			auto p1 = GJBaseGameLayer::get()->m_player1;
-			auto p2 = GJBaseGameLayer::get()->m_player2;
-
-			if (record) frame++;
-
-		yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
-
-		if (record) {
-			xpos.push_back(m_player1->getPositionX());
-			ypos.push_back(m_player1->getPositionY());
-			accel.push_back(yAccel);
-		}
-
-		if (replay && xpos.size() > 0 && xpos[frame - 1] < xpos.back()) {
-			for (int p = 0; p < 100; p++) {
-				if (frame == 0) {
-					frame++;
-					break;
-				}
-				if (xpos[frame - 1] < m_player1->getPositionX()) {
-					frame++;
-					//GJBaseGameLayer::get()->m_player1->setPositionX(xpos[frame]);
-					GJBaseGameLayer::get()->m_player1->setPositionY(ypos[frame - 1]);
-					yAccel = accel[frame - 1];
-					if (Pxpos[pushIt] <= m_player1->getPositionX()) {
-						GJBaseGameLayer::get()->pushButton(1, true);
-						std::string status = "Playing: " + std::to_string(pushIt + 1) + "/" + std::to_string(pushes.size());
-						if (guiBools[15] && pushIt <= pushes.size()) g_macro->setString(status.c_str());
-						pushIt++;
-					}
-					if (Rxpos[releaseIt] <= m_player1->getPositionX()) {
-						GJBaseGameLayer::get()->releaseButton(1, true);
-						releaseIt++;
-					}
-				} else {
-					break;
-				}
-			}
-		}
-
 			if (playerBools[40]) {
 				clickframe++;
 				if (clickframe == clickPush) {
@@ -1629,6 +1662,14 @@ class $modify(Main, PlayLayer) {
 			g_cheating->setString(bad.c_str());
 
 		}
+		if (deltaLock) {
+			auto dir = CCDirector::sharedDirector();
+
+			float spf = (float)dir->getAnimationInterval();
+			float tScale = dir->getScheduler()->getTimeScale();
+
+			f4 = spf * tScale;
+		}
 		if (pausecountdown) {
 			if (freezeCount) {
 				GameSoundManager::sharedManager()->stopBackgroundMusic();
@@ -1715,6 +1756,35 @@ class $modify(Main, PlayLayer) {
 				} else {
 					if (!freezeCount) PlayLayer::update(f4);
 				}
+			}
+		}
+
+		auto p1 = GJBaseGameLayer::get()->m_player1;
+		auto p2 = GJBaseGameLayer::get()->m_player2;
+
+		frame = (int)(m_time * 60) + offset;
+
+		yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
+
+		if (replay && pushes.size() > 0) {
+			if (std::find(pushes.begin(), pushes.end(), frame) != pushes.end()) {
+				if (currentMacroType == 1) {
+					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Pxpos[pushIt];
+					mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Pypos[pushIt];
+					mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Paccel[pushIt];
+				}
+				GJBaseGameLayer::get()->pushButton(1, true);
+				pushIt++;
+			}
+
+			if (std::find(releases.begin(), releases.end(), frame) != releases.end()) {
+				if (currentMacroType == 1) {
+					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Rxpos[releaseIt];
+					mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Rypos[releaseIt];
+					mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Raccel[releaseIt];
+				}
+				GJBaseGameLayer::get()->releaseButton(1, true);
+				releaseIt++;
 			}
 		}
         if (autoKill) {

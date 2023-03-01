@@ -16,7 +16,7 @@ CrystalClient* CrystalClient::get() {
 
 void CrystalClient::draw(GLRenderCtx* ctx) {
     if (m_visible) {
-        applyTheme(m_theme);
+        this->applyTheme(m_theme);
 
         ImGui::PushFont(m_defaultFont);
         this->drawPages();

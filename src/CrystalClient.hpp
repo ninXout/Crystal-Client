@@ -60,6 +60,7 @@ public:
     void setAnchoredPosition(CCNode* label, int anchorPos);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
+    void applyTheme(std::string const& name);
 
     static CrystalClient* get();
 
@@ -73,7 +74,7 @@ public:
 
     void render(GLRenderCtx* ctx);
 
-    // setup ImGui & DevTools
+    // setup ImGui
     void setup();
 
     void show(bool visible);
