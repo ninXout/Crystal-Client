@@ -6,23 +6,11 @@
 #include "Hacks.hpp"
 #include <imgui.h>
 #include "ImGui.hpp"
-#include "hackpro.hpp"
 
 USE_GEODE_NAMESPACE();
 
-// hackpro.hpp is where all the bools for the hacks are
+using namespace crystal;
 
-/*
-
-	Some Documentation (because this code is awful to read as of rn):
-	CrystalClient::toggle turns off and on the menu
-	CrystalClient::applyTheme makes the colors and shapes work
-	CrystalClient::drawPages is where the imgui is
-	CrystalClient::saveMods and CrystalClient::loadMods are self explanatory
-	CrystalClient::arrangeText rearranges the display text correctly
-	
-
-*/
 
 void CrystalClient::toggle() {
     auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
@@ -33,7 +21,7 @@ void CrystalClient::toggle() {
 		CrystalClient::get()->saveMods();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
 			platform->hideCursor();
-			CrystalClient::get()->arrangeText(13);
+			//CrystalClient::get()->arrangeText(13);
 		}
     }
     this->show(!m_visible);
@@ -73,7 +61,7 @@ void CrystalClient::applyTheme(std::string const& name) {
     style->Alpha = 1.f;
     style->WindowRounding = rounded ? 12.f : 0.f;
     style->FrameRounding = 4.f;
-    style->ScrollbarSize = 2.f;
+    style->ScrollbarSize = 15.f;
     style->ScrollbarRounding = 12.f;
     style->PopupRounding = 4.f;
     style->WindowBorderSize = 1.5f;
@@ -98,8 +86,7 @@ void CrystalClient::applyTheme(std::string const& name) {
 void CrystalClient::drawPages() {
     ImGui::Begin("General");
     for (int i = 0; i < playerHacks.size(); i++) {
-        const char* name = playerHacks[i];
-        ImGui::Checkbox(name, &playerBools[i]);
+        ImGui::Checkbox(playerHacks[i], &playerBools[i]);
         if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
         if (i == 40) {
             ImGui::SliderInt("Push Frames", &clickPush, 1, 20);
@@ -107,7 +94,6 @@ void CrystalClient::drawPages() {
         }
     }
     ImGui::End();
-    //ImGui::ShowDemoWindow();
     ImGui::Begin("Display");
     if (ImGui::TreeNode("Order of Displays")) {
             for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
@@ -121,13 +107,7 @@ void CrystalClient::drawPages() {
                     if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
                     {
                         item_names[n] = item_names[n_next];
-                        //int tempig = guiReorderInt[n];
-                        //guiReorderInt[n] = guiReorderInt[n_next];
                         item_names[n_next] = item;
-                        //guiReorderInt[n_next] = guiReorderInt[std::distance(item_names, std::find(item_names, item_names + 13, item))];
-                        //guiReorderInt[n_next] = tempig;
-                        //std::string log = std::to_string(guiReorderInt[2]);
-                        //log::info(log);
                         ImGui::ResetMouseDragDelta();
                     }
                 }
@@ -135,14 +115,13 @@ void CrystalClient::drawPages() {
         ImGui::TreePop();
     }
     for (int i = 0; i < guiHacks.size(); i++) {
-        const char* name = guiHacks[i];
-        if (i != 9 && i != 2) ImGui::Checkbox(name, &guiBools[i]);
+        if (i != 9 && i != 2) ImGui::Checkbox(guiHacks[i], &guiBools[i]);
         if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
         if (i == 2) {
             if (ImGui::TreeNode("CPS and Clicks"))
             {
                 ImGui::Checkbox("CPS and Clicks", &guiBools[i]);
-                ImGui::Checkbox("Reset clicks each attempt", &clickreset);
+                //ImGui::Checkbox("Reset clicks each attempt", &clickreset);
                 ImGui::Separator();
                 ImGui::TreePop();
             }
@@ -171,8 +150,7 @@ void CrystalClient::drawPages() {
     ImGui::Begin("Bypasses");
     ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
     for (int i = 0; i < bypassHacks.size(); i++) {
-        const char* name = bypassHacks[i];
-        ImGui::Checkbox(name, &bypassBools[i]);
+        ImGui::Checkbox(bypassHacks[i], &bypassBools[i]);
     }
     ImGui::End();
     ImGui::Begin("Global");
@@ -329,21 +307,15 @@ void CrystalClient::drawPages() {
     }
     ImGui::End();
     ImGui::Begin("Keybinds");
-    for (int n = 0; n < bindKeys.size(); n++) {
-        keybindings[n] = bindKeys[n];
-    }
-    for (int n = 0; n < playerHacks.size(); n++) {
-        modbindings[n] = playerHacks[n];
-    }
-    ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
-    ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
+    //ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
+    //ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
     if (ImGui::Button("Add Keybind")) {
-        activeKeys.push_back(currentKey);
-        activeMods.push_back(currentMod);
+        //activeKeys.push_back(currentKey);
+        //activeMods.push_back(currentMod);
     }
     ImGui::End();
     ImGui::Begin("Shortcuts");
-    ImGui::Checkbox("Enable NONG Loader", &EnableNONGLoader);
+    //ImGui::Checkbox("Enable NONG Loader", &EnableNONGLoader);
     if (ImGui::Button("Open Songs Folder")) {
         system("open ~/Library/Caches");
     }
@@ -602,7 +574,7 @@ class Patch3 : public Patch {
 };
 */
 GEODE_API void GEODE_DLL geode_load(Mod* m) {
-	fps_shower_init();
+	//fps_shower_init();
     /*
 		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
 		lol->apply();
@@ -727,7 +699,7 @@ void fps_shower_init() {
 		}
 	});
 }
-
+/*
 class $modify(CCLayerColor) {
 	static cocos2d::CCLayerColor* create(cocos2d::_ccColor4B const& yk) {
 		if (nodim) {
@@ -761,24 +733,24 @@ class $modify(CCLayerColor) {
 		}
 	}
 };
+*/
 
-
-static inline HitboxNode* drawer;
+static inline tulip::HitboxNode* drawer;
 
 class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 	static inline bool paused = false;
 
 	bool init(GJGameLevel* lvl) {
-		drawer = HitboxNode::create();
+		drawer = tulip::HitboxNode::create();
 		auto ret = LevelEditorLayer::init(lvl);
-		//drawer->setVisible(false);
+		drawer->setVisible(false);
 		m_objectLayer->addChild(drawer, 32);
 
 		s_drawer = drawer;
 
 		// i hate bad practices
 		drawer->m_drawTrail = playerBools[8];
-		s_noLimitTrail = noLimitTrail;
+		s_noLimitTrail = false;
 		return ret;
 	}
 	bool checkCollisions(PlayerObject* player, float uhh) {
@@ -892,13 +864,13 @@ class $modify(EditorUI) {
 
 	void scrollWheel(float y, float x) {
 		auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
-		if (kb->getShiftKeyPressed() && scrollzoom) {
-			auto zoom = this->m_editorLayer->m_objectLayer->getScale();
-			zoom = std::pow(std::numbers::e, std::log(std::max(zoom, 0.001f)) - y * 0.025f);
-			this->updateZoom(zoom);
-		} else {
+		//if (kb->getShiftKeyPressed() && scrollzoom) {
+			//auto zoom = this->m_editorLayer->m_objectLayer->getScale();
+			//zoom = std::pow(std::numbers::e, std::log(std::max(zoom, 0.001f)) - y * 0.025f);
+			//this->updateZoom(zoom);
+		//} else {
 			EditorUI::scrollWheel(y, x);
-		}
+		//}
 	}
 
 	void zoomIn(cocos2d::CCObject* sender) {
@@ -1030,31 +1002,12 @@ class $modify(LevelTools) {
 	}
 };
 
-class $modify(GameSoundManager) {
-  	void playBackgroundMusic(gd::string song, bool b1, bool b2) {
-
-  	if ((std::string(song) == "menuLoop.mp3") && randomLoop) {
-		//song = getRandomSong();
-	}  // random menu loop
-
-	//findsong = replacing;
-	replacesong = replaceWith;
-
-	if (item_current_idx > 0 && EnableNONGLoader) {
-    	//GameSoundManager::playBackgroundMusic("NONGs/" + replacesong, b1, b2);
-	} else {
-		//GameSoundManager::playBackgroundMusic(song, b1, b2);
-	}
-	GameSoundManager::playBackgroundMusic(song, b1, b2);
-	}
-};
-
 
 class $modify(GJBaseGameLayer) {
 	void pushButton(int i, bool b) {
 		pushing = true;
-		if (b) mouse1Down = true;
-	    if (!b) mouse2Down = true;
+		//if (b) mouse1Down = true;
+	    //if (!b) mouse2Down = true;
 		if (record) {
 			Pxpos.insert(Pxpos.end(), m_player1->getPositionX());
 			Pypos.insert(Pypos.end(), m_player1->getPositionY());
@@ -1081,8 +1034,8 @@ class $modify(GJBaseGameLayer) {
 
 	void releaseButton(int i, bool b) {
 		pushing = false;
-		if (b) mouse1Down = false;
-	    if (!b) mouse2Down = false;
+		//if (b) mouse1Down = false;
+	    //if (!b) mouse2Down = false;
 		if (record) {
 			Rxpos.insert(Rxpos.end(), m_player1->getPositionX());
 			Rypos.insert(Rypos.end(), m_player1->getPositionY());
@@ -1114,17 +1067,6 @@ class $modify(GJBaseGameLayer) {
         	if (object->m_hasBeenActivated && !a) g_activated_objects.push_back(object);
         	if (object->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(object);
     	}
-	}
-};
-
-class $modify(GJGameLevel) {
-	void savePercentage(int i, bool b, int i2, int i3, bool b2) {
-		if (!safe) {
-			GJGameLevel::savePercentage(i, b, i2, i3, true);
-		}
-		if (uncomplete) {
-			GJGameLevel::savePercentage(0, false, 0, 0, true);
-		}
 	}
 };
 
@@ -1212,9 +1154,6 @@ class $modify(PlayerObject) {
 		if (playerBools[32]) {
 			PlayerObject::setVisible(false);
 		}
-		if (moon) {
-			m_gravity = 20;
-		}
 		PlayerObject::update(spe);
 	}
 	void ringJump(GameObject* ring) {
@@ -1245,10 +1184,6 @@ class $modify(PlayerObject) {
 		s_drawOnDeath = true;
 	}
 	virtual void setRotation(float love) {
-		if (noRot) {
-			love = 0.0;
-		}
-
 		return PlayerObject::setRotation(love);
 	}
 };
@@ -1261,10 +1196,12 @@ class $modify(CCScheduler) {
 			PlayLayer::get()->PlayLayer::onQuit();
 			shouldQuit = false;
 		}
+		/*
 		if (DrawGridLayer::get()) {
 			DrawGridLayer::get()->m_activeGridNodeSize = gridSize;
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
+		*/
 		if (RGBAccent) {
 			if (CrystalClient::get()->g >= 360)
 				CrystalClient::get()->g = 0;
@@ -1348,42 +1285,6 @@ class $modify(Main, PlayLayer) {
 		if (playerBools[38]) g->m_isDontEnter = true;
 		PlayLayer::addObject(g);
 		SPs.push_back(reinterpret_cast<StartPosObject*>(g));
-		if (playerBools[41]) {
-			switch (g->m_objectID) {
-			case 10:
-			case 11:
-				gravityPortals.push_back(g);
-				break;
-			case 12:
-			case 13:
-			case 47:
-			case 111:
-			case 660:
-			case 745:
-			case 1331:
-				gamemodePortals.push_back(g);
-				break;
-			case 45:
-			case 46:
-				mirrorPortals.push_back(g);
-				break;
-			case 99:
-			case 101:
-				miniPortals.push_back(g);
-				break;
-			case 286:
-			case 287:
-				dualPortals.push_back(g);
-				break;
-			case 200:
-			case 201:
-			case 202:
-			case 203:
-			case 1334:
-				speedChanges.push_back(g);
-				break;
-			}
-		}
 		if (playerBools[24]) {
 			if (g->m_objectID == 31) {
 				g->retain();
@@ -1393,11 +1294,44 @@ class $modify(Main, PlayLayer) {
 				g_startPosText->setString(label.c_str());
 			}
 		}
+		switch (g->m_objectID) {
+					case 10:
+					case 11:
+						gravityPortals.push_back(g);
+						break;
+					case 12:
+					case 13:
+					case 47:
+					case 111:
+					case 660:
+					case 745:
+					case 1331:
+						gamemodePortals.push_back(g);
+						break;
+					case 45:
+					case 46:
+						mirrorPortals.push_back(g);
+						break;
+					case 99:
+					case 101:
+						miniPortals.push_back(g);
+						break;
+					case 286:
+					case 287:
+						dualPortals.push_back(g);
+						break;
+					case 200:
+					case 201:
+					case 202:
+					case 203:
+					case 1334:
+						speedChanges.push_back(g);
+						break;
+				}
 	}	
 
 	void resetLevel() {
 		auto gj = reinterpret_cast<PlayerObject*>(PlayLayer::get());
-		notDone = true;
 		if (playerBools[27] && m_isPracticeMode) load = true;
 		if (guiBools[10]) {
 			noclip_deaths = deathwait = 0;
@@ -1478,7 +1412,7 @@ class $modify(Main, PlayLayer) {
 			bad = "Not Cheating";
 			g_cheating->setColor(ccc3(0,255,0));
 		}
-		if (clickreset) clickscount = 0;
+		//if (clickreset) clickscount = 0;
 		finished = false;
 		if (guiBools[8]) {
 			double start = (m_player1->getPositionX() / m_levelLength) * 100;
@@ -1654,7 +1588,7 @@ class $modify(Main, PlayLayer) {
 			g_message->setString(message);
 		}
 		if (guiBools[4]) {
-			if (playerBools[0] || speedhack<1 || nospike || playerBools[36] || playerBools[29] || playerBools[40] || playerBools[39] || bypassBools[9] || moon) {
+			if (playerBools[0] || speedhack < 1 || playerBools[36] || playerBools[29] || playerBools[40] || playerBools[39] || bypassBools[9]) {
 				bad = "Cheating";
 				g_cheating->setColor(ccc3(155,0,0));
 			}
@@ -1697,9 +1631,9 @@ class $modify(Main, PlayLayer) {
 			g_jumps->setString(nd.c_str());
 		}
 		if (playerBools[5]) {
-			m_player2->setSecondColor(secondary);
-			m_player2->setColor(primary);
-			m_player2->m_waveTrail->setColor(primary);
+			//m_player2->setSecondColor(secondary);
+			//m_player2->setColor(primary);
+			//m_player2->m_waveTrail->setColor(primary);
 		}
 		if (guiBools[2]) {
 			std::string display2 = std::to_string(clickscount) + " clicks";
@@ -1787,11 +1721,11 @@ class $modify(Main, PlayLayer) {
 				releaseIt++;
 			}
 		}
-        if (autoKill) {
-			m_isDead = true;
-			PlayLayer::resetLevel();
-			autoKill = false; // so it doesnt loop
-		}
+        //if (autoKill) {
+			//m_isDead = true;
+			//PlayLayer::resetLevel();
+			//autoKill = false; // so it doesnt loop
+		//}
 		if (s_showOnDeath) {
 			if (!s_drawOnDeath || !playerBools[7]) return;
 			drawer->setVisible(true);
@@ -1831,7 +1765,7 @@ class $modify(Main, PlayLayer) {
 		CPoffset.push_back(frame);
 		CPaccel.push_back(yAccel);
 		CProt.push_back(GJBaseGameLayer::get()->m_player1->getRotation());
-		std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
+		//std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	}
 
 	void removeLastCheckpoint() {
@@ -1840,7 +1774,7 @@ class $modify(Main, PlayLayer) {
 		CPoffset.pop_back();
 		CPaccel.pop_back();
 		CProt.pop_back();
-		if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
+		//if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	}
 
 	void startMusic() {
@@ -1904,6 +1838,7 @@ class $modify(Main, PlayLayer) {
 
 	void startGame() {
 		PlayLayer::startGame();
+		//CrystalClient::get()->arrangeText(13);
 		if (guiBools[1]) {
 			FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
             reinterpret_cast<cocos2d::CCNode*>(CCDirector::sharedDirector()->getRunningScene()->getChildren()->objectAtIndex(0))
@@ -1912,6 +1847,13 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void setupSmartSP() {
+		if (playerBools[41]) {
+			for (int c = 0; c < PlayLayer::get()->m_objects->count(); c++) {
+				GameObject* g = reinterpret_cast<GameObject*>(PlayLayer::get()->m_objects->objectAtIndex(c));
+				
+			}
+		}
+
 		if (playerBools[41]) {
 			//willFlip.resize(gravityPortals.size());
 			for (StartPosObject* startPos : SPs) {
@@ -2003,10 +1945,10 @@ class $modify(Main, PlayLayer) {
 		}
 	}
 
-    static inline HitboxNode* drawer;
+    static inline tulip::HitboxNode* drawer;
 
 	bool init(GJGameLevel* gl) {
-		leftDisplay = 0;
+		//leftDisplay = 0;
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
 		if (playerBools[24]) {
 			rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
@@ -2067,7 +2009,7 @@ class $modify(Main, PlayLayer) {
 		if (pausecountdown) {
 			g_pauseCount = CCLabelBMFont::create("Not Paused", "goldFont.fnt");
 		}
-        drawer = HitboxNode::create();
+        drawer = tulip::HitboxNode::create();
 
 		PlayLayer::init(gl);
 		setupSmartSP();
@@ -2082,23 +2024,7 @@ class $modify(Main, PlayLayer) {
 		if (s_showOnDeath) s_drawOnDeath = false;
 
 		frame = 0;
-		maxFrame = 0;
 
-		if (variable_index == 0 && applyVC) {
-			//gl->m_levelName = stringVC;
-		} else if (variable_index == 1 && applyVC) {
-			gl->m_levelDesc = stringVC;
-		} else if (variable_index == 2 && applyVC) {
-			gl->m_creatorName = stringVC;
-		} else if (variable_index == 3 && applyVC) {
-			gl->m_attempts = std::stoi(stringVC);
-		} else if (variable_index == 4 && applyVC) {
-			gl->m_jumps = std::stoi(stringVC);
-		}
-		if (customColor) {
-			m_player1->setColor(ccc3(customR1, customG1, customB1));
-			m_player1->setSecondColor(ccc3(customR2, customG2, customB2));
-		}
 		if (bypassBools[9]) {
 			//gl->savePercentage(100, false, 100, 100, true);
 		}
@@ -2165,7 +2091,6 @@ class $modify(Main, PlayLayer) {
 			percentYpos = m_percentLabel->getPositionY();
 			percentScale = m_percentLabel->getScale();
 			percentOpac = m_percentLabel->getOpacity();
-		if (m_isTestMode) leftDisplay = 0;
 		if (guiBools[0]) {
 			//setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + 13, "Custom Message")));
 			//g_tatts->setPosition(5 , corner - 55);
@@ -2271,18 +2196,18 @@ class $modify(Main, PlayLayer) {
 			std::string levelName = gl->m_levelName;
 			std::string levelAuthor = gl->m_creatorName;
 			std::string levelID = std::to_string(gl->m_levelID);
-			if (hideID) {
+			/*if (hideID) {
 				levelID = "--------";
-			} else if (levelID<"22" && levelID>"0" || levelID == "3" || levelID == "4" || levelID == "5" || levelID == "6" || levelID == "7" || levelID == "8" || levelID == "9") {
+			} else */ if (levelID<"22" && levelID>"0" || levelID == "3" || levelID == "4" || levelID == "5" || levelID == "6" || levelID == "7" || levelID == "8" || levelID == "9") {
 				levelAuthor = "RobTop"; // this wasnt working from Polargeist (3) to Cycles (9) so i had to do that lmao
 			} else if (levelID == "0") {
 				levelID = "Copy";
 			}
-			if (author) {
-				display = levelName + " by " + levelAuthor + " (" + levelID + ")";
-			} else {
+			//if (author) {
+				//display = levelName + " by " + levelAuthor + " (" + levelID + ")";
+			//} else {
 				display = levelName + " (" + levelID + ")";
-			}
+			//}
 			g_levelInfo->setString(display.c_str());
 			addChild(g_levelInfo, 1001);
 		}
@@ -2323,17 +2248,12 @@ class $modify(Main, PlayLayer) {
 			addChild(g_pauseCount, 1000);
 		}
 		CrystalClient::get()->arrangeText(13);
-		secondary = m_player2->getColor();
-		primary = m_player1->getColor();
 		return true;
 	}
 };
 
 class $modify(CCDirector) {
 	void drawScene() {
-	if (drawDivide) {
-		return CCDirector::drawScene();
-	}
 
 	FRAME_COUNTER++;
 
@@ -2356,10 +2276,7 @@ class $modify(CCDirector) {
 };
 
 class $(UILayer) {
-	cocos2d::enumKeyCodes modToKey(int index) {
-		return keyCodes[index];
-	}
-
+/*
 	void customMod(int current) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
 		bool hitbox = true;
@@ -2396,7 +2313,7 @@ class $(UILayer) {
 			PlayLayer::get()->removeLastCheckpoint();
 		}
 	}
-
+*/
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
 		if (kc == KEY_R) {

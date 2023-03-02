@@ -49,7 +49,7 @@ protected:
     void renderDrawData(ImDrawData*);
 
 public:
-    bool isMenuOpen;
+    bool isMenuOpen = false;
     float g = 0;
 
     void loadMods();

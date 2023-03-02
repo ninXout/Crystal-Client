@@ -1,4 +1,3 @@
-
 #include <imgui_internal.h>
 #include "CrystalClient.hpp"
 #include "fonts/OpenSans.hpp"
