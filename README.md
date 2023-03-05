@@ -16,4 +16,4 @@ Crystal Client is a MacOS mod menu for Geometry Dash.
 Press TAB to open the menu, press TAB again to close.
 
 **When will X feature be added?**
-Features will be added whenever I feel that I have time. If you have a feature you would like to suggest, it is recommended that you join my [discord server](https://discord.gg/xV5dekWHTd) and ask in the #suggestions channel.
+Features will be added whenever I feel that I have time. If you have a feature you would like to suggest, it is recommended that you join my [discord server](https://discord.gg/xV5dekWHTd) and ask in the #suggestions channel, but you can also open a [new issue](https://github.com/ninXout/Crystal-Client/issues/new).
