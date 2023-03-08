@@ -21,6 +21,7 @@
 #include <Geode/modify/UILayer.hpp>
 #include <Geode/modify/ObjectToolbox.hpp>
 #include <Geode/modify/LevelTools.hpp>
+#include <Geode/loader/Dirs.hpp>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -31,6 +32,9 @@
 #include <numbers>
 #include <dirent.h>
 #include "HitboxNode.hpp"
+#include <CoreGraphics/CoreGraphics.h>
+#include <ImageIO/ImageIO.h>
+#include <CoreServices/CoreServices.h>
 
 /*
 
@@ -46,7 +50,6 @@
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
-namespace crystal {
     std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Noclip Player 1", //playerBools[0]
         "Noclip Player 2", //playerBools[1]
@@ -181,10 +184,6 @@ namespace crystal {
     std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
     int g_startPosIndex;
     CCLabelBMFont* g_startPosText;
-    bool g_toReset;
-
-    int completepos;
-    int pauseZorder;
 
     // Customization
     bool sameAsAccent;
@@ -215,7 +214,7 @@ namespace crystal {
     bool would_die;
 
     // Noclip Deaths
-    static int noclip_deaths = 0;
+    int noclip_deaths = 0;
     CCLabelBMFont* font;
     int deathwait;
 
@@ -250,14 +249,17 @@ namespace crystal {
     // Amethyst
     bool record;
     bool replay;
+    bool rendering;
+    bool withAudio;
     bool deltaLock;
     char macroname[25];
     int frame;
-    std::list<int> pushes;
+    int newFrame;
+    std::vector<int> pushes;
     std::vector<float> Pxpos;
     std::vector<float> Pypos;
     std::vector<float> Paccel;
-    std::list<int> releases;
+    std::vector<int> releases;
     std::vector<float> Rxpos;
     std::vector<float> Rypos;
     std::vector<float> Raccel;
@@ -272,38 +274,43 @@ namespace crystal {
     int releaseIt;
     int posIt;
     float yAccel;
+    int lastFrame;
     bool clickBot;
     bool pushing;
-    const char* macroTypes[] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
+    const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
+
+    static int currentKey = 0;
+    static int currentMod = 0;
+
+    std::vector<int> activeKeys;
+    std::vector<int> activeMods;
+
+    const char* keybindings[49] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Tab", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape", "Space" };
+    const char* modbindings[12] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint" };
 
     // FPS Display
     std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
-    float frame_time_sum = 0.f;
-    int frame_count = 0;
+    float frame_time_sum;
+    int frame_count;
     int bypass = 60;
-    bool applybypass;
-    double g_fps = 60.0;
-    double time_since = 0;
+    double time_since;
 
     // Display
     bool attempts;
     CCLabelBMFont* g_atts;
     bool percentcustom;
-    float percentXpos = 100;
-    float percentYpos = 100;
-    float percentScale = 0.25;
-    float percentOpac = 255;
     int clickscount;
+    int releasecount;
 
     CCLabelBMFont* g_run;
     CCLabelBMFont* g_bestRun;
     bool currentRun;
     bool bestRun;
-    int bestEnd = 0;
-    int bestStart = 0;
-    int bestEnd2 = 0;
-    int bestStart2 = 0;
+    int bestEnd;
+    int bestStart;
+    int bestEnd2;
+    int bestStart2;
     std::string display = "Best Run: " + std::to_string(bestStart) + " to " + std::to_string(bestEnd);
 
     CCLabelBMFont* g_levelInfo;
@@ -366,4 +373,7 @@ namespace crystal {
 
     bool hack;
     int cl = 0;
-}
+
+    std::deque<cocos2d::CCRect> newQueue;
+
+    int ss = 0;

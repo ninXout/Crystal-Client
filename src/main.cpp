@@ -9,9 +9,6 @@
 
 USE_GEODE_NAMESPACE();
 
-using namespace crystal;
-
-
 void CrystalClient::toggle() {
     auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
     if (!m_visible) {
@@ -85,8 +82,16 @@ void CrystalClient::applyTheme(std::string const& name) {
 
 void CrystalClient::drawPages() {
     ImGui::Begin("General");
+	CrystalClient::ImExtendedToggleable("asdjhakjhdskja", &hasSetupFonts);
+	if (ImGui::BeginPopupModal("asdjhakjhdskja", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("HOLY SHIT");
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
     for (int i = 0; i < playerHacks.size(); i++) {
-        ImGui::Checkbox(playerHacks[i], &playerBools[i]);
+        CrystalClient::ImToggleable(playerHacks[i], &playerBools[i]);
         if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
         if (i == 40) {
             ImGui::SliderInt("Push Frames", &clickPush, 1, 20);
@@ -115,42 +120,44 @@ void CrystalClient::drawPages() {
         ImGui::TreePop();
     }
     for (int i = 0; i < guiHacks.size(); i++) {
-        if (i != 9 && i != 2) ImGui::Checkbox(guiHacks[i], &guiBools[i]);
+        if (i != 9 && i != 2) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
         if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
         if (i == 2) {
-            if (ImGui::TreeNode("CPS and Clicks"))
-            {
-                ImGui::Checkbox("CPS and Clicks", &guiBools[i]);
-                //ImGui::Checkbox("Reset clicks each attempt", &clickreset);
-                ImGui::Separator();
-                ImGui::TreePop();
-            }
+			CrystalClient::ImExtendedToggleable(guiHacks[i], &guiBools[i]);
+			if (ImGui::BeginPopupModal(guiHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				CrystalClient::ImToggleable("Reset clicks each attempt", &hasSetupFonts);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
         }
         if (i == 9) {
-            if (ImGui::TreeNode("Noclip Accuracy"))
-            {
-                ImGui::Checkbox("Noclip Accuracy", &guiBools[i]);
-                ImGui::Checkbox("Increased Leniency", &lenient);
+			CrystalClient::ImExtendedToggleable(guiHacks[i], &guiBools[i]);
+			if (ImGui::BeginPopupModal(guiHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				CrystalClient::ImToggleable("Increased Leniency", &lenient);
                 ImGui::InputFloat("Kill at Accuracy", &killaccuracy, 0.00f, 99.99f, "%.2f");
-                ImGui::Checkbox("Reset at Accuracy", &resetaccuracy);
-                ImGui::Separator();
-                ImGui::TreePop();
-            }
+                CrystalClient::ImToggleable("Reset at Accuracy", &resetaccuracy);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
         }
     }
     ImGui::End();
     ImGui::Begin("Customization");
     ImGui::ColorEdit4("Accent Color", LightColour);
     ImGui::ColorEdit4("Base Color", BGColour);
-    ImGui::Checkbox("Base Color Same As Accent Color", &sameAsAccent);
-    ImGui::Checkbox("RGB Accent Color", &RGBAccent);
-    ImGui::Checkbox("Borders", &borders);
-    ImGui::Checkbox("Rounded Windows", &rounded);
+    CrystalClient::ImToggleable("Base Color Same As Accent Color", &sameAsAccent);
+    CrystalClient::ImToggleable("RGB Accent Color", &RGBAccent);
+    CrystalClient::ImToggleable("Borders", &borders);
+    CrystalClient::ImToggleable("Rounded Windows", &rounded);
     ImGui::End();
     ImGui::Begin("Bypasses");
     ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
     for (int i = 0; i < bypassHacks.size(); i++) {
-        ImGui::Checkbox(bypassHacks[i], &bypassBools[i]);
+        CrystalClient::ImToggleable(bypassHacks[i], &bypassBools[i]);
     }
     ImGui::End();
     ImGui::Begin("Global");
@@ -161,12 +168,12 @@ void CrystalClient::drawPages() {
     ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]");
-    ImGui::Checkbox("Record", &record);
+    CrystalClient::ImToggleable("Record", &record);
 	ImGui::SameLine();
-    ImGui::Checkbox("Replay", &replay);
-	ImGui::Checkbox("ClickBot", &clickBot);
+    CrystalClient::ImToggleable("Replay", &replay);
+	CrystalClient::ImToggleable("ClickBot", &clickBot);
 	ImGui::SameLine();
-	ImGui::Checkbox("Delta Lock", &deltaLock);
+	CrystalClient::ImToggleable("Delta Lock", &deltaLock);
     ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
     if (ImGui::Button("Save Macro")) {
@@ -307,15 +314,15 @@ void CrystalClient::drawPages() {
     }
     ImGui::End();
     ImGui::Begin("Keybinds");
-    //ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
-    //ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
+    ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
+    ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
     if (ImGui::Button("Add Keybind")) {
-        //activeKeys.push_back(currentKey);
-        //activeMods.push_back(currentMod);
+        activeKeys.push_back(currentKey);
+        activeMods.push_back(currentMod);
     }
     ImGui::End();
     ImGui::Begin("Shortcuts");
-    //ImGui::Checkbox("Enable NONG Loader", &EnableNONGLoader);
+    //CrystalClient::ImToggleable("Enable NONG Loader", &EnableNONGLoader);
     if (ImGui::Button("Open Songs Folder")) {
         system("open ~/Library/Caches");
     }
@@ -329,6 +336,10 @@ void CrystalClient::drawPages() {
         OptionsLayer::addToCurrentScene(false);
     }
     ImGui::End();
+	ImGui::Begin("Internal Renderer");
+	CrystalClient::ImToggleable("Render Recording", &rendering);
+	CrystalClient::ImToggleable("Include Sound", &withAudio);
+	ImGui::End();
 }
 
 void CrystalClient::saveMods() {
@@ -751,6 +762,12 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		// i hate bad practices
 		drawer->m_drawTrail = playerBools[8];
 		s_noLimitTrail = false;
+
+		for (int q = 0; q < newQueue.size(); q++) {
+			drawer->addToPlayer1Queue(newQueue[q]);
+		}
+		drawer->drawForPlayer1(m_player1);
+		drawer->setVisible(true);
 		return ret;
 	}
 	bool checkCollisions(PlayerObject* player, float uhh) {
@@ -787,23 +804,21 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 			drawer->drawForPlayer2(m_player2);
 		}
 
-		if (m_player1) {
-			float xp = m_player1->getPositionX();
+		float xp = m_player1->getPositionX();
 
-			for (int s = sectionForPos(xp) - 10; s < sectionForPos(xp) + 10; ++s) {
-				if (s < 0) continue;
-				if (s >= m_sectionObjects->count()) break;
-				auto section = static_cast<CCArray*>(m_sectionObjects->objectAtIndex(s));
-				for (size_t i = 0; i < this->getAllObjects()->count(); ++i) {
-					auto obj = static_cast<GameObject*>(this->getAllObjects()->objectAtIndex(i));
+		for (int s = sectionForPos(xp) - 5; s < sectionForPos(xp) + 6; ++s) {
+			if (s < 0) continue;
+			if (s >= m_sectionObjects->count()) break;
+			auto section = static_cast<CCArray*>(m_sectionObjects->objectAtIndex(s));
+			for (size_t i = 0; i < section->count(); ++i) {
+				auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
 
-					if (s_onlyHitboxes) obj->setOpacity(0);
+				if (s_onlyHitboxes) obj->setOpacity(0);
 
-					if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
-					if (!obj->m_active) continue;
+				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
+				if (!obj->m_active) continue;
 
-					drawer->drawForObject(obj);
-				}
+				drawer->drawForObject(obj);
 			}
 		}
 	}
@@ -857,7 +872,7 @@ class $modify(EditorUI) {
 	void keyDown(enumKeyCodes code) {
 		EditorUI::keyDown(code);
 		if (s_drawer) {
-			s_drawer->clear();
+			//s_drawer->clear();
 			static_cast<HitboxLevelEditorLayer*>(LevelEditorLayer::get())->updateHitboxEditor();
 		} 
 	}
@@ -1012,13 +1027,7 @@ class $modify(GJBaseGameLayer) {
 			Pxpos.insert(Pxpos.end(), m_player1->getPositionX());
 			Pypos.insert(Pypos.end(), m_player1->getPositionY());
 			Paccel.insert(Paccel.end(), yAccel);
-			auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
-			auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
-
-			if (!clickInPush) {
-				pushes.insert(pushes.end(), frame);
-			}
-			if (clickInRelease) releases.remove(frame);
+			pushes.insert(pushes.end(), frame);
 		}
 		if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::pushButton(i,true);
@@ -1040,13 +1049,7 @@ class $modify(GJBaseGameLayer) {
 			Rxpos.insert(Rxpos.end(), m_player1->getPositionX());
 			Rypos.insert(Rypos.end(), m_player1->getPositionY());
 			Raccel.insert(Raccel.end(), yAccel);
-			auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
-			auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
-
-			if (!clickInRelease) {
-				releases.insert(releases.end(), frame);
-			}
-			if (clickInPush) pushes.remove(frame);
+			releases.insert(releases.end(), frame);
 		}
         if (playerBools[22]) {
 			if (!b) GJBaseGameLayer::releaseButton(i,true);
@@ -1057,6 +1060,7 @@ class $modify(GJBaseGameLayer) {
 		} else {
 			GJBaseGameLayer::releaseButton(i,b);
 		}
+		releasecount++;
 	}
 
 	void bumpPlayer(PlayerObject* player, GameObject* object) {
@@ -1191,6 +1195,14 @@ class $modify(PlayerObject) {
 class $modify(CCScheduler) {
 	void update(float f3) {
 		//if (!classicspeed) CCScheduler::update(f3 * speedhack);
+		if (PlayLayer::get() && (rendering)) {
+			auto dir = CCDirector::sharedDirector();
+
+			float spf = (float)dir->getAnimationInterval();
+			float tScale = dir->getScheduler()->getTimeScale();
+
+			f3 = spf * tScale;
+		}
 		CCScheduler::update(f3);
 		if (shouldQuit && PlayLayer::get()) {
 			PlayLayer::get()->PlayLayer::onQuit();
@@ -1294,40 +1306,7 @@ class $modify(Main, PlayLayer) {
 				g_startPosText->setString(label.c_str());
 			}
 		}
-		switch (g->m_objectID) {
-					case 10:
-					case 11:
-						gravityPortals.push_back(g);
-						break;
-					case 12:
-					case 13:
-					case 47:
-					case 111:
-					case 660:
-					case 745:
-					case 1331:
-						gamemodePortals.push_back(g);
-						break;
-					case 45:
-					case 46:
-						mirrorPortals.push_back(g);
-						break;
-					case 99:
-					case 101:
-						miniPortals.push_back(g);
-						break;
-					case 286:
-					case 287:
-						dualPortals.push_back(g);
-						break;
-					case 200:
-					case 201:
-					case 202:
-					case 203:
-					case 1334:
-						speedChanges.push_back(g);
-						break;
-				}
+		
 	}	
 
 	void resetLevel() {
@@ -1353,7 +1332,13 @@ class $modify(Main, PlayLayer) {
 
 			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = CPxpos.back();
 
-			frame = (int)(m_time * 60) + offset;
+			frame = (int)(m_time * 240) + offset;
+
+			while (xpos.back() >= m_player1->getPositionX() && xpos.size() != 0) {
+				accel.pop_back();
+				ypos.pop_back();
+				xpos.pop_back();
+			}
 
 			while (pushes.back() >= frame && pushes.size() != 0) {
 				Pxpos.pop_back();
@@ -1370,19 +1355,17 @@ class $modify(Main, PlayLayer) {
 			}
 
 			if (pushing) {
-				auto clickInPush = std::find(pushes.begin(), pushes.end(), frame) != pushes.end();
-				auto clickInRelease = std::find(releases.begin(), releases.end(), frame) != releases.end();
-				if (!clickInPush) pushes.insert(pushes.end(), frame);
-				if (clickInRelease) releases.remove(frame);
+				pushes.insert(pushes.end(), frame);
 			}
 
 			mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = CPaccel.back();
 			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = CPypos.back();
 			GJBaseGameLayer::get()->m_player1->setRotation(CProt.back());
 		} else {
-			frame = 0;
+			frame = lastFrame = newFrame = 0;
 			offset = 0;
 			pushIt = releaseIt = posIt = 0;
+			clickscount = releasecount = 0;
 			//GJBaseGameLayer::get()->releaseButton(1, true);
 		}
 		if (m_checkpoints->count() == 0) {
@@ -1511,10 +1494,55 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 
+			auto p1 = GJBaseGameLayer::get()->m_player1;
+			auto p2 = GJBaseGameLayer::get()->m_player2;
+
+			frame = (int)(m_time * 240) + offset;
+
+			yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
+
+			if (record) {
+				xpos.push_back(mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8));
+				ypos.push_back(mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc));
+				accel.push_back(mbo(double, GJBaseGameLayer::get()->m_player1, 0x760));
+			}
+
+			if (replay && pushes.size() > 0) {
+				if (currentMacroType == 2) {
+					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = xpos[frame];
+					while (xpos[newFrame] < m_player1->getPositionX()) {
+						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = ypos[newFrame];
+						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = accel[newFrame];
+						newFrame++;
+					}
+				}
+
+				if (pushes[pushIt] <= frame) {
+					if (currentMacroType == 1) {
+						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Pxpos[pushIt];
+						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Pypos[pushIt];
+						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Paccel[pushIt];
+					}
+					GJBaseGameLayer::get()->pushButton(1, true);
+					pushIt++;
+				}
+
+				if (releases[releaseIt] <= frame) {
+					if (currentMacroType == 1) {
+						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Rxpos[releaseIt];
+						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Rypos[releaseIt];
+						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Raccel[releaseIt];
+					}
+					GJBaseGameLayer::get()->releaseButton(1, true);
+					releaseIt++;
+				}
+			}
+
 			PlayLayer::checkCollisions(p, g);
 
             if (p == m_player1) {
 			    drawer->addToPlayer1Queue(m_player1->getObjectRect());
+				newQueue.push_back(m_player1->getObjectRect());
 		    }
 		    if (p == m_player2) {
 			    drawer->addToPlayer2Queue(m_player2->getObjectRect());
@@ -1526,6 +1554,8 @@ class $modify(Main, PlayLayer) {
 				sprintf(ok, "%.2f%%", accu * 100);
 				reinterpret_cast<CCLabelBMFont*>(getChildByTag(31403))->setString(ok);
 			}
+
+
 	}
 
 	void levelComplete() {
@@ -1548,6 +1578,69 @@ class $modify(Main, PlayLayer) {
 			sprintf(str, "%.2lf%%", percent);
 			this->m_percentLabel->setString(str);
 		}
+	}
+
+	CGImageRef CGImageFromCCImage(CCImage* img) {
+		float width = img->getWidth();
+		float height = img->getHeight();
+		int dataLen = width * height * 4;
+
+		CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, img->getData(), dataLen, NULL);
+
+		return CGImageCreate(
+			width, height, 
+			8, 8 * 4, width * 4, 
+			CGColorSpaceCreateDeviceRGB(), 
+			kCGImageAlphaLast, 
+			provider,   // data provider
+			NULL,       // decode
+			true,        // should interpolate
+			kCGRenderingIntentDefault
+		);
+	}
+
+	bool CGImageWriteToFile(CGImageRef image) {
+		std::stringstream newthing;
+  		newthing << "/Users/" << getenv("USER") << "/Downloads/InternalRender/frame_";
+		newthing << std::setw(4) << std::setfill('0') << std::to_string(ss);
+		newthing << ".png";
+		std::string name = newthing.str();
+
+		ss++;
+
+		CFStringRef file = CFStringCreateWithCString(kCFAllocatorDefault,
+		name.c_str(),
+		kCFStringEncodingMacRoman);
+		CFStringRef type = CFSTR("public.png");
+		CFURLRef urlRef = CFURLCreateWithFileSystemPath( kCFAllocatorDefault, file, kCFURLPOSIXPathStyle, false );
+		CGImageDestinationRef destination = CGImageDestinationCreateWithURL( urlRef, kUTTypePNG, 1, NULL );
+		CGImageDestinationAddImage( destination, image, NULL );
+		CGImageDestinationFinalize( destination );
+		if (!destination) {
+			return false;
+		}
+
+		CGImageDestinationAddImage(destination, image, nil);
+
+		if (!CGImageDestinationFinalize(destination)) {
+			CFRelease(destination);
+			return false;
+		}
+
+		CFRelease(destination);
+		return true;
+	}
+
+	void captureScreen() {
+		auto size = CCDirector::sharedDirector()->getWinSize();
+		auto renderer = CCRenderTexture::create(size.width, size.height, cocos2d::kCCTexture2DPixelFormat_RGBA8888);
+
+		renderer->begin();
+		CCDirector::sharedDirector()->getRunningScene()->visit();
+		renderer->end();
+
+		auto img = renderer->newCCImage(true);
+		CGImageWriteToFile(CGImageFromCCImage(img));    
 	}
 
 	void update(float f4) {
@@ -1580,7 +1673,6 @@ class $modify(Main, PlayLayer) {
 				//if (rainP2wave) m_player2->m_waveTrail->setColor(colInverse);
 		}
 
-
 		if (guiBools[9]) {
 			percent = (m_player1->getPositionX() / m_levelLength) * 100;
 		}
@@ -1595,14 +1687,6 @@ class $modify(Main, PlayLayer) {
 
 			g_cheating->setString(bad.c_str());
 
-		}
-		if (deltaLock) {
-			auto dir = CCDirector::sharedDirector();
-
-			float spf = (float)dir->getAnimationInterval();
-			float tScale = dir->getScheduler()->getTimeScale();
-
-			f4 = spf * tScale;
 		}
 		if (pausecountdown) {
 			if (freezeCount) {
@@ -1639,10 +1723,6 @@ class $modify(Main, PlayLayer) {
 			std::string display2 = std::to_string(clickscount) + " clicks";
 			g_clicks->setString(display2.c_str());
 		}
-		m_percentLabel->setPositionX(percentXpos);
-		m_percentLabel->setPositionY(percentYpos);
-		m_percentLabel->setScale(percentScale);
-		m_percentLabel->setOpacity(percentOpac);
 		if (playerBools[12]) {
 			m_sliderGrooveSprite->setVisible(false);
 		} else {
@@ -1672,6 +1752,35 @@ class $modify(Main, PlayLayer) {
 			g_death->setString(str);
 		}
         drawer->clear();
+		/*
+		CGImageRef screenShot = CGWindowListCreateImage( CGRectInfinite, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+
+		std::stringstream newthing;
+  		newthing << "/Users/trooper/Downloads/InternalRender/frame_";
+		newthing << std::setw(3) << std::setfill('0') << std::to_string(ss);
+		newthing << "_delay-0.07s.jpg";
+		std::string name = newthing.str();
+
+		CFStringRef file = CFStringCreateWithCString(kCFAllocatorDefault,
+		name.c_str(),
+		kCFStringEncodingMacRoman);
+		CFStringRef type = CFSTR("public.jpeg");
+		CFURLRef urlRef = CFURLCreateWithFileSystemPath( kCFAllocatorDefault, file, kCFURLPOSIXPathStyle, false );
+		CGImageDestinationRef image_destination = CGImageDestinationCreateWithURL( urlRef, type, 1, NULL );
+		CGImageDestinationAddImage( image_destination, screenShot, NULL );
+		CGImageDestinationFinalize( image_destination );
+		ss++;
+		std::fstream check;
+		check.open(name.c_str());
+		*/
+		if (deltaLock) {
+			auto dir = CCDirector::sharedDirector();
+
+			float spf = (float)dir->getAnimationInterval();
+			float tScale = dir->getScheduler()->getTimeScale();
+
+			f4 = spf * tScale;
+		}
 		if (playerBools[25]) {
 			if (!smoothOut) {
 				return update(f4);
@@ -1688,39 +1797,12 @@ class $modify(Main, PlayLayer) {
 				if (classicspeed) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
-					if (!freezeCount) PlayLayer::update(f4);
+					PlayLayer::update(f4);
+					if (rendering && replay) captureScreen();
 				}
 			}
 		}
-
-		auto p1 = GJBaseGameLayer::get()->m_player1;
-		auto p2 = GJBaseGameLayer::get()->m_player2;
-
-		frame = (int)(m_time * 60) + offset;
-
-		yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
-
-		if (replay && pushes.size() > 0) {
-			if (std::find(pushes.begin(), pushes.end(), frame) != pushes.end()) {
-				if (currentMacroType == 1) {
-					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Pxpos[pushIt];
-					mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Pypos[pushIt];
-					mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Paccel[pushIt];
-				}
-				GJBaseGameLayer::get()->pushButton(1, true);
-				pushIt++;
-			}
-
-			if (std::find(releases.begin(), releases.end(), frame) != releases.end()) {
-				if (currentMacroType == 1) {
-					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Rxpos[releaseIt];
-					mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Rypos[releaseIt];
-					mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Raccel[releaseIt];
-				}
-				GJBaseGameLayer::get()->releaseButton(1, true);
-				releaseIt++;
-			}
-		}
+		
         //if (autoKill) {
 			//m_isDead = true;
 			//PlayLayer::resetLevel();
@@ -1788,20 +1870,36 @@ class $modify(Main, PlayLayer) {
 		}
 	}
 
+	std::string getOffsetTime(float time) {
+		std::string ret = "00:" + std::to_string((int)(time / 60)) + ":" + std::to_string((int)(time) % 60);
+		return ret;
+	}
+
 	void onQuit() {
 		FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
-		if (!shouldQuit && playerBools[19] && !m_hasLevelCompleteMenu && !CCDirector::sharedDirector()->getKeyboardDispatcher()->getShiftKeyPressed()) {
+		if (!shouldQuit && playerBools[19] && !m_hasLevelCompleteMenu) {
 			geode::createQuickPopup(
-    "Confirm Quit",            // title
-    "Are you sure you would like to Quit?",   // content
-    "Cancel", "Quit",      // buttons
-    [](auto, bool btn2) {
-        if (btn2) {
-            shouldQuit = true;
-        }
-    }
-);
+				"Confirm Quit",            // title
+				"Are you sure you would like to Quit?",   // content
+				"Cancel", "Quit",      // buttons
+				[](auto, bool btn2) {
+					if (btn2) {
+						shouldQuit = true;
+					}
+				}
+			);
 		} else {
+			if (withAudio) {
+				std::string songPath;
+				songPath = (std::string)geode::dirs::getGameDir() + "/" + (std::string)m_level->getAudioFileName();
+				//songPath = songPath.substr(0, songPath.size()-10);
+				std::fstream idklmao;
+				idklmao.open("geode/mods/log.txt", std::ios::app);
+				idklmao << std::to_string(LevelSettingsObject::get()->m_songOffset);
+				idklmao << getOffsetTime(LevelSettingsObject::get()->m_songOffset);
+				//geode::dirs::getTempDir()
+				std::string songname;
+			}
 			PlayLayer::onQuit();
 		}
 	}
@@ -1847,13 +1945,6 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void setupSmartSP() {
-		if (playerBools[41]) {
-			for (int c = 0; c < PlayLayer::get()->m_objects->count(); c++) {
-				GameObject* g = reinterpret_cast<GameObject*>(PlayLayer::get()->m_objects->objectAtIndex(c));
-				
-			}
-		}
-
 		if (playerBools[41]) {
 			//willFlip.resize(gravityPortals.size());
 			for (StartPosObject* startPos : SPs) {
@@ -2011,7 +2102,48 @@ class $modify(Main, PlayLayer) {
 		}
         drawer = tulip::HitboxNode::create();
 
+		ss = 0;
 		PlayLayer::init(gl);
+		if (playerBools[41]) {
+			for (int c = 0; c < PlayLayer::get()->m_objects->count(); c++) {
+				GameObject* g = reinterpret_cast<GameObject*>(PlayLayer::get()->m_objects->objectAtIndex(c));
+				
+				switch (g->m_objectID) {
+					case 10:
+					case 11:
+						gravityPortals.push_back(g);
+						break;
+					case 12:
+					case 13:
+					case 47:
+					case 111:
+					case 660:
+					case 745:
+					case 1331:
+						gamemodePortals.push_back(g);
+						break;
+					case 45:
+					case 46:
+						mirrorPortals.push_back(g);
+						break;
+					case 99:
+					case 101:
+						miniPortals.push_back(g);
+						break;
+					case 286:
+					case 287:
+						dualPortals.push_back(g);
+						break;
+					case 200:
+					case 201:
+					case 202:
+					case 203:
+					case 1334:
+						speedChanges.push_back(g);
+						break;
+				}
+			}
+		}
 		setupSmartSP();
 
         m_objectLayer->addChild(drawer, 32);
@@ -2087,10 +2219,6 @@ class $modify(Main, PlayLayer) {
 		if (playerBools[12]) {
 			m_percentLabel->setPositionX(259.638);
 		}
-			percentXpos = m_percentLabel->getPositionX();
-			percentYpos = m_percentLabel->getPositionY();
-			percentScale = m_percentLabel->getScale();
-			percentOpac = m_percentLabel->getOpacity();
 		if (guiBools[0]) {
 			//setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + 13, "Custom Message")));
 			//g_tatts->setPosition(5 , corner - 55);
@@ -2316,8 +2444,17 @@ class $(UILayer) {
 */
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
+
+		if (kc == CrystalClient::shortcutKey(activeKeys.back())) {
+			playerBools[activeMods[0]] = !playerBools[activeMods[0]];
+		}
+
 		if (kc == KEY_R) {
 			PlayLayer::get()->resetLevel();
+		} else if (kc == KEY_F) {
+			shouldUpdate = true;
+			PlayLayer::get()->update(1.0/60.0);
+			shouldUpdate = false;
 		} else {
 			UILayer::keyDown(kc);
 		}

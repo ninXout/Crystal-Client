@@ -36,6 +36,8 @@ protected:
     void setupFonts();
     void setupPlatform();
 
+    static void ImToggleable(const char* label, bool* toggle);
+    static void ImExtendedToggleable(const char* str_id, bool* v);
     void drawPages();
     void draw(GLRenderCtx* ctx);
     bool canAttachWithIME() override;
@@ -52,6 +54,7 @@ public:
     bool isMenuOpen = false;
     float g = 0;
 
+    static cocos2d::enumKeyCodes shortcutKey(int key);
     void loadMods();
     void saveMods();
     void arrangeText(int arrayLength);
