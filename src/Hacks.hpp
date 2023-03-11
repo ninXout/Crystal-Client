@@ -35,6 +35,9 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
 #include <CoreServices/CoreServices.h>
+#include "Amethyst.hpp"
+
+#pragma once
 
 /*
 
@@ -50,7 +53,9 @@
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
-    std::vector<const char*> playerHacks = { // player hacks comments are wrong
+void fps_shower_init();
+
+std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Noclip Player 1", //playerBools[0]
         "Noclip Player 2", //playerBools[1]
         "Rainbow Icon P1", //playerBools[2]
@@ -255,17 +260,23 @@
     char macroname[25];
     int frame;
     int newFrame;
+    float musicOffset;
     std::vector<int> pushes;
+    std::vector<int> releases;
+    std::vector<Amethyst::AmethystFrame> pushData;
+    std::vector<Amethyst::AmethystFrame> releaseData;
+    std::vector<Amethyst::AmethystFrame> frameData;
+    /*
     std::vector<float> Pxpos;
     std::vector<float> Pypos;
     std::vector<float> Paccel;
-    std::vector<int> releases;
     std::vector<float> Rxpos;
     std::vector<float> Rypos;
     std::vector<float> Raccel;
     std::vector<float> xpos;
     std::vector<float> ypos;
     std::vector<float> accel;
+    */
     std::vector<int> CPoffset;
     std::vector<float> CPaccel;
     std::vector<float> CProt;
@@ -286,15 +297,16 @@
     std::vector<int> activeKeys;
     std::vector<int> activeMods;
 
-    const char* keybindings[49] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Tab", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape", "Space" };
+    const char* keybindings[50] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Tab", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape", "Space" };
     const char* modbindings[12] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint" };
 
     // FPS Display
-    std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
-    float frame_time_sum;
-    int frame_count;
     int bypass = 60;
     double time_since;
+    float tps = 60;
+    bool tpsBypass;
+    bool g_disable_render = false;
+    float g_left_over = 0.f;
 
     // Display
     bool attempts;
@@ -377,3 +389,60 @@
     std::deque<cocos2d::CCRect> newQueue;
 
     int ss = 0;
+
+    bool specialAccess;
+
+    /*
+    bool noclip;
+    bool noclipP1;
+    bool noclipP2;
+
+    bool rainbowP1;
+    bool rainbowP2;
+    bool rainbowP1wave;
+    bool rainbowP2wave;
+
+    bool samedual;
+
+    bool hitboxes;
+    bool onDeath; // Hitboxes on Death
+    bool drawTrail;
+    bool inEditor;
+
+    bool deathEffect;
+    bool particles;
+    bool progressBar;
+    bool accpercentage;
+
+    bool nopulse;
+    bool hideatts;
+    bool hidepracticeatts;
+
+    bool pracmusic;
+    bool ignoreESC;
+    bool confirmQuit;
+    bool autoldm;
+
+    bool instantdeath;
+    bool flippedcontrol;
+    bool mirrorcontrol;
+
+    bool startpos;
+    bool respawnfix;
+    bool practiceorbfix;
+
+    bool checkpointswitch;
+    bool solidwave;
+    bool framestep;
+
+    bool lastCheckpoint;
+    bool autoreset;
+    bool invisibleplayer;
+
+    bool noglow;
+    bool nospike;
+    bool mirror;
+    bool layout;
+
+    bool autoclick;
+    */

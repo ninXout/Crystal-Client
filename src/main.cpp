@@ -6,6 +6,7 @@
 #include "Hacks.hpp"
 #include <imgui.h>
 #include "ImGui.hpp"
+#include "Amethyst.hpp"
 
 USE_GEODE_NAMESPACE();
 
@@ -16,12 +17,47 @@ void CrystalClient::toggle() {
     }
     if (m_visible) {
 		CrystalClient::get()->saveMods();
+		CrystalClient::get()->saveShortcuts();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
 			platform->hideCursor();
 			//CrystalClient::get()->arrangeText(13);
 		}
     }
     this->show(!m_visible);
+}
+
+void CrystalClient::saveShortcuts() {
+	std::ofstream clear("Crystal/shortcuts.cmp");
+    clear << "";
+    clear.close();
+	std::fstream sfile;
+	sfile.open("Crystal/shortcuts.cmp", std::ios::app);
+	sfile << activeKeys.size() << '\n';
+	for (size_t i = 0; i < activeKeys.size(); i++) {
+		sfile << activeKeys[i] << '\n';
+		sfile << activeMods[i] << '\n';
+	}
+	sfile.close();
+}
+
+void CrystalClient::loadShortcuts() {
+	activeKeys.clear();
+	activeMods.clear();
+	std::string line;
+	std::fstream sfile;
+    sfile.open("Crystal/shortcuts.cmp", std::ios::in);
+	if (sfile.is_open()) {
+		getline(sfile, line);
+		int len;
+		len = stoi(line);
+		for (int lineno = 1; lineno <= len; lineno++) {
+			getline(sfile, line);
+			activeKeys.push_back(stoi(line));
+			getline(sfile, line);
+			activeMods.push_back(stoi(line));
+		}
+		sfile.close();
+	}
 }
 
 void CrystalClient::applyTheme(std::string const& name) {
@@ -82,14 +118,6 @@ void CrystalClient::applyTheme(std::string const& name) {
 
 void CrystalClient::drawPages() {
     ImGui::Begin("General");
-	CrystalClient::ImExtendedToggleable("asdjhakjhdskja", &hasSetupFonts);
-	if (ImGui::BeginPopupModal("asdjhakjhdskja", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("HOLY SHIT");
-		if (ImGui::Button("Close")) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
     for (int i = 0; i < playerHacks.size(); i++) {
         CrystalClient::ImToggleable(playerHacks[i], &playerBools[i]);
         if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
@@ -161,7 +189,16 @@ void CrystalClient::drawPages() {
     }
     ImGui::End();
     ImGui::Begin("Global");
-    ImGui::InputInt("FPS Bypass", &bypass, 0, 1000);
+	ImGui::PushItemWidth(100);
+    ImGui::InputInt("##FPS Bypass", &bypass, 0, 1000);
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	CrystalClient::ImToggleable("FPS Bypass", &hasSetupFonts);
+	ImGui::PushItemWidth(100);
+	ImGui::InputFloat("##TPS Bypass", &tps);
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	CrystalClient::ImToggleable("TPS Bypass", &tpsBypass);
     ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
     CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
     cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
@@ -181,58 +218,52 @@ void CrystalClient::drawPages() {
         std::fstream myfile(filename.c_str(), std::ios::app);
         myfile << pushes.size();
         myfile << "\n";
-        for (float val : pushes)
+        for (size_t i = 0; i < pushes.size(); i++)
         {
-            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << std::setprecision(6) << std::fixed << pushes[i];
             myfile << "\n";
         }
         myfile << releases.size();
         myfile << "\n";
-        for (float val : releases)
+        for (size_t i = 0; i < releases.size(); i++)
         {
-            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << std::setprecision(6) << std::fixed << releases[i];
             myfile << "\n";
         }
-        myfile << Pxpos.size();
+		// pushes
+        myfile << pushData.size();
         myfile << "\n";
-        for (float val : Pxpos)
+        for (size_t i = 0; i < pushData.size(); i++)
         {
-            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << std::setprecision(6) << std::fixed << pushData[i].xpos;
+            myfile << "\n";
+			myfile << std::setprecision(6) << std::fixed << pushData[i].ypos;
+            myfile << "\n";
+			myfile << std::setprecision(6) << std::fixed << pushData[i].accel;
             myfile << "\n";
         }
-        myfile << Pypos.size();
+		// releases
+		myfile << releaseData.size();
         myfile << "\n";
-        for (float val : Pypos)
+        for (size_t i = 0; i < releaseData.size(); i++)
         {
-            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << std::setprecision(6) << std::fixed << releaseData[i].xpos;
+            myfile << "\n";
+			myfile << std::setprecision(6) << std::fixed << releaseData[i].ypos;
+            myfile << "\n";
+			myfile << std::setprecision(6) << std::fixed << releaseData[i].accel;
             myfile << "\n";
         }
-        myfile << Paccel.size();
+		// frames
+		myfile << frameData.size();
         myfile << "\n";
-        for (float val : Paccel)
+		for (size_t i = 0; i < frameData.size(); i++)
         {
-            myfile << std::setprecision(6) << std::fixed << val;
+            myfile << std::setprecision(6) << std::fixed << frameData[i].xpos;
             myfile << "\n";
-        }
-		myfile << Rxpos.size();
-        myfile << "\n";
-        for (float val : Rxpos)
-        {
-            myfile << std::setprecision(6) << std::fixed << val;
+			myfile << std::setprecision(6) << std::fixed << frameData[i].ypos;
             myfile << "\n";
-        }
-        myfile << Rypos.size();
-        myfile << "\n";
-        for (float val : Rypos)
-        {
-            myfile << std::setprecision(6) << std::fixed << val;
-            myfile << "\n";
-        }
-        myfile << Raccel.size();
-        myfile << "\n";
-        for (float val : Raccel)
-        {
-            myfile << std::setprecision(6) << std::fixed << val;
+			myfile << std::setprecision(6) << std::fixed << frameData[i].accel;
             myfile << "\n";
         }
     }
@@ -259,38 +290,38 @@ void CrystalClient::drawPages() {
             getline(file, line);
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
+				Amethyst::AmethystFrame newPush;
                 getline(file, line);
-                Pxpos.insert(Pxpos.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                Pypos.insert(Pypos.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                Paccel.insert(Paccel.end(), stof(line));
+				newPush.xpos = stof(line);
+				getline(file, line);
+				newPush.ypos = stof(line);
+				getline(file, line);
+				newPush.accel = stod(line);
+                pushData.insert(pushData.end(), newPush);
             }
 			getline(file, line);
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
+				Amethyst::AmethystFrame newRel;
                 getline(file, line);
-                Rxpos.insert(Rxpos.end(), stof(line));
+				newRel.xpos = stof(line);
+				getline(file, line);
+				newRel.ypos = stof(line);
+				getline(file, line);
+				newRel.accel = stod(line);
+                releaseData.insert(releaseData.end(), newRel);
             }
-            getline(file, line);
+			getline(file, line);
             len = stoi(line);
             for (int lineno = 1; lineno <= len; lineno++) {
+				Amethyst::AmethystFrame newFrameDat;
                 getline(file, line);
-                Rypos.insert(Rypos.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                Raccel.insert(Raccel.end(), stof(line));
+				newFrameDat.xpos = stof(line);
+				getline(file, line);
+				newFrameDat.ypos = stof(line);
+				getline(file, line);
+				newFrameDat.accel = stod(line);
+                frameData.insert(frameData.end(), newFrameDat);
             }
             file.close();
         }
@@ -299,15 +330,9 @@ void CrystalClient::drawPages() {
     if (ImGui::Button("Clear Macro")) {
         pushes.clear();
         releases.clear();
-        Pxpos.clear();
-        Pypos.clear();
-        Paccel.clear();
-        Rxpos.clear();
-        Rypos.clear();
-        Raccel.clear();
-        xpos.clear();
-        ypos.clear();
-        accel.clear();
+        pushData.clear();
+		releaseData.clear();
+		frameData.clear();
         CPoffset.clear();
         CPaccel.clear();
         CProt.clear();
@@ -320,6 +345,18 @@ void CrystalClient::drawPages() {
         activeKeys.push_back(currentKey);
         activeMods.push_back(currentMod);
     }
+	for (size_t i = 0; i < activeMods.size(); i++) {
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text(modbindings[activeMods[i]]);
+		ImGui::SameLine();
+		ImGui::Text(keybindings[activeKeys[i]]);
+		ImGui::SameLine();
+		if (ImGui::Button(("x##" + std::to_string(i)).c_str())) {
+			activeKeys.erase(activeKeys.begin() + i);
+			activeMods.erase(activeMods.begin() + i);
+		}
+		ImGui::Separator();
+	}
     ImGui::End();
     ImGui::Begin("Shortcuts");
     //CrystalClient::ImToggleable("Enable NONG Loader", &EnableNONGLoader);
@@ -415,7 +452,7 @@ void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
 void CrystalClient::arrangeText(int arrayLength) {
 	if (guiBools[0]) {
 		setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message")));
-	}
+	} 
 	if (guiBools[4]) {
 		setAnchoredPosition(g_cheating, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Cheat Indicator")));
 	}
@@ -585,7 +622,7 @@ class Patch3 : public Patch {
 };
 */
 GEODE_API void GEODE_DLL geode_load(Mod* m) {
-	//fps_shower_init();
+	fps_shower_init();
     /*
 		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
 		lol->apply();
@@ -624,6 +661,9 @@ class FPSOverlay : public cocos2d::CCNode {
     int m_frames;
     double m_accumulate;
     double m_resetInterval;
+	std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
+    float frame_time_sum = 0.f;
+    int frame_count = 0;
 
  public:
     static FPSOverlay* sharedState() {
@@ -663,6 +703,8 @@ class FPSOverlay : public cocos2d::CCNode {
         m_backdrop->setScale(0.166666);
         addChild(m_backdrop, 1);
 
+		this->schedule(schedule_selector(FPSOverlay::updateLabel));
+
         return true;
     }
 
@@ -693,7 +735,20 @@ class FPSOverlay : public cocos2d::CCNode {
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
+		std::fstream check;
+		check.open("Crystal/shortcuts.cmp", std::ios::app);
+		if (GJAccountManager::sharedState()->m_username == "BraedenTheCroco" && !check.is_open()) {
+			std::string alertidk = "Hi, " + (std::string)GJAccountManager::sharedState()->m_username + ". Special Access Mode has been enabled for you and as a result, a exclusive mod has popped up on the menu called \"Editor Grid Size\". Enjoy!";
+			auto alert = FLAlertLayer::create(
+				"Hi!",
+				alertidk,
+				"Okay"
+			);
+			alert->m_scene = this;
+        	alert->show();
+		}
 		CrystalClient::get()->loadMods();
+		CrystalClient::get()->loadShortcuts();
 		if (bypassBools[10]) cl = 0;
 		return true;
 	}
@@ -1024,9 +1079,7 @@ class $modify(GJBaseGameLayer) {
 		//if (b) mouse1Down = true;
 	    //if (!b) mouse2Down = true;
 		if (record) {
-			Pxpos.insert(Pxpos.end(), m_player1->getPositionX());
-			Pypos.insert(Pypos.end(), m_player1->getPositionY());
-			Paccel.insert(Paccel.end(), yAccel);
+			pushData.push_back(Amethyst::create());
 			pushes.insert(pushes.end(), frame);
 		}
 		if (playerBools[22]) {
@@ -1046,9 +1099,7 @@ class $modify(GJBaseGameLayer) {
 		//if (b) mouse1Down = false;
 	    //if (!b) mouse2Down = false;
 		if (record) {
-			Rxpos.insert(Rxpos.end(), m_player1->getPositionX());
-			Rypos.insert(Rypos.end(), m_player1->getPositionY());
-			Raccel.insert(Raccel.end(), yAccel);
+			releaseData.push_back(Amethyst::create());
 			releases.insert(releases.end(), frame);
 		}
         if (playerBools[22]) {
@@ -1203,17 +1254,43 @@ class $modify(CCScheduler) {
 
 			f3 = spf * tScale;
 		}
-		CCScheduler::update(f3);
+		if (tpsBypass && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
+			const auto fps = tps;
+			auto speedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
+
+			const float target_dt = 1.f / fps / speedhack;
+
+			// todo: find ways to disable more render stuff
+			g_disable_render = false;
+
+			unsigned times = static_cast<int>((f3 + g_left_over) / target_dt);
+			if (f3 == 0.f)
+				return CCScheduler::update(target_dt);
+			auto start = std::chrono::high_resolution_clock::now();
+			for (unsigned i = 0; i < times; ++i)
+			{
+				//if (i == times - 1)
+				//    g_disable_render = false;
+				CCScheduler::update(target_dt);
+				using namespace std::literals;
+				if (std::chrono::high_resolution_clock::now() - start > 33.333ms)
+				{
+					times = i + 1;
+					break;
+				}
+			}
+			g_left_over += f3 - target_dt * times;
+		} else {
+			CCScheduler::update(f3);
+		}
 		if (shouldQuit && PlayLayer::get()) {
 			PlayLayer::get()->PlayLayer::onQuit();
 			shouldQuit = false;
 		}
-		/*
-		if (DrawGridLayer::get()) {
+		if (DrawGridLayer::get() && specialAccess) {
 			DrawGridLayer::get()->m_activeGridNodeSize = gridSize;
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
-		*/
 		if (RGBAccent) {
 			if (CrystalClient::get()->g >= 360)
 				CrystalClient::get()->g = 0;
@@ -1309,6 +1386,10 @@ class $modify(Main, PlayLayer) {
 		
 	}	
 
+	void updateVisibility() {
+		if (!g_disable_render) PlayLayer::updateVisibility();
+	}
+
 	void resetLevel() {
 		auto gj = reinterpret_cast<PlayerObject*>(PlayLayer::get());
 		if (playerBools[27] && m_isPracticeMode) load = true;
@@ -1334,27 +1415,22 @@ class $modify(Main, PlayLayer) {
 
 			frame = (int)(m_time * 240) + offset;
 
-			while (xpos.back() >= m_player1->getPositionX() && xpos.size() != 0) {
-				accel.pop_back();
-				ypos.pop_back();
-				xpos.pop_back();
+			while (frameData.back().xpos >= m_player1->getPositionX() && frameData.size() != 0) {
+				frameData.pop_back();
 			}
 
 			while (pushes.back() >= frame && pushes.size() != 0) {
-				Pxpos.pop_back();
-				Pypos.pop_back();
-				Paccel.pop_back();
+				pushData.pop_back();
 				pushes.pop_back();
 			}
 
 			while (releases.back() >= frame && releases.size() != 0) {
-				Rxpos.pop_back();
-				Rypos.pop_back();
-				Raccel.pop_back();
+				releaseData.pop_back();
 				releases.pop_back();
 			}
 
 			if (pushing) {
+				pushData.push_back(Amethyst::create());
 				pushes.insert(pushes.end(), frame);
 			}
 
@@ -1435,7 +1511,7 @@ class $modify(Main, PlayLayer) {
 				reinterpret_cast<CCLabelBMFont*>(getChildByTag(31403))->setString(str);
 			}
 		}
-		if (frames>20 && guiBools[10]) {
+		if (guiBools[10]) {
 			deathwait++;
 			if (deathwait >= 25) {
 				noclip_deaths++;
@@ -1452,10 +1528,10 @@ class $modify(Main, PlayLayer) {
 				PlayLayer::destroyPlayer(p,g);
 			}
 		}
-		if (playerBools[0]) {
+		if (playerBools[0] && !playerBools[1]) {
 			if (p == m_player2) PlayLayer::destroyPlayer(p,g);
 		}
-		if (playerBools[1]) {
+		if (playerBools[1] && !playerBools[0]) {
 			if (p == m_player1) PlayLayer::destroyPlayer(p,g);
 		} 
 		if (!playerBools[0] && !playerBools[1]) {
@@ -1502,26 +1578,29 @@ class $modify(Main, PlayLayer) {
 			yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
 
 			if (record) {
-				xpos.push_back(mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8));
-				ypos.push_back(mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc));
-				accel.push_back(mbo(double, GJBaseGameLayer::get()->m_player1, 0x760));
+				frameData.push_back(Amethyst::create());
 			}
 
 			if (replay && pushes.size() > 0) {
 				if (currentMacroType == 2) {
-					//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = xpos[frame];
-					while (xpos[newFrame] < m_player1->getPositionX()) {
-						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = ypos[newFrame];
-						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = accel[newFrame];
+					if (newFrame == 0) newFrame++;
+					while (frameData[newFrame].xpos < m_player1->getPositionX()) {
+						Amethyst::apply(frameData[newFrame], false);
 						newFrame++;
+						if (pushes[pushIt] <= frame) {
+							GJBaseGameLayer::get()->pushButton(1, true);
+							pushIt++;
+						}
+						if (releases[releaseIt] <= frame) {
+							GJBaseGameLayer::get()->releaseButton(1, true);
+							releaseIt++;
+						}
 					}
 				}
 
 				if (pushes[pushIt] <= frame) {
 					if (currentMacroType == 1) {
-						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Pxpos[pushIt];
-						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Pypos[pushIt];
-						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Paccel[pushIt];
+						Amethyst::apply(pushData[pushIt], true);
 					}
 					GJBaseGameLayer::get()->pushButton(1, true);
 					pushIt++;
@@ -1529,13 +1608,22 @@ class $modify(Main, PlayLayer) {
 
 				if (releases[releaseIt] <= frame) {
 					if (currentMacroType == 1) {
-						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = Rxpos[releaseIt];
-						mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = Rypos[releaseIt];
-						mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = Raccel[releaseIt];
+						Amethyst::apply(releaseData[releaseIt], true);
 					}
 					GJBaseGameLayer::get()->releaseButton(1, true);
 					releaseIt++;
 				}
+			}
+
+			if (replay && !rendering) {
+				std::string status = "Playing: " + std::to_string(pushIt) + "/" + std::to_string(pushes.size());
+				g_macro->setString(status.c_str());
+			} else if (record) {
+				std::string status = "Recording: Macro Frame " + std::to_string(m_time * 240 + offset);
+				g_macro->setString(status.c_str());
+			} else if (replay && rendering) {
+				std::string status = "Rendering: Video Frame " + std::to_string(m_time * 60);
+				g_macro->setString(status.c_str());
 			}
 
 			PlayLayer::checkCollisions(p, g);
@@ -1802,7 +1890,29 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		
+			auto p1 = GJBaseGameLayer::get()->m_player1;
+			auto p2 = GJBaseGameLayer::get()->m_player2;
+
+			frame = (int)(m_time * 240) + offset;
+
+			if (replay && pushes.size() > 0) {
+				if (pushes[pushIt] <= frame) {
+					if (currentMacroType == 1) {
+						Amethyst::apply(pushData[pushIt], true);
+					}
+					GJBaseGameLayer::get()->pushButton(1, true);
+					pushIt++;
+				}
+
+				if (releases[releaseIt] <= frame) {
+					if (currentMacroType == 1) {
+						Amethyst::apply(releaseData[releaseIt], true);
+					}
+					GJBaseGameLayer::get()->releaseButton(1, true);
+					releaseIt++;
+				}
+			}
+		//musicOffset = PlayLayer::get()->m_level->m_levelSettings->m_songOffset;
         //if (autoKill) {
 			//m_isDead = true;
 			//PlayLayer::resetLevel();
@@ -2380,6 +2490,17 @@ class $modify(Main, PlayLayer) {
 	}
 };
 
+class CCDirectorVisible : public cocos2d::CCDirector {
+public:
+	void calculateDeltaTime() {
+		CCDirector::calculateDeltaTime();
+	};
+
+	void setNextScene() {
+		CCDirector::setNextScene();
+	}
+};
+
 class $modify(CCDirector) {
 	void drawScene() {
 
@@ -2391,6 +2512,8 @@ class $modify(CCDirector) {
 		return CCDirector::drawScene();
 	}
 
+	auto visible_director = reinterpret_cast<CCDirectorVisible*>(this);
+
 	if (!this->isPaused()) {
 		this->getScheduler()->update(
 			this->getDeltaTime()
@@ -2398,21 +2521,19 @@ class $modify(CCDirector) {
 	}
 
 	if (m_pNextScene) {
-		setNextScene();
+		visible_director->setNextScene();
 	}
 	}
 };
 
 class $(UILayer) {
-/*
 	void customMod(int current) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
-		bool hitbox = true;
 		float tempSpeed = 1;
 		if (current == 0) {
-			noclip = !noclip;
+			playerBools[0] = !playerBools[0];
 		} else if (current == 1) {
-			autoKill = !autoKill;
+			//autoKill = !autoKill;
 		} else if (current == 2) {
 			PlayLayer::get()->resetLevel();
 		} else if (current == 3) {
@@ -2441,12 +2562,14 @@ class $(UILayer) {
 			PlayLayer::get()->removeLastCheckpoint();
 		}
 	}
-*/
+
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
 
-		if (kc == CrystalClient::shortcutKey(activeKeys.back())) {
-			playerBools[activeMods[0]] = !playerBools[activeMods[0]];
+		for (int m = 0; m < activeMods.size(); m++) {
+			if (kc == CrystalClient::shortcutKey(activeKeys[m])) {
+				customMod(activeMods[m]);
+			}
 		}
 
 		if (kc == KEY_R) {

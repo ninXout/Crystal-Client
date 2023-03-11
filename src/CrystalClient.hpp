@@ -55,6 +55,9 @@ public:
     float g = 0;
 
     static cocos2d::enumKeyCodes shortcutKey(int key);
+    float getTimeForXPos(PlayLayer*);
+    void loadShortcuts();
+    void saveShortcuts();
     void loadMods();
     void saveMods();
     void arrangeText(int arrayLength);

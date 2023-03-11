@@ -123,9 +123,11 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
     //ImGui::SetItemAllowOverlap();
     ImGui::SameLine();
+	ImGui::PushStyleColor(0, *v ? ImVec4(255,255,255,255) : ImVec4(0,0,0,0));
     ImGui::PushStyleColor(21, ImVec4(0,0,0,0));
     if (ImGui::ArrowButton(str_id, 1))
         ImGui::OpenPopup(str_id);
+	ImGui::PopStyleColor();
     ImGui::PopStyleColor();
     // Adds 220 to each X for positioning and Adds 3 to each Y
 }
@@ -171,11 +173,21 @@ cocos2d::enumKeyCodes CrystalClient::shortcutKey(int key) {
 		case 35: return enumKeyCodes::KEY_Eight;
 		case 36: return enumKeyCodes::KEY_Nine;
 
-		case 37: return enumKeyCodes::KEY_ArrowUp;
-		case 38: return enumKeyCodes::KEY_ArrowDown;
-		case 39: return enumKeyCodes::KEY_ArrowLeft;
-		case 40: return enumKeyCodes::KEY_ArrowRight;
+		case 37: return enumKeyCodes::KEY_Up;
+		case 38: return enumKeyCodes::KEY_Down;
+		case 39: return enumKeyCodes::KEY_Left;
+		case 40: return enumKeyCodes::KEY_Right;
 
 		default: return enumKeyCodes::KEY_A;
 	}
+}
+
+float CrystalClient::getTimeForXPos(PlayLayer* play) {
+    float ret;
+    float xPos = play->m_player1->getPositionX();
+    __asm movss xmm1, xPos;
+    reinterpret_cast<void(__thiscall*)>(geode::base::get() + 0x293eb0); // PlayLayer::timeForXPos2
+    __asm movss ret, xmm0; // return value
+
+    return ret;
 }
