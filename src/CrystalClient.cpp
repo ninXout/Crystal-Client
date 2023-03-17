@@ -7,6 +7,7 @@
 #include "platform/platform.hpp"
 #include <Geode/loader/Log.hpp>
 #include "ImGui.hpp"
+#include "subprocess.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -190,4 +191,34 @@ float CrystalClient::getTimeForXPos(PlayLayer* play) {
     __asm movss ret, xmm0; // return value
 
     return ret;
+}
+
+std::string CrystalClient::getRenderPath(bool full) {
+	std::string songPath;
+	if (full) {
+		songPath = (std::string)geode::dirs::getTempDir();
+		songPath.erase(songPath.length() - 10);
+		songPath = songPath + "Crystal/temp/";
+		std::fstream log;
+		log.open("geode/mods/log.txt", std::ios::app);
+		log << songPath << '\n';
+	} else {
+		songPath = "./Crystal/temp/";
+	}
+	return songPath;
+}
+
+std::string CrystalClient::getSongCmdStr(std::string songOffset, std::string songPath, std::string tempPath, std::string time, std::string path) {
+	std::stringstream stream;
+	stream << "ffmpeg";
+	stream << " -y -ss ";
+	stream << songOffset;
+	stream << " -i \"" << songPath << "\"";
+	stream << " -i \"" << tempPath << "\"";
+	stream << " -t " << time;
+	//stream << " -b:a " << audioBitrate << "k"; //bitrate
+	stream << " -c:v copy ";
+	stream << "\"" << path << "\"";
+
+	return stream.str();
 }

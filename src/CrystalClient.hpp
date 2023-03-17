@@ -54,6 +54,8 @@ public:
     bool isMenuOpen = false;
     float g = 0;
 
+    static std::string getRenderPath(bool full);
+    static std::string getSongCmdStr(std::string songOffset, std::string songPath, std::string tempPath, std::string time, std::string path);
     static cocos2d::enumKeyCodes shortcutKey(int key);
     float getTimeForXPos(PlayLayer*);
     void loadShortcuts();

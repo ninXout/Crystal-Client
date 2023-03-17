@@ -7,6 +7,8 @@
 #include <imgui.h>
 #include "ImGui.hpp"
 #include "Amethyst.hpp"
+#include "subprocess.hpp"
+#include <iostream>
 
 USE_GEODE_NAMESPACE();
 
@@ -128,6 +130,7 @@ void CrystalClient::drawPages() {
     }
     ImGui::End();
     ImGui::Begin("Display");
+	/*
     if (ImGui::TreeNode("Order of Displays")) {
             for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
             {
@@ -147,6 +150,7 @@ void CrystalClient::drawPages() {
             }
         ImGui::TreePop();
     }
+	*/
     for (int i = 0; i < guiHacks.size(); i++) {
         if (i != 9 && i != 2) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
         if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
@@ -183,7 +187,7 @@ void CrystalClient::drawPages() {
     CrystalClient::ImToggleable("Rounded Windows", &rounded);
     ImGui::End();
     ImGui::Begin("Bypasses");
-    ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
+    //ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
     for (int i = 0; i < bypassHacks.size(); i++) {
         CrystalClient::ImToggleable(bypassHacks[i], &bypassBools[i]);
     }
@@ -202,7 +206,7 @@ void CrystalClient::drawPages() {
     ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
     CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
     cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
-    ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
+    //ImGui::InputInt("Draw Divide", &DRAW_DIVIDE, 0, 10);
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]");
     CrystalClient::ImToggleable("Record", &record);
@@ -334,8 +338,7 @@ void CrystalClient::drawPages() {
 		releaseData.clear();
 		frameData.clear();
         CPoffset.clear();
-        CPaccel.clear();
-        CProt.clear();
+        checkpointData.clear();
     }
     ImGui::End();
     ImGui::Begin("Keybinds");
@@ -373,10 +376,10 @@ void CrystalClient::drawPages() {
         OptionsLayer::addToCurrentScene(false);
     }
     ImGui::End();
-	ImGui::Begin("Internal Renderer");
-	CrystalClient::ImToggleable("Render Recording", &rendering);
-	CrystalClient::ImToggleable("Include Sound", &withAudio);
-	ImGui::End();
+	//ImGui::Begin("Internal Renderer");
+	//CrystalClient::ImToggleable("Render Recording", &rendering);
+	//CrystalClient::ImToggleable("Include Sound", &withAudio);
+	//ImGui::End();
 }
 
 void CrystalClient::saveMods() {
@@ -450,44 +453,60 @@ void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
 }
 
 void CrystalClient::arrangeText(int arrayLength) {
+	//std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message"))
+	int anchor = 0;
+	if (PlayLayer::get()->m_isTestMode) anchor = 1;
 	if (guiBools[0]) {
-		setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message")));
+		setAnchoredPosition(g_message, anchor);
+		anchor++;
 	} 
 	if (guiBools[4]) {
-		setAnchoredPosition(g_cheating, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Cheat Indicator")));
+		setAnchoredPosition(g_cheating, anchor);
+		anchor++;
 	}
 	if (guiBools[8]) {
-		setAnchoredPosition(g_run, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Run From")));
+		setAnchoredPosition(g_run, anchor);
+		anchor++;
 	}
 	if (guiBools[3]) {
-		setAnchoredPosition(g_jumps, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Jumps")));
+		setAnchoredPosition(g_jumps, anchor);
+		anchor++;
 	}
 	if (guiBools[11]) {
-		setAnchoredPosition(g_tatts, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Total Attempts")));
+		setAnchoredPosition(g_tatts, anchor);
+		anchor++;
 	}
 	if (guiBools[5]) {
-		setAnchoredPosition(g_death, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Last Death")));
+		setAnchoredPosition(g_death, anchor);
+		anchor++;
 	}
 	if (guiBools[10]) {
-		setAnchoredPosition(font, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Noclip Deaths")));
+		setAnchoredPosition(font, anchor);
+		anchor++;
 	}
 	if (guiBools[6]) {
-		setAnchoredPosition(g_atts, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Attempts Display")));
+		setAnchoredPosition(g_atts, anchor);
+		anchor++;
 	}
 	if (guiBools[7]) {
-		setAnchoredPosition(g_bestRun, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Best Run")));
+		setAnchoredPosition(g_bestRun, anchor);
+		anchor++;
 	}
 	if (guiBools[12]) {
-		setAnchoredPosition(g_levelInfo, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Level Name and ID")));
+		setAnchoredPosition(g_levelInfo, anchor);
+		anchor++;
 	}
 	if (guiBools[2]) {
-		setAnchoredPosition(g_clicks, std::distance(item_names, std::find(item_names, item_names + arrayLength, "CPS and Clicks")));
+		setAnchoredPosition(g_clicks, anchor);
+		anchor++;
 	}
 	if (guiBools[9]) {
-		setAnchoredPosition(text, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Noclip Accuracy")));
+		setAnchoredPosition(text, anchor);
+		anchor++;
 	}
 	if (guiBools[15]) {
-		setAnchoredPosition(g_macro, std::distance(item_names, std::find(item_names, item_names + arrayLength, "Macro Status")));
+		setAnchoredPosition(g_macro, anchor);
+		anchor++;
 	}
 }
 
@@ -622,7 +641,7 @@ class Patch3 : public Patch {
 };
 */
 GEODE_API void GEODE_DLL geode_load(Mod* m) {
-	fps_shower_init();
+	//fps_shower_init();
     /*
 		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
 		lol->apply();
@@ -817,10 +836,10 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		// i hate bad practices
 		drawer->m_drawTrail = playerBools[8];
 		s_noLimitTrail = false;
-
+/*
 		for (int q = 0; q < newQueue.size(); q++) {
 			drawer->addToPlayer1Queue(newQueue[q]);
-		}
+		}*/
 		drawer->drawForPlayer1(m_player1);
 		drawer->setVisible(true);
 		return ret;
@@ -965,8 +984,7 @@ class $modify(EditorUI) {
 class $modify(EditLevelLayer) {
 	static EditLevelLayer* create(GJGameLevel* ok) {
 		if (bypassBools[5]) {
-			//ok->m_isVerifiedRand = 11;
-			//ok->m_isVerifiedSeed = 10;
+			ok->m_isVerified = true;
 		}	
 		if (playerBools[20]) {
 			ok->m_lowDetailModeToggled = true;
@@ -1137,9 +1155,9 @@ class $modify(HardStreak) {
 
 class $modify(LevelInfoLayer) {
 	static LevelInfoLayer* create(GJGameLevel* g) {
+		auto layer = LevelInfoLayer::create(g);
 		if (bypassBools[6]) {
-			//g->m_passwordSeed = 20; // it can be anything
-			//g->m_passwordRand = g->m_passwordSeed + 1;
+			g->m_password = 1;
 		}
 
 		if (playerBools[20]) {
@@ -1151,14 +1169,14 @@ class $modify(LevelInfoLayer) {
 
 		if (bypassBools[10]) cl = 0;
 
-		return LevelInfoLayer::create(g);
+		return layer;
 	}
 };
 
 class $modify(PauseLayer) {
 	static PauseLayer* create(bool isPaused) {
 		auto pause = PauseLayer::create(isPaused);
-		if (playerBools[43]) pause->setVisible(false);
+		if (playerBools[41]) pause->setVisible(false);
 		PauseLayer* fcuk;
 		if (cl != 1 && bypassBools[10]) {
 			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
@@ -1253,12 +1271,16 @@ class $modify(CCScheduler) {
 			float tScale = dir->getScheduler()->getTimeScale();
 
 			f3 = spf * tScale;
+			renderTime += 1.f / static_cast<float>(spf);
 		}
 		if (tpsBypass && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
 			const auto fps = tps;
+
 			auto speedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
 
 			const float target_dt = 1.f / fps / speedhack;
+
+			//cocos2d::CCApplication::sharedApplication()->setAnimationInterval(target_dt);
 
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;
@@ -1408,10 +1430,10 @@ class $modify(Main, PlayLayer) {
         drawer->clearQueue();
 		PlayLayer::resetLevel();
 		if (m_isPracticeMode && record) {
+			Amethyst::applyCP(checkpointData.back());
+
 			if (CPoffset.size() == 0) CPoffset.push_back(0);
 			offset = CPoffset.back();
-
-			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = CPxpos.back();
 
 			frame = (int)(m_time * 240) + offset;
 
@@ -1434,9 +1456,6 @@ class $modify(Main, PlayLayer) {
 				pushes.insert(pushes.end(), frame);
 			}
 
-			mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = CPaccel.back();
-			//mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = CPypos.back();
-			GJBaseGameLayer::get()->m_player1->setRotation(CProt.back());
 		} else {
 			frame = lastFrame = newFrame = 0;
 			offset = 0;
@@ -1570,6 +1589,21 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 
+			if (guiBools[15]) {
+				if (replay && !rendering) {
+					std::string status = "Playing: " + std::to_string(pushIt) + "/" + std::to_string(pushes.size());
+					g_macro->setString(status.c_str());
+				} else if (record) {
+					std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * 240 + offset));
+					g_macro->setString(status.c_str());
+				} else if (replay && rendering) {
+					std::string status = "Rendering: Video Frame " + std::to_string(m_time * 60);
+					g_macro->setString(status.c_str());
+				}
+			}
+
+			PlayLayer::checkCollisions(p, g);
+
 			auto p1 = GJBaseGameLayer::get()->m_player1;
 			auto p2 = GJBaseGameLayer::get()->m_player2;
 
@@ -1600,7 +1634,7 @@ class $modify(Main, PlayLayer) {
 
 				if (pushes[pushIt] <= frame) {
 					if (currentMacroType == 1) {
-						Amethyst::apply(pushData[pushIt], true);
+						Amethyst::apply(pushData[pushIt], false);
 					}
 					GJBaseGameLayer::get()->pushButton(1, true);
 					pushIt++;
@@ -1608,29 +1642,16 @@ class $modify(Main, PlayLayer) {
 
 				if (releases[releaseIt] <= frame) {
 					if (currentMacroType == 1) {
-						Amethyst::apply(releaseData[releaseIt], true);
+						Amethyst::apply(releaseData[releaseIt], false);
 					}
 					GJBaseGameLayer::get()->releaseButton(1, true);
 					releaseIt++;
 				}
 			}
 
-			if (replay && !rendering) {
-				std::string status = "Playing: " + std::to_string(pushIt) + "/" + std::to_string(pushes.size());
-				g_macro->setString(status.c_str());
-			} else if (record) {
-				std::string status = "Recording: Macro Frame " + std::to_string(m_time * 240 + offset);
-				g_macro->setString(status.c_str());
-			} else if (replay && rendering) {
-				std::string status = "Rendering: Video Frame " + std::to_string(m_time * 60);
-				g_macro->setString(status.c_str());
-			}
-
-			PlayLayer::checkCollisions(p, g);
-
             if (p == m_player1) {
 			    drawer->addToPlayer1Queue(m_player1->getObjectRect());
-				newQueue.push_back(m_player1->getObjectRect());
+				//newQueue.push_back(m_player1->getObjectRect());
 		    }
 		    if (p == m_player2) {
 			    drawer->addToPlayer2Queue(m_player2->getObjectRect());
@@ -1689,7 +1710,8 @@ class $modify(Main, PlayLayer) {
 
 	bool CGImageWriteToFile(CGImageRef image) {
 		std::stringstream newthing;
-  		newthing << "/Users/" << getenv("USER") << "/Downloads/InternalRender/frame_";
+		newthing << CrystalClient::getRenderPath(true);
+  		newthing << "frame_";
 		newthing << std::setw(4) << std::setfill('0') << std::to_string(ss);
 		newthing << ".png";
 		std::string name = newthing.str();
@@ -1840,6 +1862,7 @@ class $modify(Main, PlayLayer) {
 			g_death->setString(str);
 		}
         drawer->clear();
+
 		/*
 		CGImageRef screenShot = CGWindowListCreateImage( CGRectInfinite, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 
@@ -1864,7 +1887,7 @@ class $modify(Main, PlayLayer) {
 		if (deltaLock) {
 			auto dir = CCDirector::sharedDirector();
 
-			float spf = (float)dir->getAnimationInterval();
+			float spf = (float)dir->getAnimationInterval() * (60 / tps);
 			float tScale = dir->getScheduler()->getTimeScale();
 
 			f4 = spf * tScale;
@@ -1886,32 +1909,11 @@ class $modify(Main, PlayLayer) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
 					PlayLayer::update(f4);
-					if (rendering && replay) captureScreen();
+					if (rendering && replay && m_time > 0) captureScreen();
 				}
 			}
 		}
-			auto p1 = GJBaseGameLayer::get()->m_player1;
-			auto p2 = GJBaseGameLayer::get()->m_player2;
 
-			frame = (int)(m_time * 240) + offset;
-
-			if (replay && pushes.size() > 0) {
-				if (pushes[pushIt] <= frame) {
-					if (currentMacroType == 1) {
-						Amethyst::apply(pushData[pushIt], true);
-					}
-					GJBaseGameLayer::get()->pushButton(1, true);
-					pushIt++;
-				}
-
-				if (releases[releaseIt] <= frame) {
-					if (currentMacroType == 1) {
-						Amethyst::apply(releaseData[releaseIt], true);
-					}
-					GJBaseGameLayer::get()->releaseButton(1, true);
-					releaseIt++;
-				}
-			}
 		//musicOffset = PlayLayer::get()->m_level->m_levelSettings->m_songOffset;
         //if (autoKill) {
 			//m_isDead = true;
@@ -1954,18 +1956,18 @@ class $modify(Main, PlayLayer) {
 	void markCheckpoint() {
 		if (playerBools[26]) g_orbCheckpoints.push_back({g_activated_objects.size(), g_activated_objects_p2.size()});
 		PlayLayer::markCheckpoint();
-		CPoffset.push_back(frame);
-		CPaccel.push_back(yAccel);
-		CProt.push_back(GJBaseGameLayer::get()->m_player1->getRotation());
+		if (!m_isDead) {
+			checkpointData.push_back(Amethyst::store());
+			CPoffset.push_back(frame);
+		}
 		//std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	}
 
 	void removeLastCheckpoint() {
 		if (playerBools[26]) g_orbCheckpoints.pop_back();
 		PlayLayer::removeLastCheckpoint();
+		checkpointData.pop_back();
 		CPoffset.pop_back();
-		CPaccel.pop_back();
-		CProt.pop_back();
 		//if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	}
 
@@ -1981,8 +1983,11 @@ class $modify(Main, PlayLayer) {
 	}
 
 	std::string getOffsetTime(float time) {
-		std::string ret = "00:" + std::to_string((int)(time / 60)) + ":" + std::to_string((int)(time) % 60);
-		return ret;
+		std::stringstream ret;
+		ret << "00:";
+		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time / 60)) << ":";
+		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time) % 60);
+		return ret.str();
 	}
 
 	void onQuit() {
@@ -2000,13 +2005,14 @@ class $modify(Main, PlayLayer) {
 			);
 		} else {
 			if (withAudio) {
-				std::string songPath;
-				songPath = (std::string)geode::dirs::getGameDir() + "/" + (std::string)m_level->getAudioFileName();
-				//songPath = songPath.substr(0, songPath.size()-10);
+				std::string rendercmd = "ffmpeg -framerate 60 -pattern_type glob -i '" + CrystalClient::getRenderPath(true) + "*.png' \
+			-c:v libx264 -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "newrender.mp4";
+				auto renderprocess = system(rendercmd.c_str());
+				//auto songprocess = system(CrystalClient::getSongCmdStr(getOffsetTime(LevelSettingsObject::get()->m_songOffset).c_str(), (std::string)PlayLayer::get()->m_level->getAudioFileName().c_str(), CrystalClient::getRenderPath(true).c_str() + "newrender.mp4", std::to_string(renderTime).c_str(), CrystalClient::getRenderPath(true) + "new.mp4".c_str()).c_str());
+				//(std::string)m_level->getAudioFileName()
 				std::fstream idklmao;
 				idklmao.open("geode/mods/log.txt", std::ios::app);
-				idklmao << std::to_string(LevelSettingsObject::get()->m_songOffset);
-				idklmao << getOffsetTime(LevelSettingsObject::get()->m_songOffset);
+				//idklmao << CrystalClient::renderVideo();
 				//geode::dirs::getTempDir()
 				std::string songname;
 			}
@@ -2055,95 +2061,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void setupSmartSP() {
-		if (playerBools[41]) {
-			//willFlip.resize(gravityPortals.size());
-			for (StartPosObject* startPos : SPs) {
-		for (int i = 0; i < gravityPortals.size(); i++)
-		{
-			if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-				break;
-			if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-				willFlip.push_back(gravityPortals[i]->m_objectID == 11);
-		}
-		//startPos->m_levelSettings->m_startDual = GJBaseGameLayer::get()->m_levelSettings->m_startDual;
-		for (int i = 0; i < dualPortals.size(); i++)
-		{
-			if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-				break;
-			if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-				startPos->m_levelSettings->m_startDual = (dualPortals[i]->m_objectID == 286);
-		}
-		//startPos->m_levelSettings->m_startMode = GJBaseGameLayer::get()->m_levelSettings->m_startMode;
-		for (size_t i = 0; i < gamemodePortals.size(); i++)
-		{
-			if (gamemodePortals[i]->getPositionX() - 10 > startPos->getPositionX())
-				break;
-			if (gamemodePortals[i]->getPositionX() - 10 < startPos->getPositionX())
-			{
-				switch (gamemodePortals[i]->m_objectID)
-				{
-				case 12:
-					//startPos->m_levelSettings->m_startMode = 0;
-					break;
-				case 13:
-					//startPos->m_levelSettings->m_startMode = 1;
-					break;
-				case 47:
-					//startPos->m_levelSettings->m_startMode = 2;
-					break;
-				case 111:
-					//startPos->m_levelSettings->m_startMode = 3;
-					break;
-				case 660:
-					//startPos->m_levelSettings->m_startMode = 4;
-					break;
-				case 745:
-					//startPos->m_levelSettings->m_startMode = 5;
-					break;
-				case 1331:
-					//startPos->m_levelSettings->m_startMode = 6;
-					break;
-				}
-			}
-		}
-		//startPos->m_levelSettings->m_startMini = GJBaseGameLayer::get()->m_levelSettings->m_startMini;
-		for (size_t i = 0; i < miniPortals.size(); i++)
-		{
-			if (miniPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-				break;
-			if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-				startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
-		}
-
-		//startPos->m_levelSettings->m_startSpeed = GJBaseGameLayer::get()->m_levelSettings->m_startSpeed;
-		for (size_t i = 0; i < speedChanges.size(); i++)
-		{
-			if (speedChanges[i]->getPositionX() - 50 > startPos->getPositionX())
-				break;
-			if (speedChanges[i]->getPositionX() - 50 < startPos->getPositionX())
-			{
-				switch (speedChanges[i]->m_objectID)
-				{
-				case 200:
-					//startPos->m_levelSettings->m_startSpeed = 0;
-					break;
-				case 201:
-					//startPos->m_levelSettings->m_startSpeed = 1;
-					break;
-				case 202:
-					//startPos->m_levelSettings->m_startSpeed = 2;
-					break;
-				case 203:
-					//startPos->m_levelSettings->m_startSpeed = 3;
-					break;
-				case 1334:
-					//startPos->m_levelSettings->m_startSpeed = 4;
-					break;
-				}
-			}
-		}
-	}
-		}
+		
 	}
 
     static inline tulip::HitboxNode* drawer;
@@ -2214,47 +2132,6 @@ class $modify(Main, PlayLayer) {
 
 		ss = 0;
 		PlayLayer::init(gl);
-		if (playerBools[41]) {
-			for (int c = 0; c < PlayLayer::get()->m_objects->count(); c++) {
-				GameObject* g = reinterpret_cast<GameObject*>(PlayLayer::get()->m_objects->objectAtIndex(c));
-				
-				switch (g->m_objectID) {
-					case 10:
-					case 11:
-						gravityPortals.push_back(g);
-						break;
-					case 12:
-					case 13:
-					case 47:
-					case 111:
-					case 660:
-					case 745:
-					case 1331:
-						gamemodePortals.push_back(g);
-						break;
-					case 45:
-					case 46:
-						mirrorPortals.push_back(g);
-						break;
-					case 99:
-					case 101:
-						miniPortals.push_back(g);
-						break;
-					case 286:
-					case 287:
-						dualPortals.push_back(g);
-						break;
-					case 200:
-					case 201:
-					case 202:
-					case 203:
-					case 1334:
-						speedChanges.push_back(g);
-						break;
-				}
-			}
-		}
-		setupSmartSP();
 
         m_objectLayer->addChild(drawer, 32);
 
@@ -2538,10 +2415,9 @@ class $(UILayer) {
 			PlayLayer::get()->resetLevel();
 		} else if (current == 3) {
 			if (speedhack != 1) {
-				tempSpeed = speedhack;
-				speedhack = 1;
+				CCDirector::sharedDirector()->getScheduler()->setTimeScale(1);
 			} else {
-				speedhack = tempSpeed;
+				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
 			}
 		} else if (current == 4) {
 			s_showOnDeath = !s_showOnDeath;

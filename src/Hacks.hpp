@@ -97,9 +97,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Force Dont Enter", //playerBools[38]
         "Layout Mode", //playerBools[39]
         "AutoClicker", //playerBools[40]
-        "Smart StartPos", //playerBools[41]
-        "Practice Bug Fix", //playerBools[42]
-        "Hide Pause Menu", //playerBools[43]
+        "Hide Pause Menu", //playerBools[41]
     };
     bool playerBools[45] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
     std::vector<const char*> globalHacks = { 
@@ -266,6 +264,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<Amethyst::AmethystFrame> pushData;
     std::vector<Amethyst::AmethystFrame> releaseData;
     std::vector<Amethyst::AmethystFrame> frameData;
+    std::vector<Amethyst::CheckpointData> checkpointData;
+    std::vector<int> CPoffset;
     /*
     std::vector<float> Pxpos;
     std::vector<float> Pypos;
@@ -276,10 +276,9 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<float> xpos;
     std::vector<float> ypos;
     std::vector<float> accel;
-    */
-    std::vector<int> CPoffset;
     std::vector<float> CPaccel;
     std::vector<float> CProt;
+    */
     int offset;
     int pushIt;
     int releaseIt;
@@ -290,6 +289,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     bool pushing;
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
+    double renderTime;
 
     static int currentKey = 0;
     static int currentMod = 0;
@@ -367,6 +367,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     bool inputmirror;
     float speedhack = 1;
     bool shouldUpdate = false;
+    float newDT;
 
     // Rainbow Icons
     cocos2d::_ccColor3B col;
