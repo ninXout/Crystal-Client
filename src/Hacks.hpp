@@ -168,6 +168,9 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     float DarkColour[4];
     float VeryLightColour[4];
 
+    CCSprite* noclipRed;
+    int opacity = 100;
+
     ImVec4 RGBAtoIV4(float rgb[4]) {
         float newr = rgb[0];
         float newg = rgb[1];
@@ -297,8 +300,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<int> activeKeys;
     std::vector<int> activeMods;
 
-    const char* keybindings[50] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Tab", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape", "Space" };
-    const char* modbindings[12] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint" };
+    const char* keybindings[48] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape" };
+    const char* modbindings[13] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint", "Toggle Crystal Menu" };
 
     // FPS Display
     int bypass = 60;

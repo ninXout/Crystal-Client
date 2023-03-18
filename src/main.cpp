@@ -454,8 +454,8 @@ void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
 
 void CrystalClient::arrangeText(int arrayLength) {
 	//std::distance(item_names, std::find(item_names, item_names + arrayLength, "Custom Message"))
-	int anchor = 0;
-	if (PlayLayer::get()->m_isTestMode) anchor = 1;
+	int anchor = 1;
+	if (PlayLayer::get()->m_isTestMode) anchor = 2;
 	if (guiBools[0]) {
 		setAnchoredPosition(g_message, anchor);
 		anchor++;
@@ -570,7 +570,13 @@ cocos2d::_ccColor3B CrystalClient::getRainbow(float offset) {
 
 class $modify(CCKeyboardDispatcher) {
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
-        if (down && key == KEY_Tab) {
+		cocos2d::enumKeyCodes dispatchedkey = KEY_Tab;
+		for (int m = 0; m < activeMods.size(); m++) {
+			if (activeMods[m] == 12) {
+				dispatchedkey = CrystalClient::shortcutKey(activeKeys[m]);
+			}
+		}
+        if (down && key == dispatchedkey) {
             CrystalClient::get()->toggle();
             return true;
         }
@@ -1282,6 +1288,8 @@ class $modify(CCScheduler) {
 
 			//cocos2d::CCApplication::sharedApplication()->setAnimationInterval(target_dt);
 
+			return CCScheduler::update(target_dt);
+
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;
 
@@ -1766,6 +1774,9 @@ class $modify(Main, PlayLayer) {
 		if (would_die) {
 			noclipped_frames += f4;
 			would_die = false;
+			//noclipRed->setOpacity(50);
+		} else {
+			noclipRed->setOpacity(0);
 		}
 
 		if (m_player1) {
@@ -2133,6 +2144,14 @@ class $modify(Main, PlayLayer) {
 		ss = 0;
 		PlayLayer::init(gl);
 
+		noclipRed = CCSprite::createWithSpriteFrameName("block005b_05_001.png");
+		noclipRed->setPosition({CCDirector::sharedDirector()->getWinSize().width / 2, CCDirector::sharedDirector()->getWinSize().height / 2});
+		noclipRed->setScale(1000.0f);
+		noclipRed->setColor(ccc3(255,0,0));
+		noclipRed->setOpacity(0);
+		noclipRed->setZOrder(1000);
+		m_UILayer->addChild(noclipRed);
+
         m_objectLayer->addChild(drawer, 32);
 
 		s_drawer = drawer;
@@ -2448,9 +2467,7 @@ class $(UILayer) {
 			}
 		}
 
-		if (kc == KEY_R) {
-			PlayLayer::get()->resetLevel();
-		} else if (kc == KEY_F) {
+		if (kc == KEY_F) {
 			shouldUpdate = true;
 			PlayLayer::get()->update(1.0/60.0);
 			shouldUpdate = false;

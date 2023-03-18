@@ -179,6 +179,14 @@ cocos2d::enumKeyCodes CrystalClient::shortcutKey(int key) {
 		case 39: return enumKeyCodes::KEY_Left;
 		case 40: return enumKeyCodes::KEY_Right;
 
+		case 41: return enumKeyCodes::KEY_Backspace;
+        case 42: return enumKeyCodes::KEY_Enter;
+        case 43: return enumKeyCodes::KEY_Shift;
+        case 44: return enumKeyCodes::KEY_Control;
+        case 45: return enumKeyCodes::KEY_Alt;
+        case 46: return enumKeyCodes::KEY_CapsLock;
+        case 47: return enumKeyCodes::KEY_Escape;
+
 		default: return enumKeyCodes::KEY_A;
 	}
 }
