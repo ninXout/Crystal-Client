@@ -29,11 +29,11 @@ void CrystalClient::toggle() {
 }
 
 void CrystalClient::saveShortcuts() {
-	std::ofstream clear("Crystal/shortcuts.cmp");
+	std::ofstream clear(Mod::get()->getSaveDir() / "shortcuts.cmp");
     clear << "";
     clear.close();
 	std::fstream sfile;
-	sfile.open("Crystal/shortcuts.cmp", std::ios::app);
+	sfile.open(Mod::get()->getSaveDir() / "shortcuts.cmp", std::ios::app);
 	sfile << activeKeys.size() << '\n';
 	for (size_t i = 0; i < activeKeys.size(); i++) {
 		sfile << activeKeys[i] << '\n';
@@ -47,7 +47,7 @@ void CrystalClient::loadShortcuts() {
 	activeMods.clear();
 	std::string line;
 	std::fstream sfile;
-    sfile.open("Crystal/shortcuts.cmp", std::ios::in);
+    sfile.open(Mod::get()->getSaveDir() / "shortcuts.cmp", std::ios::in);
 	if (sfile.is_open()) {
 		getline(sfile, line);
 		int len;
@@ -59,8 +59,6 @@ void CrystalClient::loadShortcuts() {
 			activeMods.push_back(stoi(line));
 		}
 		sfile.close();
-	} else {
-		system("mkdir Crystal");
 	}
 }
 
@@ -220,7 +218,7 @@ void CrystalClient::drawPages() {
     ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
     if (ImGui::Button("Save Macro")) {
-        std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+        std::string filename = (std::string)Mod::get()->getSaveDir() + (std::string)macroname + ".thyst";
         std::fstream myfile(filename.c_str(), std::ios::app);
         myfile << pushes.size();
         myfile << "\n";
@@ -276,7 +274,7 @@ void CrystalClient::drawPages() {
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
         std::string line;
-        std::string filename = "Crystal/Amethyst/Macros/" + (std::string)macroname + ".thyst";
+        std::string filename = (std::string)Mod::get()->getSaveDir() + (std::string)macroname + ".thyst";
         std::fstream file;
         file.open(filename, std::ios::in);
         if (file.is_open()) {
@@ -385,10 +383,10 @@ void CrystalClient::drawPages() {
 }
 
 void CrystalClient::saveMods() {
-    std::ofstream clear("Crystal/modconfig.cmp");
+    std::ofstream clear(Mod::get()->getSaveDir() / "modconfig.cmp");
     clear << "";
     clear.close();
-    std::fstream config("Crystal/modconfig.cmp", std::ios::app);
+    std::fstream config(Mod::get()->getSaveDir() / "modconfig.cmp", std::ios::app);
     config << LightColour[0] << '\n';
     config << LightColour[1] << '\n';
     config << LightColour[2] << '\n';
@@ -407,7 +405,7 @@ void CrystalClient::saveMods() {
 }
 
 void CrystalClient::loadMods() {
-    std::fstream config("Crystal/modconfig.cmp", std::ios::in);
+    std::fstream config(Mod::get()->getSaveDir() / "modconfig.cmp", std::ios::in);
     std::string color;
 	if (config.is_open()) {
 		    std::getline(config, color);
