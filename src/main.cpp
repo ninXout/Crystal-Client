@@ -183,7 +183,7 @@ void CrystalClient::drawPages() {
     ImGui::Begin("Customization");
     ImGui::ColorEdit4("Accent Color", LightColour);
     ImGui::ColorEdit4("Base Color", BGColour);
-    CrystalClient::ImToggleable("Base Color Same As Accent Color", &sameAsAccent);
+    //CrystalClient::ImToggleable("Base Color Same As Accent Color", &sameAsAccent);
     CrystalClient::ImToggleable("RGB Accent Color", &RGBAccent);
     CrystalClient::ImToggleable("Borders", &borders);
     CrystalClient::ImToggleable("Rounded Windows", &rounded);
@@ -393,6 +393,7 @@ void CrystalClient::saveMods() {
     config << LightColour[1] << '\n';
     config << LightColour[2] << '\n';
     config << LightColour[3] << '\n';
+	config << message << '\n';
     for (int s = 0; s < playerHacks.size(); s++) {
         config << playerBools[s] << '\n';
     }
@@ -417,6 +418,8 @@ void CrystalClient::loadMods() {
 			LightColour[2] = std::stof(color);
 			std::getline(config, color);
 			LightColour[3] = std::stof(color);
+			std::getline(config, color);
+			strcpy(message, color.c_str());
 			for (int s = 0; s < playerHacks.size(); s++) {
 				std::string playerH;
 				std::getline(config, playerH);
@@ -762,18 +765,6 @@ class FPSOverlay : public cocos2d::CCNode {
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
-		std::fstream check;
-		check.open("Crystal/shortcuts.cmp", std::ios::app);
-		if (GJAccountManager::sharedState()->m_username == "BraedenTheCroco" && !check.is_open()) {
-			std::string alertidk = "Hi, " + (std::string)GJAccountManager::sharedState()->m_username + ". Special Access Mode has been enabled for you and as a result, a exclusive mod has popped up on the menu called \"Editor Grid Size\". Enjoy!";
-			auto alert = FLAlertLayer::create(
-				"Hi!",
-				alertidk,
-				"Okay"
-			);
-			alert->m_scene = this;
-        	alert->show();
-		}
 		CrystalClient::get()->loadMods();
 		CrystalClient::get()->loadShortcuts();
 		if (bypassBools[10]) cl = 0;
@@ -1155,7 +1146,7 @@ class $modify(HardStreak) {
 	void updateStroke(float f) {
 		if (playerBools[14]) m_pulseSize = pulse;
 		if (playerBools[28]) m_isSolid = true;
-		if (playerBools[4] && PlayLayer::get()) this->setColor(col);
+		//if (playerBools[4] && PlayLayer::get()) this->setColor(col);
 		if (playerBools[28]) this->setBlendFunc(getBlendFunc());
 		HardStreak::updateStroke(f);
 	}
@@ -1230,7 +1221,7 @@ class $modify(PlayerObject) {
 	}
 	void update(float spe) {		
 		if (m_waveTrail && playerBools[28]) {
-			//m_waveTrail->setBlendFunc(getBlendFunc()); // removes the blending of it
+			m_waveTrail->setBlendFunc(getBlendFunc()); // removes the blending of it
 		}
 		if (playerBools[32]) {
 			PlayerObject::setVisible(false);
@@ -1621,27 +1612,7 @@ class $modify(Main, PlayLayer) {
 
 			yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
 
-			if (record) {
-				frameData.push_back(Amethyst::create());
-			}
-
 			if (replay && pushes.size() > 0) {
-				if (currentMacroType == 2) {
-					if (newFrame == 0) newFrame++;
-					while (frameData[newFrame].xpos < m_player1->getPositionX()) {
-						Amethyst::apply(frameData[newFrame], false);
-						newFrame++;
-						if (pushes[pushIt] <= frame) {
-							GJBaseGameLayer::get()->pushButton(1, true);
-							pushIt++;
-						}
-						if (releases[releaseIt] <= frame) {
-							GJBaseGameLayer::get()->releaseButton(1, true);
-							releaseIt++;
-						}
-					}
-				}
-
 				if (pushes[pushIt] <= frame) {
 					if (currentMacroType == 1) {
 						Amethyst::apply(pushData[pushIt], false);
@@ -1785,15 +1756,15 @@ class $modify(Main, PlayLayer) {
 			if (playerBools[2]) m_player1->setColor(col);
 			if (playerBools[3]) m_player1->setSecondColor(colInverse);
 			if (playerBools[33]) m_player1->m_waveTrail->setVisible(false);
-			//if (m_player1->m_waveTrail)
-				//if (rainP1wave) m_player1->m_waveTrail->setColor(col);
+			if (m_player1->m_waveTrail)
+				if (playerBools[4]) m_player1->m_waveTrail->setColor(col);
 		}
 
 		if (m_player2) {
 			if (playerBools[3]) m_player2->setColor(colInverse);
 			if (playerBools[2]) m_player2->setSecondColor(col);
-			//if (m_player2->m_waveTrail)
-				//if (rainP2wave) m_player2->m_waveTrail->setColor(colInverse);
+			if (m_player2->m_waveTrail)
+				if (playerBools[4]) m_player2->m_waveTrail->setColor(colInverse);
 		}
 
 		if (guiBools[9]) {
@@ -1923,6 +1894,28 @@ class $modify(Main, PlayLayer) {
 				} else {
 					PlayLayer::update(f4);
 					if (rendering && replay && m_time > 0) captureScreen();
+				}
+			}
+		}
+		
+		if (record) {
+			frameData.push_back(Amethyst::create());
+		}
+
+		if (replay && frameData.size() > 0 && frame > releases.back()) {
+			if (currentMacroType == 2) {
+				if (newFrame == 0) newFrame++;
+				while (frameData[newFrame].xpos < m_player1->getPositionX()) {
+					Amethyst::apply(frameData[newFrame], false);
+					newFrame++;
+					if (pushes[pushIt] <= frame) {
+						GJBaseGameLayer::get()->pushButton(1, true);
+						pushIt++;
+					}
+					if (releases[releaseIt] <= frame) {
+						GJBaseGameLayer::get()->releaseButton(1, true);
+						releaseIt++;
+					}
 				}
 			}
 		}
