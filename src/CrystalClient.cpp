@@ -33,7 +33,10 @@ void CrystalClient::setupFonts() {
         auto& io = ImGui::GetIO();
         ImFontConfig config;
         config.MergeMode = true;
-        auto* result = io.Fonts->AddFontFromFileTTF("Verdana.ttf", 14.0f);
+		std::fstream newlog;
+		newlog.open("geode/mods/log.txt", std::ios::app);
+		newlog << (std::string)CCFileUtils::get()->fullPathForFilename("Verdana.ttf"_spr, false);
+        auto* result = io.Fonts->AddFontFromFileTTF("geode/unzipped/ninxout.crystalclient/resources/ninxout.crystalclient/Verdana.ttf", 14.0f);
         io.Fonts->Build();
         return result;
     };

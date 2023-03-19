@@ -1905,16 +1905,18 @@ class $modify(Main, PlayLayer) {
 		if (replay && frameData.size() > 0 && frame > releases.back()) {
 			if (currentMacroType == 2) {
 				if (newFrame == 0) newFrame++;
-				while (frameData[newFrame].xpos < m_player1->getPositionX()) {
-					Amethyst::apply(frameData[newFrame], false);
-					newFrame++;
-					if (pushes[pushIt] <= frame) {
-						GJBaseGameLayer::get()->pushButton(1, true);
-						pushIt++;
-					}
-					if (releases[releaseIt] <= frame) {
-						GJBaseGameLayer::get()->releaseButton(1, true);
-						releaseIt++;
+				if (frameData[newFrame].xpos < m_player1->getPositionX()) {
+					while (frameData[newFrame].xpos < m_player1->getPositionX()) {
+						Amethyst::apply(frameData[newFrame], false);
+						newFrame++;
+						if (pushes[pushIt] <= frame) {
+							GJBaseGameLayer::get()->pushButton(1, true);
+							pushIt++;
+						}
+						if (releases[releaseIt] <= frame) {
+							GJBaseGameLayer::get()->releaseButton(1, true);
+							releaseIt++;
+						}
 					}
 				}
 			}
