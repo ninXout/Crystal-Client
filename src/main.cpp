@@ -1288,7 +1288,7 @@ class $modify(CCScheduler) {
 
 			//cocos2d::CCApplication::sharedApplication()->setAnimationInterval(target_dt);
 
-			return CCScheduler::update(target_dt);
+			//return CCScheduler::update(target_dt);
 
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;

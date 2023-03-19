@@ -262,6 +262,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     int frame;
     int newFrame;
     float musicOffset;
+    int replayFPS;
     std::vector<int> pushes;
     std::vector<int> releases;
     std::vector<Amethyst::AmethystFrame> pushData;
