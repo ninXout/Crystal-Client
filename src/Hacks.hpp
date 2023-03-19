@@ -164,7 +164,10 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     float bDir = -0.05;
 
     float BGColour[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
-    float LightColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float LightColour[4] = { 0.262715f,
+                            0.624691f,
+                            0.818605f,
+                            1.0f };
     float DarkColour[4];
     float VeryLightColour[4];
 

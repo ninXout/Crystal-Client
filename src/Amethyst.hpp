@@ -1,4 +1,7 @@
 #pragma once
+#include <Geode/Geode.hpp>
+
+#define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
 class Amethyst {
     public:
@@ -13,11 +16,16 @@ class Amethyst {
             float ypos;
             float rot;
             double accel;
+            void apply(PlayerObject* player) {
+                mbo(float, player, 0x7c8) = xpos;
+                mbo(float, player, 0x7cc) = ypos;
+                mbo(double, player, 0x760) = accel;
+                player->setRotation(rot);
+            }
         };
 
         static std::vector<AmethystFrame> frames;
         static void apply(AmethystFrame frame, bool withxpos);
-        static void applyCP(CheckpointData data);
         static AmethystFrame create();
         static CheckpointData store();
 };

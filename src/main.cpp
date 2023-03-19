@@ -59,6 +59,8 @@ void CrystalClient::loadShortcuts() {
 			activeMods.push_back(stoi(line));
 		}
 		sfile.close();
+	} else {
+		system("mkdir Crystal");
 	}
 }
 
@@ -1438,7 +1440,7 @@ class $modify(Main, PlayLayer) {
         drawer->clearQueue();
 		PlayLayer::resetLevel();
 		if (m_isPracticeMode && record) {
-			Amethyst::applyCP(checkpointData.back());
+			checkpointData.back().apply(GJBaseGameLayer::get()->m_player1);
 
 			if (CPoffset.size() == 0) CPoffset.push_back(0);
 			offset = CPoffset.back();

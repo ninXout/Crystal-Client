@@ -1,4 +1,3 @@
-#include <Geode/Geode.hpp>
 #include "Amethyst.hpp"
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
@@ -20,13 +19,6 @@ Amethyst::AmethystFrame Amethyst::create() {
     newframe.ypos = GJBaseGameLayer::get()->m_player1->getPositionY();
     newframe.accel = mbo(double, GJBaseGameLayer::get()->m_player1, 0x760);
     return newframe;
-}
-
-void Amethyst::applyCP(CheckpointData data) {
-    mbo(float, GJBaseGameLayer::get()->m_player1, 0x7c8) = data.xpos;
-	mbo(float, GJBaseGameLayer::get()->m_player1, 0x7cc) = data.ypos;
-    mbo(double, GJBaseGameLayer::get()->m_player1, 0x760) = data.accel;
-    GJBaseGameLayer::get()->m_player1->setRotation(data.rot);
 }
 
 Amethyst::CheckpointData Amethyst::store() {
