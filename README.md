@@ -4,7 +4,7 @@ Crystal Client is a MacOS mod menu for Geometry Dash.
 
 ## Installation
 
-**Option 1 (Recommended):** Download it from the Geode Mod Index (Coming Soon)
+**Option 1 (Recommended):** Download it from the Geode Mod Index
 
 **Option 2:** Download the newest release from the Releases tab, and put it into your Geode Mods Folder.
 
