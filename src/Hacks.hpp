@@ -138,8 +138,6 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Noclip Deaths", //d
         "Total Attempts", //d
         "Level Name and ID", //d
-        "Hide ID", //d
-        "Show Author", //d
         "Macro Status", //d
     };
     bool guiBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
@@ -171,6 +169,22 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     float DarkColour[4];
     float VeryLightColour[4];
 
+    bool customPLcolor;
+    bool customWaveColor;
+    bool customGlowColor;
+
+    float Player1Col[4];
+    float Player2Col[4];
+
+    float Player1Wave[4];
+    float Player2Wave[4];
+
+    float Player1Glow[4];
+    float Player2Glow[4];
+
+    cocos2d::_ccColor3B Player1CC3;
+    cocos2d::_ccColor3B Player2CC3;
+
     CCSprite* noclipRed;
     int opacity = 100;
 
@@ -180,6 +194,22 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         float newb = rgb[2];
         float newa = rgb[3];
         return ImVec4(newr, newg, newb, newa);
+    }
+
+    ImVec4 CC3toIV4(cocos2d::_ccColor3B col) {
+        float newr = col.r / 255;
+        float newg = col.g / 255;
+        float newb = col.b / 255;
+        float newa = 1;
+        return ImVec4(newr, newg, newb, newa);
+    }
+    
+    cocos2d::_ccColor3B RGBAtoCC3(float vec[4]) {
+        cocos2d::_ccColor3B ret;
+        ret.r = vec[0] * 255;
+        ret.g = vec[1] * 255;
+        ret.b = vec[2] * 255;
+        return ret;
     }
 
     ImFont* m_defaultFont  = nullptr;
@@ -375,6 +405,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     float speedhack = 1;
     bool shouldUpdate = false;
     float newDT;
+    bool author;
+    bool hideID;
 
     // Rainbow Icons
     cocos2d::_ccColor3B col;

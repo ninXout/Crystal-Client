@@ -7,8 +7,8 @@
 #include <imgui.h>
 #include "ImGui.hpp"
 #include "Amethyst.hpp"
-#include "subprocess.hpp"
 #include <iostream>
+#include "subprocess.h"
 
 USE_GEODE_NAMESPACE();
 
@@ -103,7 +103,7 @@ void CrystalClient::applyTheme(std::string const& name) {
     colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
     colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
     colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
-    colours[ImGuiCol_Border] = RGBAtoIV4(borders ? BGColour : LightColour);
+    colours[ImGuiCol_Border] = RGBAtoIV4(borders ? LightColour : BGColour);
     colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
     colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
     colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
@@ -121,12 +121,38 @@ void CrystalClient::applyTheme(std::string const& name) {
 void CrystalClient::drawPages() {
     ImGui::Begin("General");
     for (int i = 0; i < playerHacks.size(); i++) {
-        CrystalClient::ImToggleable(playerHacks[i], &playerBools[i]);
-        if (i == 14) ImGui::InputFloat("Wave Trail Size", &pulse, 0.01f, 10.00f, "%.2f");
-        if (i == 40) {
-            ImGui::SliderInt("Push Frames", &clickPush, 1, 20);
-            ImGui::SliderInt("Release Frames", &clickRel, 1, 20);
-        }
+        if (i != 14 && i != 31 && i != 40) CrystalClient::ImToggleable(playerHacks[i], &playerBools[i]);
+        if (i == 14) {
+			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
+			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				ImGui::InputFloat("Wave Trail Size", &pulse);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+		}
+		if (i == 31) {
+			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
+			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				ImGui::InputInt("Auto Reset Percentage", &autoresetnum);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+		}
+		if (i == 40) {
+			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
+			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				ImGui::InputInt("Push Frames", &clickPush);
+            	ImGui::InputInt("Release Frames", &clickRel);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+		}
     }
     ImGui::End();
     ImGui::Begin("Display");
@@ -152,7 +178,7 @@ void CrystalClient::drawPages() {
     }
 	*/
     for (int i = 0; i < guiHacks.size(); i++) {
-        if (i != 9 && i != 2) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
+        if (i != 9 && i != 2 && i != 12) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
         if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
         if (i == 2) {
 			CrystalClient::ImExtendedToggleable(guiHacks[i], &guiBools[i]);
@@ -176,11 +202,22 @@ void CrystalClient::drawPages() {
 				ImGui::EndPopup();
 			}
         }
+		if (i == 12) {
+			CrystalClient::ImExtendedToggleable(guiHacks[i], &guiBools[i]);
+			if (ImGui::BeginPopupModal(guiHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				CrystalClient::ImToggleable("Show Author", &author);
+                CrystalClient::ImToggleable("Hide ID", &hideID);
+				if (ImGui::Button("Close")) {
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+        }
     }
     ImGui::End();
     ImGui::Begin("Customization");
-    ImGui::ColorEdit4("Accent Color", LightColour);
-    ImGui::ColorEdit4("Base Color", BGColour);
+    ImGui::ColorEdit4("Accent Color", LightColour, ImGuiColorEditFlags_NoInputs);
+    ImGui::ColorEdit4("Base Color", BGColour, ImGuiColorEditFlags_NoInputs);
     //CrystalClient::ImToggleable("Base Color Same As Accent Color", &sameAsAccent);
     CrystalClient::ImToggleable("RGB Accent Color", &RGBAccent);
     CrystalClient::ImToggleable("Borders", &borders);
@@ -376,10 +413,39 @@ void CrystalClient::drawPages() {
         OptionsLayer::addToCurrentScene(false);
     }
     ImGui::End();
-	//ImGui::Begin("Internal Renderer");
-	//CrystalClient::ImToggleable("Render Recording", &rendering);
-	//CrystalClient::ImToggleable("Include Sound", &withAudio);
-	//ImGui::End();
+	ImGui::Begin("Internal Renderer");
+	CrystalClient::ImToggleable("Render Recording", &rendering);
+	CrystalClient::ImToggleable("Include Sound", &withAudio);
+	ImGui::End();
+	ImGui::Begin("Player");
+	CrystalClient::ImExtendedToggleable("Player Color", &customPLcolor);
+	if (ImGui::BeginPopupModal("Player Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Player Color 1", Player1Col, ImGuiColorEditFlags_NoInputs);
+		ImGui::ColorEdit4("Player Color 2", Player2Col, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImExtendedToggleable("Wave Trail Color", &customWaveColor);
+	if (ImGui::BeginPopupModal("Wave Trail Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Player Wave Trail 1", Player1Wave, ImGuiColorEditFlags_NoInputs);
+		ImGui::ColorEdit4("Player Wave Trail 2", Player2Wave, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImExtendedToggleable("Player Glow Color", &customGlowColor);
+	if (ImGui::BeginPopupModal("Player Glow Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Glow Color 1", Player1Glow, ImGuiColorEditFlags_NoInputs);
+		ImGui::ColorEdit4("Glow Color 2", Player2Glow, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	ImGui::End();
 }
 
 void CrystalClient::saveMods() {
@@ -507,7 +573,7 @@ void CrystalClient::arrangeText(int arrayLength) {
 		setAnchoredPosition(text, anchor);
 		anchor++;
 	}
-	if (guiBools[15]) {
+	if (guiBools[13]) {
 		setAnchoredPosition(g_macro, anchor);
 		anchor++;
 	}
@@ -994,7 +1060,7 @@ class $modify(EditLevelLayer) {
 class $modify(GameManager) {
 		bool isIconUnlocked(int a, IconType b) {
 			auto icon = GameManager::isIconUnlocked(a,b);
-			if (!bypassBools[1]) {
+			if (bypassBools[1]) {
 				return true;
 			} else {
 				return icon;
@@ -1002,7 +1068,7 @@ class $modify(GameManager) {
 		} 
 		bool isColorUnlocked(int a, bool b) {
 			auto color = GameManager::isColorUnlocked(a,b);
-			if (!bypassBools[1]) {
+			if (bypassBools[1]) {
 				return true;
 			} else {
 				return color;
@@ -1277,28 +1343,14 @@ class $modify(CCScheduler) {
 
 			const float target_dt = 1.f / fps / speedhack;
 
-			//cocos2d::CCApplication::sharedApplication()->setAnimationInterval(target_dt);
-
-			//return CCScheduler::update(target_dt);
-
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;
 
-			unsigned times = static_cast<int>((f3 + g_left_over) / target_dt);
-			if (f3 == 0.f)
-				return CCScheduler::update(target_dt);
-			auto start = std::chrono::high_resolution_clock::now();
-			for (unsigned i = 0; i < times; ++i)
-			{
-				//if (i == times - 1)
-				//    g_disable_render = false;
+			const int times = std::min(static_cast<int>((f3 + g_left_over) / target_dt), 100); // limit it to 100x just in case
+			for (int i = 0; i < times; ++i) {
+				if (i == times - 1)
+					g_disable_render = false;
 				CCScheduler::update(target_dt);
-				using namespace std::literals;
-				if (std::chrono::high_resolution_clock::now() - start > 33.333ms)
-				{
-					times = i + 1;
-					break;
-				}
 			}
 			g_left_over += f3 - target_dt * times;
 		} else {
@@ -1308,10 +1360,12 @@ class $modify(CCScheduler) {
 			PlayLayer::get()->PlayLayer::onQuit();
 			shouldQuit = false;
 		}
+		/*
 		if (DrawGridLayer::get() && specialAccess) {
 			DrawGridLayer::get()->m_activeGridNodeSize = gridSize;
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
+		*/
 		if (RGBAccent) {
 			if (CrystalClient::get()->g >= 360)
 				CrystalClient::get()->g = 0;
@@ -1364,8 +1418,13 @@ class $modify(Main, PlayLayer) {
 		if (m_isTestMode) {
 			auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
 			g_startPosText->setString(label.c_str());
-			g_startPosText->runAction(CCSequence::create(colorPulseBegin, colorPulseEnd, nullptr));
-			g_startPosText->runAction(CCSequence::create(opacityPulseBegin, opacityPulseEnd, nullptr));
+			auto opacityPulseBegin = CCFadeTo::create(0, 255);
+			auto opacityPulseWait = CCFadeTo::create(0.4, 255);
+			auto opacityPulseEnd = CCFadeTo::create(0.3, 0);
+
+			//g_startPosText->runAction(opacityPulseBegin);
+			//g_startPosText->runAction(opacityPulseWait);
+			//g_startPosText->runAction(opacityPulseEnd);
 		}
 
 		if (m_isTestMode) {
@@ -1588,7 +1647,7 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 
-			if (guiBools[15]) {
+			if (guiBools[13]) {
 				if (replay && !rendering) {
 					std::string status = "Playing: " + std::to_string(pushIt) + "/" + std::to_string(pushes.size());
 					g_macro->setString(status.c_str());
@@ -1745,15 +1804,21 @@ class $modify(Main, PlayLayer) {
 		if (would_die) {
 			noclipped_frames += f4;
 			would_die = false;
-			//noclipRed->setOpacity(50);
+			if (opacity < 70) {
+				opacity += 10;
+				noclipRed->setOpacity(opacity);
+			}
 		} else {
-			noclipRed->setOpacity(0);
+			if (opacity > 0) {
+				opacity -= 10;
+				noclipRed->setOpacity(opacity);
+			}
 		}
 
 		if (m_player1) {
 			if (playerBools[2]) m_player1->setColor(col);
 			if (playerBools[3]) m_player1->setSecondColor(colInverse);
-			if (playerBools[33]) m_player1->m_waveTrail->setVisible(false);
+			//if (playerBools[33]) m_player1->m_waveTrail->setVisible(false);
 			if (m_player1->m_waveTrail)
 				if (playerBools[4]) m_player1->m_waveTrail->setColor(col);
 		}
@@ -1763,6 +1828,38 @@ class $modify(Main, PlayLayer) {
 			if (playerBools[2]) m_player2->setSecondColor(col);
 			if (m_player2->m_waveTrail)
 				if (playerBools[4]) m_player2->m_waveTrail->setColor(colInverse);
+		}
+
+		if (customPLcolor) {
+			if (m_player1) {
+				m_player1->setColor(RGBAtoCC3(Player1Col));
+				m_player1->setSecondColor(RGBAtoCC3(Player2Col));
+			}
+
+			if (m_player2) {
+				m_player2->setSecondColor(RGBAtoCC3(Player1Col));
+				m_player2->setColor(RGBAtoCC3(Player2Col));
+			}
+		}
+
+		if (customWaveColor) {
+			m_player1->m_waveTrail->setColor(RGBAtoCC3(Player1Wave));
+			m_player2->m_waveTrail->setColor(RGBAtoCC3(Player2Wave));
+		} else if (!customWaveColor && customPLcolor) {
+			m_player1->m_waveTrail->setColor(RGBAtoCC3(Player1Col));
+			m_player2->m_waveTrail->setColor(RGBAtoCC3(Player2Col));
+		}
+
+		if (customGlowColor) {
+			m_player1->m_iconGlow->setColor(RGBAtoCC3(Player1Glow));
+			m_player2->m_iconGlow->setColor(RGBAtoCC3(Player2Glow));
+			m_player1->m_vehicleGlow->setChildColor(RGBAtoCC3(Player1Glow));
+			m_player2->m_vehicleGlow->setChildColor(RGBAtoCC3(Player2Glow));
+		} else if (!customGlowColor && customPLcolor) {
+			m_player1->m_iconGlow->setColor(RGBAtoCC3(Player1Col));
+			m_player2->m_iconGlow->setColor(RGBAtoCC3(Player2Col));
+			m_player1->m_vehicleGlow->setChildColor(RGBAtoCC3(Player1Col));
+			m_player2->m_vehicleGlow->setChildColor(RGBAtoCC3(Player2Col));
 		}
 
 		if (guiBools[9]) {
@@ -2010,14 +2107,19 @@ class $modify(Main, PlayLayer) {
 				}
 			);
 		} else {
+			int result;
+			struct subprocess_s subprocess;
 			if (withAudio) {
 				std::string rendercmd = "ffmpeg -framerate 60 -pattern_type glob -i '" + CrystalClient::getRenderPath(true) + "*.png' \
 			-c:v libx264 -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "newrender.mp4";
-				auto renderprocess = system(rendercmd.c_str());
+				const char* command_line = rendercmd.c_str();
+				result = subprocess_create(&command_line, 0, &subprocess);
+				int newresult = subprocess_join(&subprocess, &result);
+				//auto renderprocess = system(rendercmd.c_str());
 				//auto songprocess = system(CrystalClient::getSongCmdStr(getOffsetTime(LevelSettingsObject::get()->m_songOffset).c_str(), (std::string)PlayLayer::get()->m_level->getAudioFileName().c_str(), CrystalClient::getRenderPath(true).c_str() + "newrender.mp4", std::to_string(renderTime).c_str(), CrystalClient::getRenderPath(true) + "new.mp4".c_str()).c_str());
 				//(std::string)m_level->getAudioFileName()
-				std::fstream idklmao;
-				idklmao.open("geode/mods/log.txt", std::ios::app);
+				//std::fstream idklmao;
+				//idklmao.open("geode/mods/log.txt", std::ios::app);
 				//idklmao << CrystalClient::renderVideo();
 				//geode::dirs::getTempDir()
 				std::string songname;
@@ -2128,7 +2230,7 @@ class $modify(Main, PlayLayer) {
 		if (guiBools[9]) {
 			text = CCLabelBMFont::create("100%", "bigFont.fnt");
 		}
-		if (guiBools[15]) {
+		if (guiBools[13]) {
 			g_macro = CCLabelBMFont::create("Playing: 0/0", "bigFont.fnt");
 		}
 		if (pausecountdown) {
@@ -2325,18 +2427,18 @@ class $modify(Main, PlayLayer) {
 			std::string levelName = gl->m_levelName;
 			std::string levelAuthor = gl->m_creatorName;
 			std::string levelID = std::to_string(gl->m_levelID);
-			/*if (hideID) {
+			if (hideID) {
 				levelID = "--------";
-			} else */ if (levelID<"22" && levelID>"0" || levelID == "3" || levelID == "4" || levelID == "5" || levelID == "6" || levelID == "7" || levelID == "8" || levelID == "9") {
+			} else if (gl->m_levelID < 22 && gl->m_levelID > 0) {
 				levelAuthor = "RobTop"; // this wasnt working from Polargeist (3) to Cycles (9) so i had to do that lmao
 			} else if (levelID == "0") {
 				levelID = "Copy";
 			}
-			//if (author) {
-				//display = levelName + " by " + levelAuthor + " (" + levelID + ")";
-			//} else {
+			if (author) {
+				display = levelName + " by " + levelAuthor + " (" + levelID + ")";
+			} else {
 				display = levelName + " (" + levelID + ")";
-			//}
+			}
 			g_levelInfo->setString(display.c_str());
 			addChild(g_levelInfo, 1001);
 		}
@@ -2360,7 +2462,7 @@ class $modify(Main, PlayLayer) {
 			addChild(text, 1000);
 			frames = noclipped_frames = 0;
 		}
-		if (guiBools[15]) {
+		if (guiBools[13]) {
 			//setAnchoredPosition(g_macro, std::distance(item_names, std::find(item_names, item_names + 13, "Macro Status")));
 			//text->setPosition(5 , corner - 145);
 			g_macro->setAnchorPoint({0, 0.5});

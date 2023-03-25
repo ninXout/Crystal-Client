@@ -7,7 +7,7 @@
 #include "platform/platform.hpp"
 #include <Geode/loader/Log.hpp>
 #include "ImGui.hpp"
-#include "subprocess.hpp"
+#include "subprocess.h"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -204,12 +204,9 @@ float CrystalClient::getTimeForXPos(PlayLayer* play) {
 std::string CrystalClient::getRenderPath(bool full) {
 	std::string songPath;
 	if (full) {
-		songPath = (std::string)geode::dirs::getTempDir();
-		songPath.erase(songPath.length() - 10);
-		songPath = songPath + "Crystal/temp/";
-		std::fstream log;
-		log.open("geode/mods/log.txt", std::ios::app);
-		log << songPath << '\n';
+		songPath = (std::string)Mod::get()->getSaveDir();
+		//songPath.erase(songPath.length() - 10);
+		songPath = songPath + "/temp/";
 	} else {
 		songPath = "./Crystal/temp/";
 	}
