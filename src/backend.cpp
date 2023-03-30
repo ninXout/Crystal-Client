@@ -1,7 +1,6 @@
 #include <cocos2d.h>
 #include <Geode/modify/CCTouchDispatcher.hpp>
 #include <Geode/modify/CCIMEDispatcher.hpp>
-#include "platform/platform.hpp"
 #include "CrystalClient.hpp"
 #include "ImGui.hpp"
 
@@ -93,9 +92,6 @@ void CrystalClient::deleteBackward() {
 	ImGui::GetIO().AddKeyEvent(ImGuiKey_Backspace, false);
 }
 
-bool CrystalClient::canAttachWithIME() { return true; }
-bool CrystalClient::canDetachWithIME() { return true; }
-
 void CrystalClient::setupPlatform() {
     ImGui::CreateContext();
 
@@ -140,32 +136,20 @@ void CrystalClient::newFrame() {
     io.AddMousePosEvent(mouse_pos.x, mouse_pos.y);
 #endif
 
-    if (io.WantTextInput) {
-		if (!m_ime_attached) {
-			this->attachWithIME();
-		}
-		m_ime_attached = true;
-	} else {
-		if (m_ime_attached) {
-			this->detachWithIME();
-		}
-		m_ime_attached = false;
-	}
-
     auto* kb = director->getKeyboardDispatcher();
     io.KeyAlt = kb->getAltKeyPressed() || kb->getCommandKeyPressed(); // look
     io.KeyCtrl = kb->getControlKeyPressed();
     io.KeyShift = kb->getShiftKeyPressed();
 }
 
-void CrystalClient::render(GLRenderCtx* ctx) {
+void CrystalClient::render() {
     ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     this->newFrame();
 
     ImGui::NewFrame();
 
-    CrystalClient::get()->draw(ctx);
+    CrystalClient::get()->draw();
 
     ImGui::Render();
 
@@ -239,34 +223,10 @@ class $modify(CCTouchDispatcher) {
         const auto pos = toVec2(touch->getLocation());
         io.AddMousePosEvent(pos.x, pos.y);
         if (io.WantCaptureMouse) {
-            bool didGDSwallow = false;
-
-            if (shouldPassEventsToGDButTransformed()) {
-                auto win = ImGui::GetMainViewport()->Size;
-                const auto gdRect = getGDWindowRect();
-                if (gdRect.Contains(pos)) {
-                    auto relativePos = ImVec2(
-                        pos.x - gdRect.Min.x,
-                        pos.y - gdRect.Min.y
-                    );
-                    auto x = (relativePos.x / gdRect.GetWidth()) * win.x;
-                    auto y = (1.f - relativePos.y / gdRect.GetHeight()) * win.y;
-
-                    auto pos = toCocos(ImVec2(x, y));
-                    touch->setTouchInfo(touch->getID(), pos.x, pos.y);
-                    CCTouchDispatcher::touches(touches, event, type);
-                    
-                    ImGui::SetWindowFocus("Geometry Dash");
-                    didGDSwallow = true;
-                    io.AddMouseButtonEvent(0, false);
-                }
-            }
-            if (!didGDSwallow) {
-                if (type == TouchMessageType::Began || type == TouchMessageType::Moved) {
-                    io.AddMouseButtonEvent(0, true);
-                } else {
-                    io.AddMouseButtonEvent(0, false);
-                }
+            if (type == TouchMessageType::Began || type == TouchMessageType::Moved) {
+                io.AddMouseButtonEvent(0, true);
+            } else {
+                io.AddMouseButtonEvent(0, false);
             }
         } else {
             if (type != TouchMessageType::Moved) {

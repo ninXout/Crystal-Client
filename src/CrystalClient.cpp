@@ -1,10 +1,5 @@
 #include <imgui_internal.h>
 #include "CrystalClient.hpp"
-#include "fonts/OpenSans.hpp"
-#include "fonts/GeodeIcons.hpp"
-#include "fonts/RobotoMono.hpp"
-#include "fonts/SourceCodeProLight.hpp"
-#include "platform/platform.hpp"
 #include <Geode/loader/Log.hpp>
 #include "ImGui.hpp"
 #include "subprocess.h"
@@ -14,9 +9,9 @@ CrystalClient* CrystalClient::get() {
     return inst;
 }
 
-void CrystalClient::draw(GLRenderCtx* ctx) {
+void CrystalClient::draw() {
     if (m_visible) {
-        this->applyTheme(m_theme);
+        this->applyTheme();
 
         ImGui::PushFont(m_defaultFont);
         this->drawPages();
@@ -28,7 +23,6 @@ void CrystalClient::setupFonts() {
     static const ImWchar* def_ranges   = ImGui::GetIO().Fonts->GetGlyphRangesDefault();
     
     static constexpr auto add_font = [](
-        void* font, float size, const ImWchar* range
     ) {
         auto& io = ImGui::GetIO();
         ImFontConfig config;
@@ -38,9 +32,7 @@ void CrystalClient::setupFonts() {
         return result;
     };
 
-    m_defaultFont = add_font(Font_OpenSans, 18.f, def_ranges);
-    m_smallFont = add_font(Font_OpenSans, 10.f, def_ranges);
-    m_monoFont = add_font(Font_RobotoMono, 18.f, def_ranges);
+    m_defaultFont = add_font();
 }
 
 void CrystalClient::setup() {
@@ -60,10 +52,6 @@ void CrystalClient::setup() {
 void CrystalClient::show(bool visible) {
     m_visible = visible;
     isMenuOpen = visible;
-}
-
-void CrystalClient::sceneChanged() {
-    m_selectedNode = nullptr;
 }
 
 void CrystalClient::ImToggleable(const char* str_id, bool* v) {

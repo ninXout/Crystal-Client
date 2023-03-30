@@ -20,6 +20,8 @@ class Amethyst {
                 mbo(float, player, 0x7c8) = xpos;
                 mbo(float, player, 0x7cc) = ypos;
                 mbo(double, player, 0x760) = accel;
+                player->setPositionX(xpos);
+                player->setPositionX(ypos);
                 player->setRotation(rot);
             }
         };

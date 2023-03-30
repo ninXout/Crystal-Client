@@ -1,4 +1,3 @@
-#include "platform/platform.hpp"
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 #include <Geode/modify/AchievementNotifier.hpp>
 #include <Geode/modify/CCDirector.hpp>
@@ -62,7 +61,7 @@ void CrystalClient::loadShortcuts() {
 	}
 }
 
-void CrystalClient::applyTheme(std::string const& name) {
+void CrystalClient::applyTheme() {
     ImGuiStyle * style = &ImGui::GetStyle();
     ImVec4* colours = ImGui::GetStyle().Colors;
 
@@ -156,27 +155,6 @@ void CrystalClient::drawPages() {
     }
     ImGui::End();
     ImGui::Begin("Display");
-	/*
-    if (ImGui::TreeNode("Order of Displays")) {
-            for (int n = 0; n < IM_ARRAYSIZE(item_names); n++)
-            {
-                const char* item = item_names[n];
-                ImGui::Selectable(item);
-
-                if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
-                {
-                    int n_next = n + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
-                    if (n_next >= 0 && n_next < IM_ARRAYSIZE(item_names))
-                    {
-                        item_names[n] = item_names[n_next];
-                        item_names[n_next] = item;
-                        ImGui::ResetMouseDragDelta();
-                    }
-                }
-            }
-        ImGui::TreePop();
-    }
-	*/
     for (int i = 0; i < guiHacks.size(); i++) {
         if (i != 9 && i != 2 && i != 12) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
         if (i == 0) ImGui::InputTextWithHint("Message", "Custom Message", message, IM_ARRAYSIZE(message));
@@ -255,7 +233,7 @@ void CrystalClient::drawPages() {
     ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
     if (ImGui::Button("Save Macro")) {
-        std::string filename = (std::string)Mod::get()->getSaveDir() + (std::string)macroname + ".thyst";
+        std::string filename = (std::string)Mod::get()->getConfigDir() + "/" + (std::string)macroname + ".thyst";
         std::fstream myfile(filename.c_str(), std::ios::app);
         myfile << pushes.size();
         myfile << "\n";
@@ -311,7 +289,7 @@ void CrystalClient::drawPages() {
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
         std::string line;
-        std::string filename = (std::string)Mod::get()->getSaveDir() + (std::string)macroname + ".thyst";
+        std::string filename = (std::string)Mod::get()->getConfigDir() + "/" + (std::string)macroname + ".thyst";
         std::fstream file;
         file.open(filename, std::ios::in);
         if (file.is_open()) {
@@ -653,29 +631,13 @@ class $modify(CCKeyboardDispatcher) {
     }
 };
 
-class $modify(AchievementNotifier) {
-    void willSwitchToScene(CCScene* scene) {
-        AchievementNotifier::willSwitchToScene(scene);
-        CrystalClient::get()->sceneChanged();
-    }
-};
-
 class $modify(CCDirector) {
     void drawScene() {
         CrystalClient::get()->setup();
 
-        static GLRenderCtx* gdTexture = nullptr;
-
-        if (shouldUpdateGDRenderBuffer()) {
-            if (gdTexture) {
-                delete gdTexture;
-                gdTexture = nullptr;
-            }
-            shouldUpdateGDRenderBuffer() = false;
-        }
         CCDirector::drawScene();
 
-        CrystalClient::get()->render(gdTexture);
+        CrystalClient::get()->render();
     }
 };
 
@@ -715,7 +677,7 @@ class Patch3 : public Patch {
  	}
 };
 */
-GEODE_API void GEODE_DLL geode_load(Mod* m) {
+//GEODE_API void GEODE_DLL geode_load(Mod* m) {
 	//fps_shower_init();
     /*
 		Patch2* lol = new Patch2({'\xeb'}, {'\x76'}, base::get() + 0x18D811);
@@ -744,7 +706,7 @@ GEODE_API void GEODE_DLL geode_load(Mod* m) {
 		// custom objects
 		(new Patch2({'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, 0x1d72d))->apply();
         */
-}
+//}
 
 class FPSOverlay : public cocos2d::CCNode {
  protected:
@@ -1336,21 +1298,40 @@ class $modify(CCScheduler) {
 			f3 = spf * tScale;
 			renderTime += 1.f / static_cast<float>(spf);
 		}
+		const auto fps = tps;
+		if (deltaLock) {
+			auto dir = CCDirector::sharedDirector();
+
+			float spf = (float)dir->getAnimationInterval() * (60 / tps);
+			float tScale = dir->getScheduler()->getTimeScale();
+
+			f3 = 1.f / (fps * tScale);
+		}
 		if (tpsBypass && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
-			const auto fps = tps;
+			auto speedhack2 = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
 
-			auto speedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
+			//if (record) f3 *= speedhack;
 
-			const float target_dt = 1.f / fps / speedhack;
+			const float target_dt = 1.f / (fps * speedhack2);
+
+			//if (deltaLock) return CCScheduler::update(target_dt);
 
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;
 
-			const int times = std::min(static_cast<int>((f3 + g_left_over) / target_dt), 100); // limit it to 100x just in case
-			for (int i = 0; i < times; ++i) {
-				if (i == times - 1)
-					g_disable_render = false;
+			unsigned times = static_cast<int>((f3 + g_left_over) / target_dt);
+			if (f3 == 0.f)
+				return CCScheduler::update(target_dt);
+			auto start = std::chrono::high_resolution_clock::now();
+			for (unsigned i = 0; i < times; ++i) {
+				// if (i == times - 1)
+				//     g_disable_render = false;
 				CCScheduler::update(target_dt);
+				using namespace std::literals;
+				if (std::chrono::high_resolution_clock::now() - start > 33.333ms) {
+					times = i + 1;
+					break;
+				}
 			}
 			g_left_over += f3 - target_dt * times;
 		} else {
@@ -1588,13 +1569,6 @@ class $modify(Main, PlayLayer) {
 				reinterpret_cast<CCLabelBMFont*>(getChildByTag(31403))->setString(str);
 			}
 		}
-		if (guiBools[10]) {
-			deathwait++;
-			if (deathwait >= 25) {
-				noclip_deaths++;
-				deathwait = 0;
-			} 
-		}
 		if (bypassBools[0]) {
 			bool m_antiCheatPassed = true;
 			bool m_shouldTryToKick = false;
@@ -1655,7 +1629,7 @@ class $modify(Main, PlayLayer) {
 					std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * 240 + offset));
 					g_macro->setString(status.c_str());
 				} else if (replay && rendering) {
-					std::string status = "Rendering: Video Frame " + std::to_string(m_time * 60);
+					std::string status = "Rendering: Video Frame " + std::to_string(m_time * 240);
 					g_macro->setString(status.c_str());
 				}
 			}
@@ -1800,6 +1774,14 @@ class $modify(Main, PlayLayer) {
 		colInverse = CrystalClient::get()->getRainbow(180);
 
 		frames += f4;
+
+		if (would_die && !lastDeath) {
+			if (guiBools[10]) {
+				noclip_deaths++;
+			}
+		}
+
+		lastDeath = would_die;
 
 		if (would_die) {
 			noclipped_frames += f4;
@@ -1963,14 +1945,6 @@ class $modify(Main, PlayLayer) {
 		std::fstream check;
 		check.open(name.c_str());
 		*/
-		if (deltaLock) {
-			auto dir = CCDirector::sharedDirector();
-
-			float spf = (float)dir->getAnimationInterval() * (60 / tps);
-			float tScale = dir->getScheduler()->getTimeScale();
-
-			f4 = spf * tScale;
-		}
 		if (playerBools[25]) {
 			if (!smoothOut) {
 				return update(f4);

@@ -36,6 +36,8 @@
 #include <ImageIO/ImageIO.h>
 #include <CoreServices/CoreServices.h>
 #include "Amethyst.hpp"
+#include <Geode/fmod/fmod.hpp>
+#include "globalBP.h"
 
 #pragma once
 
@@ -407,6 +409,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     float newDT;
     bool author;
     bool hideID;
+    bool lastDeath;
 
     // Rainbow Icons
     cocos2d::_ccColor3B col;
