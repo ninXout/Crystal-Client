@@ -52,6 +52,8 @@ public:
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     void applyTheme();
+    static bool getMod(const char* name);
+    static void setMod(const char* name, bool b);
 
     static CrystalClient* get();
 

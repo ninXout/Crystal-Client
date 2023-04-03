@@ -9,25 +9,31 @@ class Amethyst {
             float xpos;
             float ypos;
             double accel;
-        };
-
-        struct CheckpointData {
-            float xpos;
-            float ypos;
-            float rot;
-            double accel;
             void apply(PlayerObject* player) {
-                mbo(float, player, 0x7c8) = xpos;
-                mbo(float, player, 0x7cc) = ypos;
+                //mbo(float, player, 0x7c8) = xpos;
+                //mbo(float, player, 0x7cc) = ypos;
                 mbo(double, player, 0x760) = accel;
                 player->setPositionX(xpos);
                 player->setPositionX(ypos);
+            }
+        };
+
+        struct CheckpointData {
+            //float xpos;
+            //float ypos;
+            float rot;
+            double accel;
+            void apply(PlayerObject* player) {
+                //mbo(float, player, 0x7c8) = xpos;
+                //mbo(float, player, 0x7cc) = ypos;
+                mbo(double, player, 0x760) = accel;
+                //player->setPositionX(xpos);
+                //player->setPositionX(ypos);
                 player->setRotation(rot);
             }
         };
 
         static std::vector<AmethystFrame> frames;
-        static void apply(AmethystFrame frame, bool withxpos);
         static AmethystFrame create();
         static CheckpointData store();
 };

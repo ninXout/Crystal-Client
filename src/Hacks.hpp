@@ -49,7 +49,8 @@
 	CrystalClient::drawPages is where the imgui is
 	CrystalClient::saveMods and CrystalClient::loadMods are self explanatory
 	CrystalClient::arrangeText rearranges the display text correctly
-
+    CrystalClient::getMod accesses the mods from the vectors
+    CrystalClient::setMod changes them
 
 */
 
@@ -58,15 +59,15 @@
 void fps_shower_init();
 
 std::vector<const char*> playerHacks = { // player hacks comments are wrong
-        "Noclip Player 1", //playerBools[0]
-        "Noclip Player 2", //playerBools[1]
+        "Noclip", //playerBools[0]
+        //"Noclip Player 2", //playerBools[1]
         "Rainbow Icon P1", //playerBools[2]
         "Rainbow Icon P2", //playerBools[3]
         "Rainbow Wave Trail", //playerBools[4]
         "Same Color Dual", //playerBools[5]
         "Show Hitboxes on Death", //playerBools[6]
         "Show Hitboxes", //playerBools[7]
-        "Show Hitbox trail", //playerBools[8]
+        "Show Hitbox Trail", //playerBools[8]
         "Show Hitboxes in Editor", //playerBools[9]
         "Disable Death Effect", //playerBools[10]
         "Disable Particles", //playerBools[11]
@@ -95,8 +96,9 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "No Glow", //playerBools[34]
         "No Spikes", //playerBools[35]
         "No Mirror", //playerBools[36]
-        "Force Dont Fade", //playerBools[37]
-        "Force Dont Enter", //playerBools[38]
+        "Freeze Attempts",
+        //"Force Dont Fade", //playerBools[37]
+        //"Force Dont Enter", //playerBools[38]
         "Layout Mode", //playerBools[39]
         "AutoClicker", //playerBools[40]
         "Hide Pause Menu", //playerBools[41]
@@ -141,6 +143,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Total Attempts", //d
         "Level Name and ID", //d
         "Macro Status", //d
+        "Pause Countdown", //d
     };
     bool guiBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
     const char* item_names[13] = {
@@ -415,31 +418,34 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     cocos2d::_ccColor3B col;
     cocos2d::_ccColor3B colInverse;
 
+    // Macro Buffer
+    std::vector<cocos2d::CCRect> newQueue;
+    bool macroBuffer;
+
     // Grid Size
     float gridSize = 30;
 
     // Draw Divide
-    bool drawDivide;
-    int FRAME_COUNTER;
-    int DRAW_DIVIDE = 1;
-    bool DRAW_SCENE;
+    double frame_remainder = 0;
+    int target_fps = 60;
+    int frame_counter = 0;
+    bool drawDivide = false;
 
     //uint16_t unicode = (uint16_t)H;
 
     bool hack;
     int cl = 0;
 
-    std::deque<cocos2d::CCRect> newQueue;
-
     int ss = 0;
 
     bool specialAccess;
 
-    /*
-    bool noclip;
     bool noclipP1;
     bool noclipP2;
+    bool tintOnDeath;
 
+/*
+    bool noclip;
     bool rainbowP1;
     bool rainbowP2;
     bool rainbowP1wave;
