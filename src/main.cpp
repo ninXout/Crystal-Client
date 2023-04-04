@@ -406,6 +406,26 @@ void CrystalClient::drawPages() {
 		ImGui::Separator();
 	}
     ImGui::End();
+	ImGui::Begin("Variable Changer");
+    ImGui::Combo("Variable", &currentVar, playerVars, IM_ARRAYSIZE(playerVars));
+	ImGui::InputFloat("Value", &changeValue);
+    if (ImGui::Button("Add Change")) {
+        playerVariables.push_back(currentVar);
+        playerValues.push_back(changeValue);
+    }
+	for (size_t i = 0; i < playerValues.size(); i++) {
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text(playerVars[playerVariables[i]]);
+		ImGui::SameLine();
+		ImGui::Text(std::to_string(playerValues[i]).c_str());
+		ImGui::SameLine();
+		if (ImGui::Button(("x##" + std::to_string(i)).c_str())) {
+			playerVariables.erase(playerVariables.begin() + i);
+			playerValues.erase(playerValues.begin() + i);
+		}
+		ImGui::Separator();
+	}
+    ImGui::End();
     ImGui::Begin("Shortcuts");
     //CrystalClient::ImToggleable("Enable NONG Loader", &EnableNONGLoader);
     if (ImGui::Button("Open Songs Folder")) {
@@ -1157,6 +1177,30 @@ class $modify(GJBaseGameLayer) {
 			pushData.push_back(Amethyst::create());
 			pushes.insert(pushes.end(), frame);
 		}
+		if (clickBot) {
+			if (!inited) {
+				FMOD::System_Create(&Clickbot::system);
+				Clickbot::system->init(1024 * 2, FMOD_INIT_NORMAL, nullptr);
+				inited = true;
+			}
+
+			Clickbot::now = std::chrono::system_clock::now();
+			Clickbot::cycleTime = Clickbot::now - Clickbot::start;
+			if (Clickbot::cycleTime.count() < 0.5f) {
+				std::string path = Clickbot::pickRandomSoftClick();
+				Clickbot::start = std::chrono::system_clock::now();
+				std::cout << Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
+			} else {
+				std::string path = Clickbot::pickRandomClick();
+				Clickbot::start = std::chrono::system_clock::now();
+				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
+			}
+			
+			Clickbot::system->playSound(Clickbot::clickSound, nullptr, true, &Clickbot::clickChannel);
+			Clickbot::clickChannel->setVolume((float)(clickVolume / 100));
+			Clickbot::clickChannel->setPaused(false);
+			Clickbot::system->update();
+		}
 		if (CrystalClient::getMod("Flipped Dual Controls")) {
 			if (!b) GJBaseGameLayer::pushButton(i,true);
 			if (b) GJBaseGameLayer::pushButton(i,false);
@@ -1176,6 +1220,21 @@ class $modify(GJBaseGameLayer) {
 		if (record) {
 			releaseData.push_back(Amethyst::create());
 			releases.insert(releases.end(), frame);
+		}
+		if (clickBot) {
+			if (Clickbot::cycleTime.count() < 0.5f) {
+				std::string path = Clickbot::pickRandomRelease();
+				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
+			} else {
+				std::string path = Clickbot::pickRandomRelease();
+				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
+			}
+			
+			
+			Clickbot::system->playSound(Clickbot::releaseSound, nullptr, true, &Clickbot::releaseChannel);
+			Clickbot::releaseChannel->setVolume((float)(clickVolume / 100));
+			Clickbot::releaseChannel->setPaused(false);
+			Clickbot::system->update();
 		}
         if (CrystalClient::getMod("Flipped Dual Controls")) {
 			if (!b) GJBaseGameLayer::releaseButton(i,true);
@@ -1336,7 +1395,7 @@ class $modify(CCScheduler) {
 			float spf = (float)dir->getAnimationInterval() * (60 / tps);
 			auto speedhack2 = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
 
-			const float target_dt = 1.f / (tps * (1 / speedhack2));
+			const float target_dt = 1.f / (tps * speedhack2);
 
 			if (deltaLock) return CCScheduler::update(target_dt);
 
@@ -1379,12 +1438,6 @@ class $modify(CCScheduler) {
 			else
 				CrystalClient::get()->g += rainbowspeed;
 		}
-		//CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-
-    	//CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) 7, true);
-
-    	//CGEventPost (kCGHIDEventTap, evt);
-    	//CFRelease (evt); CFRelease (src);
 	}
 };
 
@@ -1599,7 +1652,7 @@ class $modify(Main, PlayLayer) {
 			bool m_hasCheated = false;
 		}
 		if (CrystalClient::getMod("No Spikes")) {
-			if (g->m_objectID != 8 || g->m_objectID != 39 || g->m_objectID != 103) {
+			if (g->m_objectID != 8 && g->m_objectID != 39 && g->m_objectID != 103) {
 				PlayLayer::destroyPlayer(p,g);
 			}
 		}
@@ -1988,6 +2041,29 @@ class $modify(Main, PlayLayer) {
 		}
         drawer->clear();
 
+		for (int i = 0; i < playerValues.size(); i++) {
+			if (playerVariables[i] == 0) m_player1->m_gravity = playerValues[i];
+			if (playerVariables[i] == 1) m_player1->m_xAccel = playerValues[i];
+			if (playerVariables[i] == 2) m_player1->m_yAccel = playerValues[i];
+			if (playerVariables[i] == 3) m_player1->m_position.x = playerValues[i];
+			if (playerVariables[i] == 4) m_player1->m_position.y = playerValues[i];
+			if (playerVariables[i] == 5) m_player1->m_jumpAccel = playerValues[i];
+			if (playerVariables[i] == 6) m_player1->m_vehicleSize = playerValues[i];
+		}
+
+		if (globalBools[6]) {
+			double percent = (m_player1->getPositionX() / m_levelLength) * 100;
+			if (notDeafened && percent >= deafenPercent) {
+				CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+
+				CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) 7, true);
+
+				CGEventPost (kCGHIDEventTap, evt);
+				CFRelease (evt); CFRelease (src);
+				notDeafened = false;
+			}
+		}
+
 		/*
 		CGImageRef screenShot = CGWindowListCreateImage( CGRectInfinite, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 
@@ -2026,7 +2102,7 @@ class $modify(Main, PlayLayer) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
 					PlayLayer::update(f4);
-					if (rendering && replay && m_time > 0) captureScreen();
+					if (rendering && m_time > 0) captureScreen();
 				}
 			}
 		}
@@ -2163,13 +2239,16 @@ class $modify(Main, PlayLayer) {
 			int result;
 			struct subprocess_s subprocess;
 			if (withAudio) {
-				std::string rendercmd = "ffmpeg -framerate 60 -pattern_type glob -i '" + CrystalClient::getRenderPath(true) + "*.png' \
-			-c:v libx264 -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "newrender.mp4";
+				std::string rendercmd = "ffmpeg -framerate 60 -i '" + CrystalClient::getRenderPath(true) + "frame_%4d.png' -c:v libx264 -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "newrender.mp4";
+				std::string fullcmd = "osascript -e 'tell app \"Terminal\" to do script \"" + rendercmd + "\"'";
+				//std::string songcmd = CrystalClient::getSongCmdStr(getOffsetTime(LevelSettingsObject::get()->m_songOffset).c_str(), (std::string)PlayLayer::get()->m_level->getAudioFileName().c_str(), std::string(CrystalClient::getRenderPath(true) + (std::string)"newrender.mp4").c_str(), std::to_string(renderTime).c_str(), std::string(CrystalClient::getRenderPath(true) + (std::string)"new.mp4").c_str()).c_str();
 				const char* command_line = rendercmd.c_str();
-				result = subprocess_create(&command_line, 0, &subprocess);
-				int newresult = subprocess_join(&subprocess, &result);
+				//popen(fullcmd.c_str());
+				//popen(songcmd.c_str());
+				//result = subprocess_create(&command_line, 0, &subprocess);
+				//int newresult = subprocess_join(&subprocess, &result);
 				//auto renderprocess = system(rendercmd.c_str());
-				//auto songprocess = system(CrystalClient::getSongCmdStr(getOffsetTime(LevelSettingsObject::get()->m_songOffset).c_str(), (std::string)PlayLayer::get()->m_level->getAudioFileName().c_str(), CrystalClient::getRenderPath(true).c_str() + "newrender.mp4", std::to_string(renderTime).c_str(), CrystalClient::getRenderPath(true) + "new.mp4".c_str()).c_str());
+				//auto songprocess = system();
 				//(std::string)m_level->getAudioFileName()
 				//std::fstream idklmao;
 				//idklmao.open("geode/mods/log.txt", std::ios::app);
@@ -2294,6 +2373,8 @@ class $modify(Main, PlayLayer) {
 		ss = 0;
 		PlayLayer::init(gl);
 
+		if (clickBot) Clickbot::start = std::chrono::system_clock::now();
+
 		noclipRed = CCSprite::createWithSpriteFrameName("block005b_05_001.png");
 		noclipRed->setPosition({CCDirector::sharedDirector()->getWinSize().width / 2, CCDirector::sharedDirector()->getWinSize().height / 2});
 		noclipRed->setScale(1000.0f);
@@ -2373,7 +2454,7 @@ class $modify(Main, PlayLayer) {
 			addChild(CPleftButton, 1000);
 		}
 		if (CrystalClient::getMod("Disable Progressbar")) {
-			m_percentLabel->setPositionX(259.638);
+			m_percentLabel->setPositionX(CCDirector::sharedDirector()->getWinSize().width / 2);
 		}
 		if (guiBools[0]) {
 			//setAnchoredPosition(g_message, std::distance(item_names, std::find(item_names, item_names + 13, "Custom Message")));

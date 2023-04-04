@@ -192,9 +192,9 @@ float CrystalClient::getTimeForXPos(PlayLayer* play) {
 std::string CrystalClient::getRenderPath(bool full) {
 	std::string songPath;
 	if (full) {
-		songPath = (std::string)Mod::get()->getSaveDir();
-		//songPath.erase(songPath.length() - 10);
-		songPath = songPath + "/temp/";
+		songPath = (std::string)geode::dirs::getTempDir();
+		songPath.erase(songPath.length() - 10);
+		songPath = songPath + "Crystal/temp/";
 	} else {
 		songPath = "./Crystal/temp/";
 	}

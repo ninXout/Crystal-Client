@@ -38,6 +38,7 @@
 #include "Amethyst.hpp"
 #include <Geode/fmod/fmod.hpp>
 #include "globalBP.h"
+#include <stdio.h>
 
 #pragma once
 
@@ -290,6 +291,14 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     bool editorHitbox;
     bool turnonHitbox;
 
+    // Variable Changer
+    const char* playerVars[7] = { "Gravity", "X Acceleration", "Y Acceleration", "X Position", "Y Position", "Jump Acceleration", "Vehicle Size" };
+    const char* levelVars[4] = { "Level Name", "Level Author", "Level ID", "Level Song" };
+    static int currentVar = 0;
+    static float changeValue = 0;
+    std::vector<int> playerVariables;
+    std::vector<float> playerValues;
+
     // Amethyst
     bool record;
     bool replay;
@@ -332,6 +341,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
     double renderTime;
+    inline extern bool inited = false;
+    float clickVolume = 500;
 
     static int currentKey = 0;
     static int currentMod = 0;
@@ -341,6 +352,10 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
 
     const char* keybindings[48] = { "Space Bar", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow", "Backspace", "Enter", "Shift", "Control", "Alt", "Caps Lock", "Escape" };
     const char* modbindings[13] = { "Noclip", "Suicide", "Restart Level", "Speedhack", "Hitbox Viewer", "AutoClicker", "Switcher Left", "Switcher Right", "Player 1", "Player 2", "Place Checkpoint", "Remove Checkpoint", "Toggle Crystal Menu" };
+
+    // Auto-Deafen
+    bool notDeafened = true;
+    double deafenPercent = 100;
 
     // FPS Display
     int bypass = 60;
