@@ -215,3 +215,4 @@ std::string CrystalClient::getSongCmdStr(std::string songOffset, std::string son
 
 	return stream.str();
 }
+

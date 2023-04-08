@@ -2,7 +2,7 @@
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
-namespace fs = std::filesystem;
+namespace fs = ghc::filesystem;
 
 Amethyst::AmethystFrame Amethyst::create() {
     Amethyst::AmethystFrame newframe;
@@ -14,17 +14,17 @@ Amethyst::AmethystFrame Amethyst::create() {
 
 Amethyst::CheckpointData Amethyst::store() {
     Amethyst::CheckpointData newcp;
-    //newcp.xpos = GJBaseGameLayer::get()->m_player1->getPositionX();
-    //newcp.ypos = GJBaseGameLayer::get()->m_player1->getPositionY();
+    newcp.xpos = GJBaseGameLayer::get()->m_player1->m_position.x;
+    newcp.ypos = GJBaseGameLayer::get()->m_player1->m_position.y;
     newcp.rot = GJBaseGameLayer::get()->m_player1->getRotation();
-    newcp.accel = mbo(double, GJBaseGameLayer::get()->m_player1, 0x760);
+    newcp.accel = GJBaseGameLayer::get()->m_player1->m_yAccel;
     return newcp;
 }
 
 std::string Clickbot::pickRandomClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    std::filesystem::path path = std::filesystem::current_path() / "Crystal" / "clicks";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "clicks";
     for (const auto & entry : fs::directory_iterator(path))
     {
         clicks.push_back(entry.path().string());
@@ -34,7 +34,7 @@ std::string Clickbot::pickRandomClick() {
 std::string Clickbot::pickRandomSoftClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    std::filesystem::path path = std::filesystem::current_path() / "Crystal" / "softClicks";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "softClicks";
     for (const auto & entry : fs::directory_iterator(path))
     {
         clicks.push_back(entry.path().string());
@@ -44,7 +44,7 @@ std::string Clickbot::pickRandomSoftClick() {
 std::string Clickbot::pickRandomRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    std::filesystem::path path = std::filesystem::current_path() / "Crystal" / "releases";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "releases";
     for (const auto & entry : fs::directory_iterator(path))
         releases.push_back(entry.path().string());
     return releases[rand() % releases.size()];
@@ -52,7 +52,7 @@ std::string Clickbot::pickRandomRelease() {
 std::string Clickbot::pickRandomSoftRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    std::filesystem::path path = std::filesystem::current_path() / "Crystal" / "softReleases";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "softReleases";
     for (const auto & entry : fs::directory_iterator(path))
         releases.push_back(entry.path().string());
     return releases[rand() % releases.size()];

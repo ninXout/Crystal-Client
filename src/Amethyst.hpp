@@ -19,17 +19,15 @@ class Amethyst {
         };
 
         struct CheckpointData {
-            //float xpos;
-            //float ypos;
+            float xpos;
+            float ypos;
             float rot;
             double accel;
             void apply(PlayerObject* player) {
-                //mbo(float, player, 0x7c8) = xpos;
-                //mbo(float, player, 0x7cc) = ypos;
-                mbo(double, player, 0x760) = accel;
-                //player->setPositionX(xpos);
-                //player->setPositionX(ypos);
                 player->setRotation(rot);
+                player->m_yAccel = accel;
+                player->m_position.x = xpos;
+                player->m_position.y = ypos;
             }
         };
 

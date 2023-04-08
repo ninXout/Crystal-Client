@@ -256,6 +256,7 @@ void CrystalClient::drawPages() {
 	CrystalClient::ImToggleable("ClickBot", &clickBot);
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Delta Lock", &deltaLock);
+	ImGui::SliderFloat("ClickBot Volume", &clickVolume, 100.f, 1000.f);
     ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
     if (ImGui::Button("Save Macro")) {
@@ -1174,8 +1175,8 @@ class $modify(GJBaseGameLayer) {
 		//if (b) mouse1Down = true;
 	    //if (!b) mouse2Down = true;
 		if (record) {
-			pushData.push_back(Amethyst::create());
 			pushes.insert(pushes.end(), frame);
+			pushData.push_back(Amethyst::create());
 		}
 		if (clickBot) {
 			if (!inited) {
@@ -1389,17 +1390,19 @@ class $modify(CCScheduler) {
 			renderTime += 1.f / static_cast<float>(spf);
 		}
 		const auto fps = tps;
-		if (tpsBypass && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
+		if ((tpsBypass || replay || record) && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
 			auto dir = CCDirector::sharedDirector();
+
+			//if (record) f3 *= speedhack;
 
 			float spf = (float)dir->getAnimationInterval() * (60 / tps);
 			auto speedhack2 = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
 
-			const float target_dt = 1.f / (tps * speedhack2);
+			const float target_dt = 1 / fps / speedhack2;
 
+			//f3 = target_dt;
+			if (deltaLock) dir->setAnimationInterval(target_dt);
 			if (deltaLock) return CCScheduler::update(target_dt);
-
-			//if (record) f3 *= speedhack;
 
 			// todo: find ways to disable more render stuff
 			g_disable_render = false;
@@ -1440,7 +1443,6 @@ class $modify(CCScheduler) {
 		}
 	}
 };
-
 
 class $modify(Main, PlayLayer) {
 	void updateIndex(bool increment) {
@@ -1512,6 +1514,9 @@ class $modify(Main, PlayLayer) {
 		if (CrystalClient::getMod("No Glow")) g->m_isGlowDisabled = true;
 		PlayLayer::addObject(g);
 		SPs.push_back(reinterpret_cast<StartPosObject*>(g));
+		if ((g->m_objectID == 1329 || g->m_objectID == 142) && CrystalClient::getMod("Coin Finder")) {
+			coins.push_back(g);
+		}
 		if (CrystalClient::getMod("StartPos Switcher")) {
 			if (g->m_objectID == 31) {
 				g->retain();
@@ -1553,7 +1558,7 @@ class $modify(Main, PlayLayer) {
 
 			frame = (int)(m_time * 240) + offset;
 
-			while (frameData.back().xpos >= m_player1->getPositionX() && frameData.size() != 0) {
+			while (frameData.size() >= frame && frameData.size() != 0) {
 				frameData.pop_back();
 			}
 
@@ -1728,52 +1733,29 @@ class $modify(Main, PlayLayer) {
 
 			PlayLayer::checkCollisions(p, g);
 
-			auto p1 = GJBaseGameLayer::get()->m_player1;
-			auto p2 = GJBaseGameLayer::get()->m_player2;
-
+			PlayerObject* currentPlayer;
+			if (p == m_player1) currentPlayer = GJBaseGameLayer::get()->m_player1;
+			if (p == m_player2) currentPlayer = GJBaseGameLayer::get()->m_player2;
 
 			frame = (int)(m_time * 240) + offset;
 
-			yAccel = (*reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(GJBaseGameLayer::get()->m_player1) + 0x760));
-
-			if (record) {
-				frameData.push_back(Amethyst::create());
-			}
-
-			if (replay && frameData.size() > 0 && frame > releases.back()) {
-				if (currentMacroType == 2) {
-					if (newFrame == 0) newFrame++;
-					if (frameData[newFrame].xpos < m_player1->getPositionX()) {
-						while (frameData[newFrame].xpos < m_player1->getPositionX()) {
-							frameData[newFrame].apply(GJBaseGameLayer::get()->m_player1);
-							newFrame++;
-							if (pushes[pushIt] <= frame) {
-								GJBaseGameLayer::get()->pushButton(1, true);
-								pushIt++;
-							}
-							if (releases[releaseIt] <= frame) {
-								GJBaseGameLayer::get()->releaseButton(1, true);
-								releaseIt++;
-							}
-						}
-					}
-				}
-			}
-
 			if (replay && pushes.size() > 0) {
+				if (pushIt > pushData.size()) pushIt--;
+				if (releaseIt > releaseData.size()) releaseIt--;
+
 				if (pushes[pushIt] <= frame) {
+					GJBaseGameLayer::get()->pushButton(1, true);
 					if (currentMacroType == 1) {
 						pushData[pushIt].apply(GJBaseGameLayer::get()->m_player1);
 					}
-					GJBaseGameLayer::get()->pushButton(1, true);
 					pushIt++;
 				}
 
 				if (releases[releaseIt] <= frame) {
+					GJBaseGameLayer::get()->releaseButton(1, true);
 					if (currentMacroType == 1) {
 						releaseData[releaseIt].apply(GJBaseGameLayer::get()->m_player1);
 					}
-					GJBaseGameLayer::get()->releaseButton(1, true);
 					releaseIt++;
 				}
 			}
@@ -2013,9 +1995,9 @@ class $modify(Main, PlayLayer) {
 		}
 		if (CrystalClient::getMod("Disable Progressbar")) {
 			m_sliderGrooveSprite->setVisible(false);
+			m_percentLabel->setPositionX(cocos2d::CCDirector::sharedDirector()->getWinSize().width / 2 - (m_percentLabel->getContentSize().width / 4));
 		} else {
 			m_sliderGrooveSprite->setVisible(true);
-			m_percentLabel->setPositionX(m_percentLabel->getPositionX());
 		}
 		if (CrystalClient::getMod("Hide Attempts")) {
 			m_attemptLabel->setVisible(false);
@@ -2061,6 +2043,17 @@ class $modify(Main, PlayLayer) {
 				CGEventPost (kCGHIDEventTap, evt);
 				CFRelease (evt); CFRelease (src);
 				notDeafened = false;
+			}
+		}
+
+		if (record && lastFrame != newFrame) {
+			frameData.push_back(Amethyst::create());
+			newFrame = lastFrame;
+		}
+
+		if (replay && frameData.size() > 0 && frame < frameData.size()) {
+			if (currentMacroType == 2) {
+				frameData[frame].apply(GJBaseGameLayer::get()->m_player1);
 			}
 		}
 
@@ -2117,6 +2110,10 @@ class $modify(Main, PlayLayer) {
 			if (!s_drawOnDeath || !CrystalClient::getMod("Show Hitboxes")) return;
 			drawer->setVisible(true);
 		}		
+
+		for (size_t i = 0; i < coins.size(); i++) {
+			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && CrystalClient::getMod("Show Hitboxes") && CrystalClient::getMod("Coin Finder")) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
+		}
 
 		if (m_player1 && CrystalClient::getMod("Show Hitboxes")) {
 			drawer->drawForPlayer1(m_player1);

@@ -70,6 +70,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Show Hitboxes", //playerBools[7]
         "Show Hitbox Trail", //playerBools[8]
         "Show Hitboxes in Editor", //playerBools[9]
+        "Coin Finder",
         "Disable Death Effect", //playerBools[10]
         "Disable Particles", //playerBools[11]
         "Disable Progressbar", //playerBools[12]
@@ -111,8 +112,10 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Safe Mode",
         "No Transition",
         "No Rotation",
-        "Auto Safe Mode",
+        "Safe Mode",
         "Auto Deafen",
+        "Mute on Unfocus",
+        "Unfocused FPS",
     };
     bool globalBools[30] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
     std::vector<const char*> bypassHacks = { 
@@ -279,6 +282,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<GameObject*> miniPortals;
     std::vector<GameObject*> dualPortals;
     std::vector<GameObject*> speedChanges;
+    std::vector<GameObject*> coins;
     std::vector<StartPosObject*> SPs;
     std::vector<bool> willFlip;
     
@@ -317,6 +321,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<Amethyst::AmethystFrame> frameData;
     std::vector<Amethyst::CheckpointData> checkpointData;
     std::vector<int> CPoffset;
+    std::vector<int> FrameOffset;
     /*
     std::vector<float> Pxpos;
     std::vector<float> Pypos;
@@ -334,7 +339,6 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     int pushIt;
     int releaseIt;
     int posIt;
-    float yAccel;
     int lastFrame;
     bool clickBot;
     bool pushing;
@@ -343,6 +347,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     double renderTime;
     inline extern bool inited = false;
     float clickVolume = 500;
+    int timeRate;
 
     static int currentKey = 0;
     static int currentMod = 0;
