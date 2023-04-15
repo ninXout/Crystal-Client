@@ -15,6 +15,7 @@
 #include <Geode/modify/LevelInfoLayer.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayerObject.hpp>
+#include <Geode/modify/CCSprite.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/CCDirector.hpp>
@@ -322,20 +323,8 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     std::vector<Amethyst::CheckpointData> checkpointData;
     std::vector<int> CPoffset;
     std::vector<int> FrameOffset;
-    /*
-    std::vector<float> Pxpos;
-    std::vector<float> Pypos;
-    std::vector<float> Paccel;
-    std::vector<float> Rxpos;
-    std::vector<float> Rypos;
-    std::vector<float> Raccel;
-    std::vector<float> xpos;
-    std::vector<float> ypos;
-    std::vector<float> accel;
-    std::vector<float> CPaccel;
-    std::vector<float> CProt;
-    */
     int offset;
+    int FRoffset;
     int pushIt;
     int releaseIt;
     int posIt;
@@ -369,6 +358,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     bool tpsBypass;
     bool g_disable_render = false;
     float g_left_over = 0.f;
+    float fps_left_over = 0.f;
 
     // Display
     bool attempts;

@@ -1,6 +1,7 @@
 #include <cocos2d.h>
 #include <Geode/modify/CCTouchDispatcher.hpp>
 #include <Geode/modify/CCIMEDispatcher.hpp>
+#include <Geode/modify/CCMouseDispatcher.hpp>
 #include "CrystalClient.hpp"
 #include "ImGui.hpp"
 
@@ -214,6 +215,19 @@ enum TouchMessageType : unsigned int {
     Moved = 1,
     Ended = 2,
     Cancelled = 3
+};
+
+class $modify(CCMouseDispatcher) {
+    bool dispatchScrollMSG(float y, float x) {
+        auto& io = ImGui::GetIO();
+        io.AddMouseWheelEvent(x / 5, y / 5);
+
+        if (!io.WantCaptureMouse) {
+            return CCMouseDispatcher::dispatchScrollMSG(y, x);
+        }
+
+        return true;
+    }
 };
 
 class $modify(CCTouchDispatcher) {

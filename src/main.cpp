@@ -247,7 +247,6 @@ void CrystalClient::drawPages() {
 	CrystalClient::ImToggleable("Draw Divide", &drawDivide);
     ImGui::InputFloat("Speedhack", &speedhack, 0.001f, 10.000f, "%.3f");
     CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
-    cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.0 / bypass);
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]");
     CrystalClient::ImToggleable("Record", &record);
@@ -1024,9 +1023,33 @@ class $modify(EditorUI) {
 	void keyDown(enumKeyCodes code) {
 		EditorUI::keyDown(code);
 		if (s_drawer) {
-			//s_drawer->clear();
-			reinterpret_cast<HitboxLevelEditorLayer*>(LevelEditorLayer::get())->updateHitboxEditor();
+			s_drawer->clear();
+			if (GJBaseGameLayer::get()->m_player1) {
+				drawer->drawForPlayer1(GJBaseGameLayer::get()->m_player1);
+			}
+			if (GJBaseGameLayer::get()->m_player2) {
+				drawer->drawForPlayer2(GJBaseGameLayer::get()->m_player2);
+			}
+
+			float xp = GJBaseGameLayer::get()->m_player1->getPositionX();
+
+			for (int s = GJBaseGameLayer::get()->sectionForPos(xp) - 5; s < GJBaseGameLayer::get()->sectionForPos(xp) + 6; ++s) {
+				if (s < 0) continue;
+				if (s >= GJBaseGameLayer::get()->m_sectionObjects->count()) break;
+				auto section = static_cast<CCArray*>(GJBaseGameLayer::get()->m_sectionObjects->objectAtIndex(s));
+				for (size_t i = 0; i < section->count(); ++i) {
+					auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
+
+					if (s_onlyHitboxes) obj->setOpacity(0);
+
+					if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
+					if (!obj->m_active) continue;
+
+					drawer->drawForObject(obj);
+				}
+			}
 		} 
+		//reinterpret_cast<HitboxLevelEditorLayer*>(LevelEditorLayer::get())->updateHitboxEditor();
 	}
 
 	void scrollWheel(float y, float x) {
@@ -1390,38 +1413,40 @@ class $modify(CCScheduler) {
 			renderTime += 1.f / static_cast<float>(spf);
 		}
 		const auto fps = tps;
-		if ((tpsBypass || replay || record) && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
+		if ((tpsBypass || replay || record || hasSetupFonts) && PlayLayer::get() && !PlayLayer::get()->m_isPaused) {
 			auto dir = CCDirector::sharedDirector();
 
 			//if (record) f3 *= speedhack;
 
 			float spf = (float)dir->getAnimationInterval() * (60 / tps);
-			auto speedhack2 = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
+			auto nspeedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
+    
+			const float newdt = 1.f / tps / nspeedhack;
+			const float otherdt = 1.f / bypass / nspeedhack;
+			g_disable_render = true;
 
-			const float target_dt = 1 / fps / speedhack2;
+			if (hasSetupFonts) cocos2d::CCApplication::sharedApplication()->setAnimationInterval(otherdt);
+			else cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.f / 60.f);
 
-			//f3 = target_dt;
-			if (deltaLock) dir->setAnimationInterval(target_dt);
-			if (deltaLock) return CCScheduler::update(target_dt);
-
-			// todo: find ways to disable more render stuff
-			g_disable_render = false;
-
-			unsigned times = static_cast<int>((f3 + g_left_over) / target_dt);
-			if (f3 == 0.f)
-				return CCScheduler::update(target_dt);
-			auto start = std::chrono::high_resolution_clock::now();
-			for (unsigned i = 0; i < times; ++i) {
-				// if (i == times - 1)
-				//     g_disable_render = false;
-				CCScheduler::update(target_dt);
-				using namespace std::literals;
-				if (std::chrono::high_resolution_clock::now() - start > 33.333ms) {
-					times = i + 1;
-					break;
+			if (tpsBypass) {
+				const int times = std::min(static_cast<int>((f3 + g_left_over) / newdt), 100); // limit it to 100x just in case
+				for (int i = 0; i < times; ++i) {
+					if (i == times - 1)
+						g_disable_render = false;
+					CCScheduler::update(newdt);
 				}
+				g_left_over += f3 - newdt * times;
 			}
-			g_left_over += f3 - target_dt * times;
+
+			if (hasSetupFonts) {
+				const int fpstimes = std::min(static_cast<int>((f3 + fps_left_over) / otherdt), 100); // limit it to 100x just in case
+				for (int i = 0; i < fpstimes; ++i) {
+					if (i == fpstimes - 1)
+						g_disable_render = false;
+					CCScheduler::update(otherdt);
+				}
+				fps_left_over += f3 - otherdt * fpstimes;
+			}
 		} else {
 			CCScheduler::update(f3);
 		}
@@ -1435,12 +1460,6 @@ class $modify(CCScheduler) {
 			DrawGridLayer::get()->m_gridSize = gridSize;
 		}
 		*/
-		if (RGBAccent) {
-			if (CrystalClient::get()->g >= 360)
-				CrystalClient::get()->g = 0;
-			else
-				CrystalClient::get()->g += rainbowspeed;
-		}
 	}
 };
 
@@ -1555,10 +1574,15 @@ class $modify(Main, PlayLayer) {
 
 			if (CPoffset.size() == 0) CPoffset.push_back(0);
 			offset = CPoffset.back();
+			if (FrameOffset.size() == 0) FrameOffset.push_back(0);
+			FRoffset = FrameOffset.back();
 
-			frame = (int)(m_time * 240) + offset;
+			timeRate = tps * (1 / speedhack) * 4;
 
-			while (frameData.size() >= frame && frameData.size() != 0) {
+			frame = (int)(m_time * tps) + offset;
+			lastFrame = (int)(m_time * 60) + FRoffset;
+
+			while (frameData.size() >= lastFrame && frameData.size() != 0) {
 				frameData.pop_back();
 			}
 
@@ -1723,10 +1747,10 @@ class $modify(Main, PlayLayer) {
 					std::string status = "Playing: " + std::to_string(pushIt) + "/" + std::to_string(pushes.size());
 					g_macro->setString(status.c_str());
 				} else if (record) {
-					std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * 240 + offset));
+					std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * tps + offset));
 					g_macro->setString(status.c_str());
 				} else if (replay && rendering) {
-					std::string status = "Rendering: Video Frame " + std::to_string(m_time * 240);
+					std::string status = "Rendering: Video Frame " + std::to_string(m_time * tps);
 					g_macro->setString(status.c_str());
 				}
 			}
@@ -1737,28 +1761,28 @@ class $modify(Main, PlayLayer) {
 			if (p == m_player1) currentPlayer = GJBaseGameLayer::get()->m_player1;
 			if (p == m_player2) currentPlayer = GJBaseGameLayer::get()->m_player2;
 
-			frame = (int)(m_time * 240) + offset;
+					frame = (int)(m_time * tps) + offset;
 
-			if (replay && pushes.size() > 0) {
-				if (pushIt > pushData.size()) pushIt--;
-				if (releaseIt > releaseData.size()) releaseIt--;
+		if (replay && pushes.size() > 0) {
+			if (pushIt > pushData.size()) pushIt--;
+			if (releaseIt > releaseData.size()) releaseIt--;
 
-				if (pushes[pushIt] <= frame) {
-					GJBaseGameLayer::get()->pushButton(1, true);
-					if (currentMacroType == 1) {
-						pushData[pushIt].apply(GJBaseGameLayer::get()->m_player1);
-					}
-					pushIt++;
+			if (pushes[pushIt] <= frame) {
+				GJBaseGameLayer::get()->pushButton(1, true);
+				if (currentMacroType == 1) {
+					pushData[pushIt].apply(GJBaseGameLayer::get()->m_player1);
 				}
-
-				if (releases[releaseIt] <= frame) {
-					GJBaseGameLayer::get()->releaseButton(1, true);
-					if (currentMacroType == 1) {
-						releaseData[releaseIt].apply(GJBaseGameLayer::get()->m_player1);
-					}
-					releaseIt++;
-				}
+				pushIt++;
 			}
+
+			if (releases[releaseIt] <= frame) {
+				GJBaseGameLayer::get()->releaseButton(1, true);
+				if (currentMacroType == 1) {
+					releaseData[releaseIt].apply(GJBaseGameLayer::get()->m_player1);
+				}
+				releaseIt++;
+			}
+		}
 
             if (p == m_player1) {
 			    drawer->addToPlayer1Queue(m_player1->getObjectRect());
@@ -2046,14 +2070,16 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 
-		if (record && lastFrame != newFrame) {
+		lastFrame = (int)(m_time * 60) + FRoffset;
+
+		if (record && newFrame != lastFrame) {
 			frameData.push_back(Amethyst::create());
-			newFrame = lastFrame;
+			lastFrame = newFrame;
 		}
 
 		if (replay && frameData.size() > 0 && frame < frameData.size()) {
 			if (currentMacroType == 2) {
-				frameData[frame].apply(GJBaseGameLayer::get()->m_player1);
+				frameData[newFrame].apply(GJBaseGameLayer::get()->m_player1);
 			}
 		}
 
@@ -2188,6 +2214,7 @@ class $modify(Main, PlayLayer) {
 		if (!m_isDead) {
 			checkpointData.push_back(Amethyst::store());
 			CPoffset.push_back(frame);
+			FrameOffset.push_back(newFrame);
 		}
 		//std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	}
@@ -2197,6 +2224,7 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::removeLastCheckpoint();
 		checkpointData.pop_back();
 		CPoffset.pop_back();
+		FrameOffset.pop_back();
 		//if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	}
 
