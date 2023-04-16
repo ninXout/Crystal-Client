@@ -1,8 +1,13 @@
 {
 	"geode": "1.0.0",
-	"version": "v2.0.0",
+	"version": "v2.0.5",
 	"id": "ninxout.crystalclient",
 	"name": "Crystal Client",
 	"developer": "ninXout and Nosu",
-	"description": "Premium Cross-Platform Modded Client"
+	"description": "Premium Cross-Platform Modded Client",
+	"resources": {
+        "files": [
+            "resources/Verdana.ttf"
+        ]
+    }
 }

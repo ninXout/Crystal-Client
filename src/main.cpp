@@ -7,16 +7,20 @@
 #include "ImGui.hpp"
 #include "Amethyst.hpp"
 #include <iostream>
-#include "subprocess.h"
+#include "CrystalProfile.hpp"
 
 USE_GEODE_NAMESPACE();
+
+#define Crystal::profile profile
 
 void CrystalClient::toggle() {
     auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
     if (!m_visible) {
+		profile = loadFromFile("config.dat");
         platform->showCursor();
     }
     if (m_visible) {
+		saveToFile("config.dat");
 		CrystalClient::get()->saveMods();
 		CrystalClient::get()->saveShortcuts();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
@@ -128,54 +132,99 @@ void CrystalClient::applyTheme() {
 }
 
 void CrystalClient::drawPages() {
-    ImGui::Begin("General");
-    for (int i = 0; i < playerHacks.size(); i++) {
-        if (i != 13 && i != 30 && i != 39 && i != 0) CrystalClient::ImToggleable(playerHacks[i], &playerBools[i]);
-		if (i == 0) {
-			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
-			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-				CrystalClient::ImToggleable("Noclip Player 1", &noclipP1);
-				CrystalClient::ImToggleable("Noclip Player 2", &noclipP2);
-				CrystalClient::ImToggleable("Tint Screen on Death", &tintOnDeath);
-				if (ImGui::Button("Close")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
+    ImGui::Begin("Player");
+	CrystalClient::ImExtendedToggleable("Noclip", &profile.noclip);
+	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImToggleable("Noclip Player 1", &profile.noclipP1);
+		CrystalClient::ImToggleable("Noclip Player 2", &profile.noclipP2);
+		CrystalClient::ImToggleable("Tint Screen on Death", &profile.tintOnDeath);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
 		}
-        if (i == 13) {
-			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
-			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputFloat("Wave Trail Size", &pulse);
-				if (ImGui::Button("Close")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImToggleable("No Death Effect", &profile.deathEffect);
+	CrystalClient::ImToggleable("Instant Death Respawn", &profile.instantdeath);
+	CrystalClient::ImExtendedToggleable("Auto Reset", &profile.autoreset);
+	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::InputFloat("Auto Reset Percentage", &profile.autoresetpercent);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
 		}
-		if (i == 30) {
-			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
-			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputInt("Auto Reset Percentage", &autoresetnum);
-				if (ImGui::Button("Close")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImToggleable("Respawn Bug Fix", &profile.respawnfix);
+	CrystalClient::ImToggleable("Practice Bug Fix", &profile.practiceorbfix);
+	CrystalClient::ImExtendedToggleable("No Wave Pulse", &profile.nopulse);
+	if (ImGui::BeginPopupModal("No Wave Pulse", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::InputFloat("Wave Trail Size", &profile.trailsize);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
 		}
-		if (i == 39) {
-			CrystalClient::ImExtendedToggleable(playerHacks[i], &playerBools[i]);
-			if (ImGui::BeginPopupModal(playerHacks[i], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::InputInt("Push Frames", &clickPush);
-            	ImGui::InputInt("Release Frames", &clickRel);
-				if (ImGui::Button("Close")) {
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndPopup();
-			}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImToggleable("Solid Wave Trail", &profile.solidwave);
+	CrystalClient::ImToggleable("Invisible Player", &profile.invisibleplayer);
+	ImGui::End();
+
+	ImGui::Begin("Icon");
+	CrystalClient::ImExtendedToggleable("Player Color", &profile.customPlayerColor);
+	if (ImGui::BeginPopupModal("Player Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Player Color 1", Player1Col, ImGuiColorEditFlags_NoInputs);
+		ImGui::ColorEdit4("Player Color 2", Player2Col, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
 		}
-    }
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImExtendedToggleable("Wave Trail Color", &profile.customWaveColor);
+	if (ImGui::BeginPopupModal("Wave Trail Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Player Wave Trail 1", Player1Wave, ImGuiColorEditFlags_NoInputs);
+		ImGui::ColorEdit4("Player Wave Trail 2", Player2Wave, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	ImGui::End();
+
+	ImGui::Begin("Level");
+	CrystalClient::ImExtendedToggleable("Hitbox Viewer", &profile.hitboxes);
+	if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImToggleable("Show Hitboxes on Death", &profile.onDeath);
+		CrystalClient::ImToggleable("Show Hitbox Trail", &profile.drawTrail);
+		CrystalClient::ImToggleable("Show Hitboxes in Editor", &profile.inEditor);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImToggleable("No Progress Bar", &profile.progressBar);
+	CrystalClient::ImToggleable("Accurate Percentage", &profile.accpercentage);
+	CrystalClient::ImExtendedToggleable("Hide Attempts Label", &profile.hideatts);
+	if (ImGui::BeginPopupModal("Hide Attempts Label", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImToggleable("Hide in Normal Mode", &profile.hidenormalatts);
+		CrystalClient::ImToggleable("Hide in Practice Mode", &profile.hidepracticeatts);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	CrystalClient::ImToggleable("Practice Music Hack", &profile.pracmusic);
+	CrystalClient::ImToggleable("Ignore ESC", &profile.ignoreESC);
+	CrystalClient::ImToggleable("Confirm Quit", &profile.confirmQuit);
+	CrystalClient::ImToggleable("Auto LDM", &profile.autoldm);
+	CrystalClient::ImToggleable("Flipped Dual Controls", &profile.flippedcontrol);
+	CrystalClient::ImToggleable("Mirrored Dual Controls", &profile.mirrorcontrol);
+	CrystalClient::ImToggleable("Start Pos Switcher", &profile.startpos);
+	CrystalClient::ImToggleable("Frame Stepper", &profile.framestep);
+	CrystalClient::ImToggleable("Load from Last Checkpoint", &profile.lastCheckpoint);
+	CrystalClient::ImToggleable("No Glow", &profile.noglow);
+	CrystalClient::ImToggleable("No Mirror Effect", &profile.mirror);
+	CrystalClient::ImToggleable("Layout Mode", &profile.layout);
+	CrystalClient::ImToggleable("AutoClicker", &profile.autoclick);
     ImGui::End();
+
     ImGui::Begin("Display");
     for (int i = 0; i < guiHacks.size(); i++) {
         if (i != 9 && i != 2 && i != 12) CrystalClient::ImToggleable(guiHacks[i], &guiBools[i]);
@@ -445,35 +494,6 @@ void CrystalClient::drawPages() {
 	CrystalClient::ImToggleable("Render Recording", &rendering);
 	CrystalClient::ImToggleable("Include Sound", &withAudio);
 	ImGui::End();
-	ImGui::Begin("Player");
-	CrystalClient::ImExtendedToggleable("Player Color", &customPLcolor);
-	if (ImGui::BeginPopupModal("Player Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::ColorEdit4("Player Color 1", Player1Col, ImGuiColorEditFlags_NoInputs);
-		ImGui::ColorEdit4("Player Color 2", Player2Col, ImGuiColorEditFlags_NoInputs);
-		if (ImGui::Button("Close")) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-	CrystalClient::ImExtendedToggleable("Wave Trail Color", &customWaveColor);
-	if (ImGui::BeginPopupModal("Wave Trail Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::ColorEdit4("Player Wave Trail 1", Player1Wave, ImGuiColorEditFlags_NoInputs);
-		ImGui::ColorEdit4("Player Wave Trail 2", Player2Wave, ImGuiColorEditFlags_NoInputs);
-		if (ImGui::Button("Close")) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-	CrystalClient::ImExtendedToggleable("Player Glow Color", &customGlowColor);
-	if (ImGui::BeginPopupModal("Player Glow Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::ColorEdit4("Glow Color 1", Player1Glow, ImGuiColorEditFlags_NoInputs);
-		ImGui::ColorEdit4("Glow Color 2", Player2Glow, ImGuiColorEditFlags_NoInputs);
-		if (ImGui::Button("Close")) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-	ImGui::End();
 }
 
 void CrystalClient::saveMods() {
@@ -706,27 +726,7 @@ CCNode* getChildByFnRecursive(CCNode* node, std::function<bool(CCNode*)> fn) {
 
     return nullptr;
 }
-/*
-class Patch2 : public Patch {
- public:
- 	Patch2(byte_array patch, byte_array original, uintptr_t address) : Patch() {
- 		m_patch = patch;
- 		m_original = original;
- 		m_address = (void*)address;
- 		m_owner = Mod::get();
- 	}
-};
 
-class Patch3 : public Patch {
- public:
- 	Patch3(char patch, char original, uintptr_t address) : Patch() {
- 		m_patch = {patch};
- 		m_original = {original};
- 		m_address = (void*)(base::get() + address);
- 		m_owner = Mod::get();
- 	}
-};
-*/
 //GEODE_API void GEODE_DLL geode_load(Mod* m) {
 	//fps_shower_init();
     /*
@@ -909,7 +909,7 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		s_drawer = drawer;
 
 		// i hate bad practices
-		drawer->m_drawTrail = CrystalClient::getMod("Show Hitbox Trail");
+		drawer->m_drawTrail = profile.drawTrail;
 		s_noLimitTrail = false;
 
 		if (macroBuffer) {
@@ -918,7 +918,7 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 			}
 			drawer->drawForPlayer1(m_player1);
 		}
-		if (CrystalClient::getMod("Show Hitboxes in Editor")) drawer->setVisible(true);
+		if (profile.inEditor) drawer->setVisible(true);
 		return ret;
 	}
 	bool checkCollisions(PlayerObject* player, float uhh) {
@@ -935,7 +935,7 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		LevelEditorLayer::onPlaytest();
 		drawer->drawForPlayer1(m_player1);
 		this->updateHitboxEditor();
-		if (CrystalClient::getMod("Show Hitboxes in Editor")) {
+		if (profile.inEditor) {
 			drawer->setVisible(true);
 		}
 	}
@@ -982,7 +982,7 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		if (s_noLimitTrail) drawer->m_noLimitTrail = false;
 		paused = false;
         drawer->clearQueue();
-        if (CrystalClient::getMod("Show Hitboxes in Editor")) {
+        if (profile.inEditor) {
 			drawer->setVisible(true);
 		}
         LevelEditorLayer::onStopPlaytest();
@@ -993,10 +993,10 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 		LevelEditorLayer::update(dt);
 
 		if (m_player1) {
-			if (CrystalClient::getMod("Show Hitboxes in Editor")) drawer->drawForPlayer1(m_player1);
+			if (profile.inEditor) drawer->drawForPlayer1(m_player1);
 		}
 		if (m_player2) {
-			if (CrystalClient::getMod("Show Hitboxes in Editor")) drawer->drawForPlayer2(m_player2);
+			if (profile.inEditor) drawer->drawForPlayer2(m_player2);
 		}
 
 		float xp = m_player1->getPositionX();
@@ -1013,7 +1013,7 @@ class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
 				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
 				if (!obj->m_active) continue;
 
-				if (CrystalClient::getMod("Show Hitboxes in Editor")) drawer->drawForObject(obj);
+				if (profile.inEditor) drawer->drawForObject(obj);
 			}
 		}
 	}
@@ -1087,7 +1087,7 @@ class $modify(EditLevelLayer) {
 		if (bypassBools[5]) {
 			ok->m_isVerified = true;
 		}	
-		if (CrystalClient::getMod("Auto LDM")) {
+		if (profile.autoldm) {
 			ok->m_lowDetailModeToggled = true;
 		} 
 		if (bypassBools[10]) cl = 1;
@@ -1166,7 +1166,7 @@ class $(MyGameObject, GameObject) {
 		if (CrystalClient::getMod("No Glow")) {
 			bool m_isGlowDisabled = true;
 		}
-		if (CrystalClient::getMod("Disable")) {
+		if (profile.instantdeath) {
 			bool m_particleAdded = true;
    			bool m_hasParticles = false;
 		}
@@ -1285,7 +1285,7 @@ class $modify(GJBaseGameLayer) {
 
 class $modify(HardStreak) {
 	void updateStroke(float f) {
-		if (CrystalClient::getMod("No Wave Pulse")) m_pulseSize = pulse;
+		if (profile.nopulse) m_pulseSize = pulse;
 		if (CrystalClient::getMod("Solid Wave Trail")) m_isSolid = true;
 		//if (playerBools[4] && PlayLayer::get()) this->setColor(col);
 		if (CrystalClient::getMod("Solid Wave Trail")) this->setBlendFunc(getBlendFunc());
@@ -1300,7 +1300,7 @@ class $modify(LevelInfoLayer) {
 			g->m_password = 1;
 		}
 
-		if (CrystalClient::getMod("Auto LDM")) {
+		if (profile.autoldm) {
 			g->m_lowDetailModeToggled = true;
 		}
 		
@@ -1332,7 +1332,7 @@ class $modify(PauseLayer) {
 
 	void keyDown(cocos2d::enumKeyCodes key) {
 		if (key == KEY_Escape) {
-			if (!CrystalClient::getMod("Ignore ESC")) {
+			if (!profile.ignoreESC) {
 				PauseLayer::keyDown(key);
 			}
 		} else {
@@ -1344,18 +1344,18 @@ class $modify(PauseLayer) {
 
 class $modify(PlayerObject) {
 	void playDeathEffect() {
-		if (!CrystalClient::getMod("Disable Death Effect")) {
+		if (!profile.deathEffect) {
 			PlayerObject::playDeathEffect();
 		}
-		if (CrystalClient::getMod("Instant Death Respawn")) {
+		if (profile.instantdeath) {
 			PlayLayer::get()->resetLevel();
 		}
-		if (CrystalClient::getMod("Practice Music Hack")) {
+		if (profile.pracmusic) {
 			GameSoundManager::sharedManager()->stopBackgroundMusic();
 		}
 	}
 	void addAllParticles() {
-		if (!CrystalClient::getMod("Disable")) {
+		if (!profile.instantdeath) {
 			PlayerObject::addAllParticles();
 		}
 	}
@@ -1685,14 +1685,14 @@ class $modify(Main, PlayLayer) {
 				PlayLayer::destroyPlayer(p,g);
 			}
 		}
-		if (CrystalClient::getMod("Noclip") && !noclipP2 && noclipP1) {
+		if (profile.noclip && !profile.noclipP2 && profile.noclipP1) {
 			if (p == m_player2) PlayLayer::destroyPlayer(p,g);
 		}
-		if (CrystalClient::getMod("Noclip") && noclipP2 && !noclipP1) {
+		if (profile.noclip && profile.noclipP2 && !profile.noclipP1) {
 			if (p == m_player1) PlayLayer::destroyPlayer(p,g);
 
 		} 
-		if (!CrystalClient::getMod("Noclip") || (CrystalClient::getMod("Noclip") && !noclipP2 && !noclipP1)) {
+		if (!profile.noclip || (profile.noclip && !profile.noclipP2 && !profile.noclipP1)) {
 			PlayLayer::destroyPlayer(p,g);
 		}
 	}
@@ -1813,7 +1813,7 @@ class $modify(Main, PlayLayer) {
 		if ((resetPercentage == autoresetnum) && CrystalClient::getMod("Auto Reset")) {
 			resetLevel();
 		}
-		if (CrystalClient::getMod("Accurate Percentage")) {
+		if (profile.accpercentage) {
 			double percent = (m_player1->getPositionX() / m_levelLength) * 100;
 			if (percent > 100.00) {
 				percent = 100.00;
@@ -1911,7 +1911,7 @@ class $modify(Main, PlayLayer) {
 			would_die = false;
 			if (opacity < 70) {
 				opacity += 10;
-				if (tintOnDeath) noclipRed->setOpacity(opacity);
+				if (profile.tintOnDeath) noclipRed->setOpacity(opacity);
 			}
 		} else {
 			if (opacity > 0) {
@@ -1921,18 +1921,18 @@ class $modify(Main, PlayLayer) {
 		}
 
 		if (m_player1) {
-			if (CrystalClient::getMod("Rainbow Icon P1")) m_player1->setColor(col);
-			if (CrystalClient::getMod("Rainbow Icon P2")) m_player1->setSecondColor(colInverse);
+			if (profile.rainbowP1) m_player1->setColor(col);
+			if (profile.rainbowP2) m_player1->setSecondColor(colInverse);
 			//if (playerBools[33]) m_player1->m_waveTrail->setVisible(false);
 			if (m_player1->m_waveTrail)
-				if (CrystalClient::getMod("Rainbow Wave Trail")) m_player1->m_waveTrail->setColor(col);
+				if (profile.rainbowP1wave) m_player1->m_waveTrail->setColor(col);
 		}
 
 		if (m_player2) {
-			if (CrystalClient::getMod("Rainbow Icon P2")) m_player2->setColor(colInverse);
-			if (CrystalClient::getMod("Rainbow Icon P1")) m_player2->setSecondColor(col);
+			if (profile.rainbowP2) m_player2->setColor(colInverse);
+			if (profile.rainbowP1) m_player2->setSecondColor(col);
 			if (m_player2->m_waveTrail)
-				if (CrystalClient::getMod("Rainbow Wave Trail")) m_player2->m_waveTrail->setColor(colInverse);
+				if (profile.rainbowP2wave) m_player2->m_waveTrail->setColor(colInverse);
 		}
 
 		if (customPLcolor) {
@@ -2017,17 +2017,15 @@ class $modify(Main, PlayLayer) {
 			std::string display2 = std::to_string(clickscount) + " clicks";
 			g_clicks->setString(display2.c_str());
 		}
-		if (CrystalClient::getMod("Disable Progressbar")) {
+		if (profile.progressBar) {
 			m_sliderGrooveSprite->setVisible(false);
 			m_percentLabel->setPositionX(cocos2d::CCDirector::sharedDirector()->getWinSize().width / 2 - (m_percentLabel->getContentSize().width / 4));
 		} else {
 			m_sliderGrooveSprite->setVisible(true);
 		}
-		if (CrystalClient::getMod("Hide Attempts")) {
-			m_attemptLabel->setVisible(false);
-		}
-		if (CrystalClient::getMod("Hide Attempts in Practice Mode")) {
-			if (m_isPracticeMode) m_attemptLabel->setVisible(false);
+		if (profile.hideatts) {
+			if (profile.hidenormalatts && !m_isPracticeMode) m_attemptLabel->setVisible(false);
+			if (profile.hidepracticeatts && m_isPracticeMode) m_attemptLabel->setVisible(false);
 		}
 		if (guiBools[6]) {
 			auto work = m_currentAttempt;
@@ -2133,22 +2131,22 @@ class $modify(Main, PlayLayer) {
 			//autoKill = false; // so it doesnt loop
 		//}
 		if (s_showOnDeath) {
-			if (!s_drawOnDeath || !CrystalClient::getMod("Show Hitboxes")) return;
+			if (!s_drawOnDeath || !profile.hitboxes) return;
 			drawer->setVisible(true);
 		}		
 
 		for (size_t i = 0; i < coins.size(); i++) {
-			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && CrystalClient::getMod("Show Hitboxes") && CrystalClient::getMod("Coin Finder")) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
+			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && profile.hitboxes && CrystalClient::getMod("Coin Finder")) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
 		}
 
-		if (m_player1 && CrystalClient::getMod("Show Hitboxes")) {
+		if (m_player1 && profile.hitboxes) {
 			drawer->drawForPlayer1(m_player1);
 		}
-		if (m_player2 && CrystalClient::getMod("Show Hitboxes")) {
+		if (m_player2 && profile.hitboxes) {
 			drawer->drawForPlayer2(m_player2);
 		}
 
-		s_showOnDeath = CrystalClient::getMod("Show Hitboxes on Death");
+		s_showOnDeath = profile.onDeath;
 
 		float xp = m_player1->getPositionX();
 
@@ -2164,7 +2162,7 @@ class $modify(Main, PlayLayer) {
 				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
 				if (!obj->m_active) continue;
 
-				if (CrystalClient::getMod("Show Hitboxes")) drawer->drawForObject(obj);
+				if (profile.hitboxes) drawer->drawForObject(obj);
 			}
 		}
 
@@ -2229,7 +2227,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void startMusic() {
-		if (CrystalClient::getMod("Practice Music Hack")) {
+		if (profile.pracmusic) {
 			auto p = m_isPracticeMode;
 			m_isPracticeMode = false; // pretend there is no practice mode
 			PlayLayer::startMusic();
@@ -2249,7 +2247,7 @@ class $modify(Main, PlayLayer) {
 
 	void onQuit() {
 		FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
-		if (!shouldQuit && CrystalClient::getMod("Confirm Quit") && !m_hasLevelCompleteMenu) {
+		if (!shouldQuit && profile.confirmQuit && !m_hasLevelCompleteMenu) {
 			geode::createQuickPopup(
 				"Confirm Quit",            // title
 				"Are you sure you would like to Quit?",   // content
@@ -2262,7 +2260,6 @@ class $modify(Main, PlayLayer) {
 			);
 		} else {
 			int result;
-			struct subprocess_s subprocess;
 			if (withAudio) {
 				std::string rendercmd = "ffmpeg -framerate 60 -i '" + CrystalClient::getRenderPath(true) + "frame_%4d.png' -c:v libx264 -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "newrender.mp4";
 				std::string fullcmd = "osascript -e 'tell app \"Terminal\" to do script \"" + rendercmd + "\"'";
@@ -2286,7 +2283,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void togglePracticeMode(bool p) {
-		if (CrystalClient::getMod("Practice Music Hack")) {
+		if (profile.pracmusic) {
 			if (!m_isPracticeMode && p) {
 				// receate function without the music restart
 				m_isPracticeMode = p;
@@ -2412,8 +2409,8 @@ class $modify(Main, PlayLayer) {
 
 		s_drawer = drawer;
 
-		s_showOnDeath = CrystalClient::getMod("Show Hitboxes on Death");
-		drawer->m_drawTrail = CrystalClient::getMod("Show Hitbox Trail");
+		s_showOnDeath = profile.onDeath;
+		drawer->m_drawTrail = profile.drawTrail;
 		s_onlyHitboxes = false;
 		if (s_showOnDeath) s_drawOnDeath = false;
 
@@ -2478,7 +2475,7 @@ class $modify(Main, PlayLayer) {
 			addChild(CPrightButton, 1000);
 			addChild(CPleftButton, 1000);
 		}
-		if (CrystalClient::getMod("Disable Progressbar")) {
+		if (profile.progressBar) {
 			m_percentLabel->setPositionX(CCDirector::sharedDirector()->getWinSize().width / 2);
 		}
 		if (guiBools[0]) {

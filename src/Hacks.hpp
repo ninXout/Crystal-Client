@@ -38,7 +38,6 @@
 #include <CoreServices/CoreServices.h>
 #include "Amethyst.hpp"
 #include <Geode/fmod/fmod.hpp>
-#include "globalBP.h"
 #include <stdio.h>
 
 #pragma once
@@ -83,6 +82,7 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
         "Ignore ESC", //playerBools[18]
         "Confirm Quit", //playerBools[19]
         "Auto LDM", //playerBools[20]
+
         "Instant Death Respawn", //playerBools[21]
         "Flipped Dual Controls", //playerBools[22]
         "Mirrored Dual Controls", //playerBools[23]
@@ -197,6 +197,11 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
 
     CCSprite* noclipRed;
     int opacity = 100;
+
+    //float floatsToArray(float r, float b, float g, float a)[4] {
+        //float tempN[4] = {r, b, g, a};
+        //return {r, b, g, a};
+    //};
 
     ImVec4 RGBAtoIV4(float rgb[4]) {
         float newr = rgb[0];

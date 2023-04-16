@@ -2,7 +2,6 @@
 #include "CrystalClient.hpp"
 #include <Geode/loader/Log.hpp>
 #include "ImGui.hpp"
-#include "subprocess.h"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
