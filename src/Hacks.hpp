@@ -322,10 +322,10 @@ std::vector<const char*> playerHacks = { // player hacks comments are wrong
     int replayFPS;
     std::vector<int> pushes;
     std::vector<int> releases;
-    std::vector<Amethyst::AmethystFrame> pushData;
-    std::vector<Amethyst::AmethystFrame> releaseData;
-    std::vector<Amethyst::AmethystFrame> frameData;
-    std::vector<Amethyst::CheckpointData> checkpointData;
+    std::vector<AmethystReplay::AmethystFrame> pushData;
+    std::vector<AmethystReplay::AmethystFrame> releaseData;
+    std::vector<AmethystReplay::AmethystFrame> frameData;
+    std::vector<AmethystReplay::CheckpointData> checkpointData;
     std::vector<int> CPoffset;
     std::vector<int> FrameOffset;
     int offset;

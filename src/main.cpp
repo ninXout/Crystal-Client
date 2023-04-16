@@ -11,14 +11,15 @@
 
 USE_GEODE_NAMESPACE();
 
+using namespace Crystal;
+
 void CrystalClient::toggle() {
     auto platform = reinterpret_cast<PlatformToolbox*>(PlayLayer::get());
     if (!m_visible) {
-		loadFromFile("config.dat");
         platform->showCursor();
     }
     if (m_visible) {
-		saveToFile("config.dat");
+		Crystal::saveToFile("GH_config.json");
 		CrystalClient::get()->saveMods();
 		CrystalClient::get()->saveShortcuts();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) {
@@ -145,7 +146,7 @@ void CrystalClient::drawPages() {
 	CrystalClient::ImToggleable("Instant Death Respawn", &Crystal::profile.instantdeath);
 	CrystalClient::ImExtendedToggleable("Auto Reset", &Crystal::profile.autoreset);
 	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::InputFloat("Auto Reset Percentage", &Crystal::profile.autoresetpercent);
+		ImGui::InputFloat("Auto Reset Percentage", &Crystal::profile.autoresetnum);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -166,6 +167,18 @@ void CrystalClient::drawPages() {
 	ImGui::End();
 
 	ImGui::Begin("Icon");
+	CrystalClient::ImExtendedToggleable("Rainbow Icon", &Crystal::profile.rainbowIcon);
+	if (ImGui::BeginPopupModal("Rainbow Icon", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImToggleable("Rainbow Player Color 1", &Crystal::profile.rainbowP1);
+		CrystalClient::ImToggleable("Rainbow Player Color 2", &Crystal::profile.rainbowP2);
+		CrystalClient::ImToggleable("Rainbow Wave Trail Player 1", &Crystal::profile.rainbowP1wave);
+		CrystalClient::ImToggleable("Rainbow Wave Trail Player 2", &Crystal::profile.rainbowP2wave);
+		ImGui::InputFloat("Rainbow Speed", &Crystal::profile.rainbowspeed);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 	CrystalClient::ImExtendedToggleable("Player Color", &Crystal::profile.customPlayerColor);
 	if (ImGui::BeginPopupModal("Player Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::ColorEdit4("Player Color 1", Player1Col, ImGuiColorEditFlags_NoInputs);
@@ -305,119 +318,12 @@ void CrystalClient::drawPages() {
 	ImGui::SliderFloat("ClickBot Volume", &clickVolume, 100.f, 1000.f);
     ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", macroname, IM_ARRAYSIZE(macroname));
-    if (ImGui::Button("Save Macro")) {
-        std::string filename = (std::string)Mod::get()->getConfigDir() + "/" + (std::string)macroname + ".thyst";
-        std::fstream myfile(filename.c_str(), std::ios::app);
-        myfile << pushes.size();
-        myfile << "\n";
-        for (size_t i = 0; i < pushes.size(); i++)
-        {
-            myfile << std::setprecision(6) << std::fixed << pushes[i];
-            myfile << "\n";
-        }
-        myfile << releases.size();
-        myfile << "\n";
-        for (size_t i = 0; i < releases.size(); i++)
-        {
-            myfile << std::setprecision(6) << std::fixed << releases[i];
-            myfile << "\n";
-        }
-		// pushes
-        myfile << pushData.size();
-        myfile << "\n";
-        for (size_t i = 0; i < pushData.size(); i++)
-        {
-            myfile << std::setprecision(6) << std::fixed << pushData[i].xpos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << pushData[i].ypos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << pushData[i].accel;
-            myfile << "\n";
-        }
-		// releases
-		myfile << releaseData.size();
-        myfile << "\n";
-        for (size_t i = 0; i < releaseData.size(); i++)
-        {
-            myfile << std::setprecision(6) << std::fixed << releaseData[i].xpos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << releaseData[i].ypos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << releaseData[i].accel;
-            myfile << "\n";
-        }
-		// frames
-		myfile << frameData.size();
-        myfile << "\n";
-		for (size_t i = 0; i < frameData.size(); i++)
-        {
-            myfile << std::setprecision(6) << std::fixed << frameData[i].xpos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << frameData[i].ypos;
-            myfile << "\n";
-			myfile << std::setprecision(6) << std::fixed << frameData[i].accel;
-            myfile << "\n";
-        }
-    }
+    if (ImGui::Button("Save Macro")) AmethystReplay::saveToFile(amethyst, macroname);
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
-        std::string line;
-        std::string filename = (std::string)Mod::get()->getConfigDir() + "/" + (std::string)macroname + ".thyst";
-        std::fstream file;
-        file.open(filename, std::ios::in);
-        if (file.is_open()) {
-            getline(file, line);
-            int len;
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                pushes.insert(pushes.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-                getline(file, line);
-                releases.insert(releases.end(), stof(line));
-            }
-            getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-				Amethyst::AmethystFrame newPush;
-                getline(file, line);
-				newPush.xpos = stof(line);
-				getline(file, line);
-				newPush.ypos = stof(line);
-				getline(file, line);
-				newPush.accel = stod(line);
-                pushData.insert(pushData.end(), newPush);
-            }
-			getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-				Amethyst::AmethystFrame newRel;
-                getline(file, line);
-				newRel.xpos = stof(line);
-				getline(file, line);
-				newRel.ypos = stof(line);
-				getline(file, line);
-				newRel.accel = stod(line);
-                releaseData.insert(releaseData.end(), newRel);
-            }
-			getline(file, line);
-            len = stoi(line);
-            for (int lineno = 1; lineno <= len; lineno++) {
-				Amethyst::AmethystFrame newFrameDat;
-                getline(file, line);
-				newFrameDat.xpos = stof(line);
-				getline(file, line);
-				newFrameDat.ypos = stof(line);
-				getline(file, line);
-				newFrameDat.accel = stod(line);
-                frameData.insert(frameData.end(), newFrameDat);
-            }
-            file.close();
-        }
-    }
+		amethyst = new AmethystReplay;
+		AmethystReplay::createFromFile(amethyst, macroname);
+	}
     ImGui::SameLine();
     if (ImGui::Button("Clear Macro")) {
         pushes.clear();
@@ -839,6 +745,7 @@ class FPSOverlay : public cocos2d::CCNode {
 class $modify(MenuLayer) {
 	bool init() {
 		MenuLayer::init();
+		Crystal::loadFromFile("GH_config.json");
 		CrystalClient::get()->loadMods();
 		CrystalClient::get()->loadShortcuts();
 		if (bypassBools[10]) cl = 0;
@@ -1118,7 +1025,7 @@ class $(MyGameObject, GameObject) {
 	cocos2d::_ccColor3B m_realColor;
 
 	void setVisible(bool v) {
-		if (CrystalClient::getMod("Layout Mode")) {
+		if (Crystal::profile.layout) {
 			m_fields->m_realVisible = v;
 
 			if (m_objectType == GameObjectType::Decoration) {
@@ -1137,7 +1044,7 @@ class $(MyGameObject, GameObject) {
 	void setOpacity(unsigned char g) {
 		GameObject::setOpacity(g);
 
-		if (CrystalClient::getMod("Layout Mode") && m_objectType != GameObjectType::Decoration) {
+		if (Crystal::profile.layout && m_objectType != GameObjectType::Decoration) {
 			CCSpritePlus::setOpacity(255);
 			if (m_glowSprite)
 				m_glowSprite->setOpacity(255);
@@ -1145,7 +1052,7 @@ class $(MyGameObject, GameObject) {
 	}
 
 	void setGlowColor(cocos2d::_ccColor3B const& col) {
-		if (CrystalClient::getMod("Layout Mode")) {
+		if (Crystal::profile.layout) {
 			GameObject::setGlowColor(ccc3(255, 255, 255));
 		} else {
 			GameObject::setGlowColor(col);
@@ -1153,7 +1060,7 @@ class $(MyGameObject, GameObject) {
 	}
 
 	void setObjectColor(const cocos2d::ccColor3B& cor) {
-		if (CrystalClient::getMod("Layout Mode") && m_objectType != GameObjectType::Decoration) {
+		if (Crystal::profile.layout && m_objectType != GameObjectType::Decoration) {
 			GameObject::setObjectColor(ccc3(255, 255, 255));
 		} else {
 			GameObject::setObjectColor(cor);
@@ -1161,7 +1068,7 @@ class $(MyGameObject, GameObject) {
 	}
 
     virtual void update(float time2) {
-		if (CrystalClient::getMod("No Glow")) {
+		if (Crystal::profile.noglow) {
 			bool m_isGlowDisabled = true;
 		}
 		if (Crystal::profile.instantdeath) {
@@ -1195,38 +1102,10 @@ class $modify(GJBaseGameLayer) {
 		pushing = true;
 		//if (b) mouse1Down = true;
 	    //if (!b) mouse2Down = true;
-		if (record) {
-			pushes.insert(pushes.end(), frame);
-			pushData.push_back(Amethyst::create());
-		}
-		if (clickBot) {
-			if (!inited) {
-				FMOD::System_Create(&Clickbot::system);
-				Clickbot::system->init(1024 * 2, FMOD_INIT_NORMAL, nullptr);
-				inited = true;
-			}
-
-			Clickbot::now = std::chrono::system_clock::now();
-			Clickbot::cycleTime = Clickbot::now - Clickbot::start;
-			if (Clickbot::cycleTime.count() < 0.5f) {
-				std::string path = Clickbot::pickRandomSoftClick();
-				Clickbot::start = std::chrono::system_clock::now();
-				std::cout << Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
-			} else {
-				std::string path = Clickbot::pickRandomClick();
-				Clickbot::start = std::chrono::system_clock::now();
-				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
-			}
-			
-			Clickbot::system->playSound(Clickbot::clickSound, nullptr, true, &Clickbot::clickChannel);
-			Clickbot::clickChannel->setVolume((float)(clickVolume / 100));
-			Clickbot::clickChannel->setPaused(false);
-			Clickbot::system->update();
-		}
-		if (CrystalClient::getMod("Flipped Dual Controls")) {
+		if (Crystal::profile.flippedcontrol) {
 			if (!b) GJBaseGameLayer::pushButton(i,true);
 			if (b) GJBaseGameLayer::pushButton(i,false);
-		} else if (CrystalClient::getMod("Mirrored Dual Controls")) {
+		} else if (Crystal::profile.mirrorcontrol) {
 			GJBaseGameLayer::pushButton(i,true);
 			GJBaseGameLayer::pushButton(i,false);
 		} else {
@@ -1239,29 +1118,10 @@ class $modify(GJBaseGameLayer) {
 		pushing = false;
 		//if (b) mouse1Down = false;
 	    //if (!b) mouse2Down = false;
-		if (record) {
-			releaseData.push_back(Amethyst::create());
-			releases.insert(releases.end(), frame);
-		}
-		if (clickBot) {
-			if (Clickbot::cycleTime.count() < 0.5f) {
-				std::string path = Clickbot::pickRandomRelease();
-				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
-			} else {
-				std::string path = Clickbot::pickRandomRelease();
-				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
-			}
-			
-			
-			Clickbot::system->playSound(Clickbot::releaseSound, nullptr, true, &Clickbot::releaseChannel);
-			Clickbot::releaseChannel->setVolume((float)(clickVolume / 100));
-			Clickbot::releaseChannel->setPaused(false);
-			Clickbot::system->update();
-		}
-        if (CrystalClient::getMod("Flipped Dual Controls")) {
+        if (Crystal::profile.flippedcontrol) {
 			if (!b) GJBaseGameLayer::releaseButton(i,true);
 			if (b) GJBaseGameLayer::releaseButton(i,false);
-		} else if (CrystalClient::getMod("Mirrored Dual Controls")) {
+		} else if (Crystal::profile.mirrorcontrol) {
 			GJBaseGameLayer::releaseButton(i,true);
 			GJBaseGameLayer::releaseButton(i,false);
 		} else {
@@ -1284,9 +1144,9 @@ class $modify(GJBaseGameLayer) {
 class $modify(HardStreak) {
 	void updateStroke(float f) {
 		if (Crystal::profile.nopulse) m_pulseSize = pulse;
-		if (CrystalClient::getMod("Solid Wave Trail")) m_isSolid = true;
+		if (Crystal::profile.solidwave) m_isSolid = true;
 		//if (playerBools[4] && PlayLayer::get()) this->setColor(col);
-		if (CrystalClient::getMod("Solid Wave Trail")) this->setBlendFunc(getBlendFunc());
+		if (Crystal::profile.solidwave) this->setBlendFunc(getBlendFunc());
 		HardStreak::updateStroke(f);
 	}
 };
@@ -1358,10 +1218,10 @@ class $modify(PlayerObject) {
 		}
 	}
 	void update(float spe) {		
-		if (m_waveTrail && CrystalClient::getMod("Solid Wave Trail")) {
+		if (m_waveTrail && Crystal::profile.solidwave) {
 			m_waveTrail->setBlendFunc(getBlendFunc()); // removes the blending of it
 		}
-		if (CrystalClient::getMod("Invisible Player")) {
+		if (Crystal::profile.invisibleplayer) {
 			PlayerObject::setVisible(false);
 		}
 		PlayerObject::update(spe);
@@ -1372,14 +1232,14 @@ class $modify(PlayerObject) {
 		a = ring->m_hasBeenActivated;
     	b = ring->m_hasBeenActivatedP2;
 		PlayerObject::ringJump(ring);
-		if (PlayLayer::get() && PlayLayer::get()->m_isPracticeMode && CrystalClient::getMod("Practice Orb Bugfix")) {
+		if (PlayLayer::get() && PlayLayer::get()->m_isPracticeMode && Crystal::profile.practiceorbfix) {
         	if (ring->m_hasBeenActivated && !a) g_activated_objects.push_back(ring);
         	if (ring->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(ring);
     	}
 	}
 	void saveToCheckpoint(PlayerCheckpoint* g) {
 		PlayerObject::saveToCheckpoint(g);
-		if (CrystalClient::getMod("Checkpoint Switcher")) {
+		if (Crystal::profile.checkpointswitch) {
 			g->retain();
 		//g_startPoses.push_back({reinterpret_cast<CheckpointObject*>(g), g->getPosition()});
 		g_checkpointsPos.push_back(g->getPosition());
@@ -1528,13 +1388,13 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void addObject(GameObject* g) {
-		if (CrystalClient::getMod("No Glow")) g->m_isGlowDisabled = true;
+		if (Crystal::profile.noglow) g->m_isGlowDisabled = true;
 		PlayLayer::addObject(g);
 		SPs.push_back(reinterpret_cast<StartPosObject*>(g));
 		if ((g->m_objectID == 1329 || g->m_objectID == 142) && CrystalClient::getMod("Coin Finder")) {
 			coins.push_back(g);
 		}
-		if (CrystalClient::getMod("StartPos Switcher")) {
+		if (Crystal::profile.startpos) {
 			if (g->m_objectID == 31) {
 				g->retain();
 				g_startPoses.push_back({reinterpret_cast<StartPosObject*>(g), g->getPosition()});
@@ -1552,11 +1412,11 @@ class $modify(Main, PlayLayer) {
 
 	void resetLevel() {
 		auto gj = reinterpret_cast<PlayerObject*>(PlayLayer::get());
-		if (CrystalClient::getMod("Checkpoint Switcher") && m_isPracticeMode) load = true;
+		if (Crystal::profile.checkpointswitch && m_isPracticeMode) load = true;
 		if (guiBools[10]) {
 			noclip_deaths = deathwait = 0;
 		}
-		if (CrystalClient::getMod("Respawn Bug Fix")) {
+		if (Crystal::profile.respawnfix) {
 			if (m_isTestMode || m_isPracticeMode) {
 				smoothOut = 2;
 			}
@@ -1567,51 +1427,13 @@ class $modify(Main, PlayLayer) {
         if (s_showOnDeath) s_drawOnDeath = false;
         drawer->clearQueue();
 		PlayLayer::resetLevel();
-		if (m_isPracticeMode && record) {
-			checkpointData.back().apply(GJBaseGameLayer::get()->m_player1);
-
-			if (CPoffset.size() == 0) CPoffset.push_back(0);
-			offset = CPoffset.back();
-			if (FrameOffset.size() == 0) FrameOffset.push_back(0);
-			FRoffset = FrameOffset.back();
-
-			timeRate = tps * (1 / speedhack) * 4;
-
-			frame = (int)(m_time * tps) + offset;
-			lastFrame = (int)(m_time * 60) + FRoffset;
-
-			while (frameData.size() >= lastFrame && frameData.size() != 0) {
-				frameData.pop_back();
-			}
-
-			while (pushes.back() >= frame && pushes.size() != 0) {
-				pushData.pop_back();
-				pushes.pop_back();
-			}
-
-			while (releases.back() >= frame && releases.size() != 0) {
-				releaseData.pop_back();
-				releases.pop_back();
-			}
-
-			if (pushing) {
-				pushData.push_back(Amethyst::create());
-				pushes.insert(pushes.end(), frame);
-			}
-
-		} else {
-			frame = lastFrame = newFrame = 0;
-			offset = 0;
-			pushIt = releaseIt = posIt = 0;
-			clickscount = releasecount = 0;
-			//GJBaseGameLayer::get()->releaseButton(1, true);
-		}
+		if (amethyst) amethyst->adjustFrames(tps, pushing, record);
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
         	g_activated_objects_p2.clear();
         	g_orbCheckpoints.clear();
     	} else {
-			if (CrystalClient::getMod("Practice Orb Bugfix") && m_isPracticeMode) {
+			if (Crystal::profile.practiceorbfix && m_isPracticeMode) {
 				const auto [p1, p2] = g_orbCheckpoints.back();
         		g_activated_objects.erase(
             		g_activated_objects.begin() + p1,
@@ -1678,7 +1500,7 @@ class $modify(Main, PlayLayer) {
 			bool m_shouldTryToKick = false;
 			bool m_hasCheated = false;
 		}
-		if (CrystalClient::getMod("No Spikes")) {
+		if (Crystal::profile.nospike) {
 			if (g->m_objectID != 8 && g->m_objectID != 39 && g->m_objectID != 103) {
 				PlayLayer::destroyPlayer(p,g);
 			}
@@ -1696,7 +1518,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void fullReset() {
-		if (CrystalClient::getMod("Load from Last Checkpoint") && m_isPracticeMode) {
+		if (Crystal::profile.lastCheckpoint && m_isPracticeMode) {
 			loadLastCheckpoint();
 			resetLevel();
 		} else {
@@ -1707,13 +1529,13 @@ class $modify(Main, PlayLayer) {
 	void pauseGame(bool pause) {
 		PlayLayer::pauseGame(pause);
 		if (pause && guiBools[14]) {
-			//CrystalClient::getMod("Frame Stepper") = true;
+			//Crystal::profile.framestep = true;
 			shouldUpdate = false;
 			noclipRed->setOpacity(255);
 			freezeCount = true;
 			//std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(3));
 			noclipRed->setOpacity(0);
-			//CrystalClient::getMod("Frame Stepper") = false;
+			//Crystal::profile.framestep = false;
 			shouldUpdate = true;
 		}
 	}
@@ -1729,12 +1551,12 @@ class $modify(Main, PlayLayer) {
 		if (bypassBools[9]) GJBaseGameLayer::get()->m_player1->setPositionY(1050);
 		if (bypassBools[9]) GJBaseGameLayer::get()->m_player1->setPositionX(m_levelLength - 200);
 
-			if (CrystalClient::getMod("AutoClicker")) {
+			if (Crystal::profile.autoclick) {
 				clickframe++;
-				if (clickframe == clickPush) {
+				if (clickframe == Crystal::profile.ACpushframe) {
 					GJBaseGameLayer::get()->pushButton(1, true);
 				}
-				if (clickframe >= (clickPush + clickRel)) {
+				if (clickframe >= (Crystal::profile.ACpushframe + Crystal::profile.ACrelframe)) {
 					GJBaseGameLayer::get()->releaseButton(1, true);
 					clickframe = 0;
 				}
@@ -1759,28 +1581,8 @@ class $modify(Main, PlayLayer) {
 			if (p == m_player1) currentPlayer = GJBaseGameLayer::get()->m_player1;
 			if (p == m_player2) currentPlayer = GJBaseGameLayer::get()->m_player2;
 
-					frame = (int)(m_time * tps) + offset;
-
-		if (replay && pushes.size() > 0) {
-			if (pushIt > pushData.size()) pushIt--;
-			if (releaseIt > releaseData.size()) releaseIt--;
-
-			if (pushes[pushIt] <= frame) {
-				GJBaseGameLayer::get()->pushButton(1, true);
-				if (currentMacroType == 1) {
-					pushData[pushIt].apply(GJBaseGameLayer::get()->m_player1);
-				}
-				pushIt++;
-			}
-
-			if (releases[releaseIt] <= frame) {
-				GJBaseGameLayer::get()->releaseButton(1, true);
-				if (currentMacroType == 1) {
-					releaseData[releaseIt].apply(GJBaseGameLayer::get()->m_player1);
-				}
-				releaseIt++;
-			}
-		}
+			if (amethyst) amethyst->newReplayFrame(replay, record, tps, currentMacroType);
+			else if (record && !amethyst) amethyst = new AmethystReplay;
 
             if (p == m_player1) {
 			    drawer->addToPlayer1Queue(m_player1->getObjectRect());
@@ -1808,7 +1610,7 @@ class $modify(Main, PlayLayer) {
 	void updateProgressbar() {
 		PlayLayer::updateProgressbar();	
 		int resetPercentage = (m_player1->getPositionX() / m_levelLength) * 100;
-		if ((resetPercentage == autoresetnum) && CrystalClient::getMod("Auto Reset")) {
+		if ((resetPercentage == Crystal::profile.autoresetnum) && CrystalClient::getMod("Auto Reset")) {
 			resetLevel();
 		}
 		if (Crystal::profile.accpercentage) {
@@ -1972,7 +1774,7 @@ class $modify(Main, PlayLayer) {
 			g_message->setString(message);
 		}
 		if (guiBools[4]) {
-			if (playerBools[0] || speedhack < 1 || CrystalClient::getMod("No Mirror") || CrystalClient::getMod("Frame Stepper") || CrystalClient::getMod("AutoClicker") || CrystalClient::getMod("Layout Mode") || bypassBools[9]) {
+			if (playerBools[0] || speedhack < 1 || Crystal::profile.mirror || Crystal::profile.framestep || Crystal::profile.autoclick || Crystal::profile.layout || bypassBools[9]) {
 				bad = "Cheating";
 				g_cheating->setColor(ccc3(155,0,0));
 			}
@@ -2066,19 +1868,6 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 
-		lastFrame = (int)(m_time * 60) + FRoffset;
-
-		if (record && newFrame != lastFrame) {
-			frameData.push_back(Amethyst::create());
-			lastFrame = newFrame;
-		}
-
-		if (replay && frameData.size() > 0 && frame < frameData.size()) {
-			if (currentMacroType == 2) {
-				frameData[newFrame].apply(GJBaseGameLayer::get()->m_player1);
-			}
-		}
-
 		/*
 		CGImageRef screenShot = CGWindowListCreateImage( CGRectInfinite, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 
@@ -2100,7 +1889,7 @@ class $modify(Main, PlayLayer) {
 		std::fstream check;
 		check.open(name.c_str());
 		*/
-		if (CrystalClient::getMod("Respawn Bug Fix")) {
+		if (Crystal::profile.respawnfix) {
 			if (!smoothOut) {
 				return update(f4);
 			}
@@ -2112,7 +1901,7 @@ class $modify(Main, PlayLayer) {
 
 			PlayLayer::update(time);
 		} else {
-			if (!CrystalClient::getMod("Frame Stepper") || (CrystalClient::getMod("Frame Stepper") && shouldUpdate)) {
+			if (!Crystal::profile.framestep || (Crystal::profile.framestep && shouldUpdate)) {
 				if (classicspeed) {
 					PlayLayer::update(f4 * speedhack);
 				} else {
@@ -2205,22 +1994,16 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void markCheckpoint() {
-		if (CrystalClient::getMod("Practice Orb Bugfix")) g_orbCheckpoints.push_back({g_activated_objects.size(), g_activated_objects_p2.size()});
+		if (Crystal::profile.practiceorbfix) g_orbCheckpoints.push_back({g_activated_objects.size(), g_activated_objects_p2.size()});
 		PlayLayer::markCheckpoint();
-		if (!m_isDead) {
-			checkpointData.push_back(Amethyst::store());
-			CPoffset.push_back(frame);
-			FrameOffset.push_back(newFrame);
-		}
+		if (amethyst) amethyst->addCheckpoint(true);
 		//std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	}
 
 	void removeLastCheckpoint() {
-		if (CrystalClient::getMod("Practice Orb Bugfix")) g_orbCheckpoints.pop_back();
+		if (Crystal::profile.practiceorbfix) g_orbCheckpoints.pop_back();
 		PlayLayer::removeLastCheckpoint();
-		checkpointData.pop_back();
-		CPoffset.pop_back();
-		FrameOffset.pop_back();
+		if (amethyst) amethyst->addCheckpoint(false);
 		//if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	}
 
@@ -2305,7 +2088,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void toggleFlipped(bool one, bool two) {
-		if (!CrystalClient::getMod("No Mirror")) {
+		if (!Crystal::profile.mirror) {
 			PlayLayer::toggleFlipped(one, two);
 		}
 	}
@@ -2329,7 +2112,7 @@ class $modify(Main, PlayLayer) {
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		if (CrystalClient::getMod("StartPos Switcher")) {
+		if (Crystal::profile.startpos) {
 			rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 			leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
 			g_startPosText = CCLabelBMFont::create("0/0", "bigFont.fnt");
@@ -2337,7 +2120,7 @@ class $modify(Main, PlayLayer) {
 			g_startPoses = {};
 			
 		}
-		if (CrystalClient::getMod("Checkpoint Switcher")) {
+		if (Crystal::profile.checkpointswitch) {
 			CPrightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 			CPleftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
 			g_checkpointText = CCLabelBMFont::create("0/0", "bigFont.fnt");
@@ -2418,7 +2201,7 @@ class $modify(Main, PlayLayer) {
 			//gl->savePercentage(100, false, 100, 100, true);
 		}
 		
-		if (CrystalClient::getMod("StartPos Switcher")) {
+		if (Crystal::profile.startpos) {
 			g_startPosText->setPosition(252 , corner - 275);
 			if (g_startPoses.size() > 9) {
 				g_startPosText->setPosition(245 , corner - 275);
@@ -2445,7 +2228,7 @@ class $modify(Main, PlayLayer) {
 			addChild(rightButton, 1000);
 			addChild(leftButton, 1000);
 		}
-		if (CrystalClient::getMod("Checkpoint Switcher")) {
+		if (Crystal::profile.checkpointswitch) {
 			g_checkpointText->setPosition(252 , corner - 275);
 			if (g_startPoses.size() > 9) {
 				//g_checkpointText->setPosition(245 , corner - 275);
@@ -2695,7 +2478,7 @@ class $(UILayer) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
 		float tempSpeed = 1;
 		if (current == 0) {
-			playerBools[0] = !playerBools[0];
+			Crystal::profile.noclip = !Crystal::profile.noclip;
 		} else if (current == 1) {
 			//autoKill = !autoKill;
 		} else if (current == 2) {
@@ -2709,11 +2492,11 @@ class $(UILayer) {
 		} else if (current == 4) {
 			s_showOnDeath = !s_showOnDeath;
 		} else if (current == 5) {
-			if (CrystalClient::getMod("AutoClicker")) {
-				//CrystalClient::getMod("AutoClicker") = false;
+			if (Crystal::profile.autoclick) {
+				Crystal::profile.autoclick = false;
 				GJBaseGameLayer::get()->releaseButton(1,true);
 			} else {
-				//CrystalClient::getMod("AutoClicker") = true;
+				Crystal::profile.autoclick = true;
 			}
 		} else if (current == 6) {
 			mpl->updateIndex(false);
