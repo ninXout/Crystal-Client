@@ -3,7 +3,32 @@
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
-struct AmethystReplay {
+struct CheckpointData {
+    float xpos;
+    float ypos;
+    float rot;
+    double yaccel;
+    double xaccel;
+    double jump_accel;
+    bool isUpsideDown;
+    float vehicle_size;
+    float player_speed;
+    void apply(PlayerObject* player) {
+        player->setRotation(rot);
+        player->m_position.x = xpos;
+        player->m_position.y = ypos;
+        player->m_yAccel = yaccel;
+        player->m_xAccel = xaccel;
+        player->m_jumpAccel = jump_accel;
+        player->m_isUpsideDown = isUpsideDown;
+        player->m_vehicleSize = vehicle_size;
+        player->m_playerSpeed = player_speed;
+    }
+};
+
+CheckpointData store();
+
+namespace AmethystReplay {
     struct AmethystFrame {
         float xpos;
         float ypos;
@@ -15,41 +40,19 @@ struct AmethystReplay {
         }
     };
 
-    static void createFromFile(AmethystReplay* replay, char macroname[25]);
-    static void saveToFile(AmethystReplay* replay, char macroname[25]);
-    void newReplayFrame(bool isReplay, bool isRecord, int tps, int currentMacroType);
-    void adjustFrames(int tps, bool pushing, bool record);
-    void addInput(bool pushButton, bool record, bool clickBot, bool inited);
-    void addCheckpoint(bool mark);
+    void saveToFile(std::string macroName);
+    void loadFromFile(std::string macroName);
+    void clearMacro();
+    AmethystFrame create();
 
-    struct CheckpointData {
-        float xpos;
-        float ypos;
-        float rot;
-        double accel;
-        void apply(PlayerObject* player) {
-            player->setRotation(rot);
-            player->m_yAccel = accel;
-            player->m_position.x = xpos;
-            player->m_position.y = ypos;
-        }
-    };
-
-    int currentPindex = 0;
-    int currentRindex = 0;
-    int currentIndex = 0;
-    int currentFrame = 0;
-    int currentOffset = 0;
-    std::vector<AmethystFrame> frames;
-    std::vector<int> pushes;
-    std::vector<AmethystFrame> pushData;
-    std::vector<int> releases;
-    std::vector<AmethystFrame> releaseData;
-    std::vector<int> checkpointFrames;
-    std::vector<CheckpointData> checkpoints;
-    static AmethystFrame create();
-    static CheckpointData store();
-};
+    static inline std::vector<AmethystReplay::AmethystFrame> framesData;
+    static inline std::vector<int> pushes;
+    static inline std::vector<AmethystReplay::AmethystFrame> pushData;
+    static inline std::vector<int> releases;
+    static inline std::vector<AmethystReplay::AmethystFrame> releaseData;
+    static inline std::vector<int> checkpointFrames;
+    static inline std::vector<CheckpointData> checkpoints;
+}
 
 namespace Clickbot {
     std::string pickRandomClick();

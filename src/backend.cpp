@@ -74,19 +74,6 @@ ImGuiKey cocos_to_imkey(cocos2d::enumKeyCodes key) {
 	}
 }
 
-void CrystalClient::keyDown(cocos2d::enumKeyCodes key) {
-	ImGui::GetIO().AddKeyEvent(cocos_to_imkey(key), true);
-}
-
-void CrystalClient::keyUp(cocos2d::enumKeyCodes key) {
-	ImGui::GetIO().AddKeyEvent(cocos_to_imkey(key), false);
-}
-
-void CrystalClient::insertText(const char* text, int len) {
-	std::string str(text, len);
-	ImGui::GetIO().AddInputCharactersUTF8(str.c_str());
-}
-
 void CrystalClient::deleteBackward() {
 	// is this really how youre supposed to do this
 	ImGui::GetIO().AddKeyEvent(ImGuiKey_Backspace, true);
@@ -246,7 +233,7 @@ class $modify(CCTouchDispatcher) {
             if (type != TouchMessageType::Moved) {
                 io.AddMouseButtonEvent(0, false);
             }
-            if (!CrystalClient::get()->isMenuOpen) {
+            if (!CrystalClient::get()->isRendering) {
                 CCTouchDispatcher::touches(touches, event, type);
             }
         }

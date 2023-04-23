@@ -39,6 +39,10 @@ struct CrystalProfile {
     bool onDeath = false;
     bool drawTrail = false;
     bool inEditor = false;
+    bool fillHitbox = true;
+    float fillOpacity = 150;
+    bool coinFind = false;
+    bool trajectory = false;
     bool particles = false;
     bool progressBar = false;
     bool accpercentage = false;
@@ -62,10 +66,55 @@ struct CrystalProfile {
     bool autoclick = false;
     int ACpushframe = 1;
     int ACrelframe = 1;
+    bool hidepause = false;
+
+    bool anticheat = false;
+    bool unlockAll = false;
+    bool verify = false;
+    bool copy = false;
+    bool editorZoom = false;
+    bool loadfail = false;
+    
+    bool customMessage = false;
+    char message[64];
+    bool fps = false;
+    bool cps = false;
+    bool jumps = false;
+    bool cheatIndicate = false;
+    bool lastDeath = false;
+    bool attempts = false;
+    bool bestRun = false;
+    bool runFrom = false;
+    bool noclipAcc = false;
+    bool noclipDeath = false;
+    bool totalAtt = false;
+    bool lvlData = false;
+    bool macroStatus = false;
+    bool pauseCountdown = false;
+    bool clock = false;
+    bool igt = false;
+
+    bool RGBAccent = false;
+    bool borders = false;
+    bool rounded = false;
+
+    bool noTransition = false;
+    bool speedhack = false;
+    float speed = 1.0;
+    bool FPSbypass = false;
+    float FPS = 60;
+    bool TPSbypass = false;
+    float TPS = 60;
+
+    bool record = false;
+    bool replay = false;
+    bool deltaLock = false;
+    bool clickBot = false;
+    float CBvolume = 100;
+    char macroname[64];
 };
 
 namespace Crystal {
-    static inline AmethystReplay* amethyst = nullptr;
     static inline CrystalProfile profile;
     static inline void saveToFile(std::string filename);
     static inline void loadFromFile(std::string filename);

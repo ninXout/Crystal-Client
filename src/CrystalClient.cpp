@@ -1,7 +1,10 @@
+
 #include <imgui_internal.h>
 #include "CrystalClient.hpp"
 #include <Geode/loader/Log.hpp>
+#include <Geode/loader/Mod.hpp>
 #include "ImGui.hpp"
+#include "Includes.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -10,28 +13,20 @@ CrystalClient* CrystalClient::get() {
 
 void CrystalClient::draw() {
     if (m_visible) {
-        this->applyTheme();
-
         ImGui::PushFont(m_defaultFont);
-        this->drawPages();
+        this->addTheme();
+        this->drawGUI();
         ImGui::PopFont();
     }
 }
 
-void CrystalClient::setupFonts() {
-    static const ImWchar* def_ranges   = ImGui::GetIO().Fonts->GetGlyphRangesDefault();
-    
-    static constexpr auto add_font = [](
-    ) {
-        auto& io = ImGui::GetIO();
-        ImFontConfig config;
-        config.MergeMode = true;
-        auto* result = io.Fonts->AddFontFromFileTTF("geode/unzipped/ninxout.crystalclient/resources/ninxout.crystalclient/Verdana.ttf", 14.0f);
-        io.Fonts->Build();
-        return result;
-    };
-
-    m_defaultFont = add_font();
+void CrystalClient::setupFonts(const char* filepath, float size) {
+    auto& io = ImGui::GetIO();
+    ImFontConfig config;
+    config.MergeMode = true;
+    auto* result = io.Fonts->AddFontFromFileTTF(filepath, size);
+    io.Fonts->Build();
+    m_defaultFont = result;
 }
 
 void CrystalClient::setup() {
@@ -40,17 +35,27 @@ void CrystalClient::setup() {
 
     IMGUI_CHECKVERSION();
     
-    ImGui::CreateContext();
-    
-    auto& io = ImGui::GetIO();
-
-    this->setupFonts();
+    auto ctx = ImGui::CreateContext();
+        
+    this->setupFonts("geode/unzipped/ninxout.crystalclient/resources/ninxout.crystalclient/Lexend.ttf", 14.0f);
     this->setupPlatform();
 }
 
 void CrystalClient::show(bool visible) {
-    m_visible = visible;
-    isMenuOpen = visible;
+	m_visible = visible;
+	isRendering = visible;
+}
+
+void CrystalClient::toggle() {
+	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
+    if (!m_visible) {
+		platform->showCursor();
+	}
+    if (m_visible) {
+		Crystal::saveToFile(geode::Mod::get()->getSaveDir() / "GH_config.json");
+        if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
+    }
+    this->show(!m_visible);
 }
 
 void CrystalClient::ImToggleable(const char* str_id, bool* v) {
@@ -200,18 +205,49 @@ std::string CrystalClient::getRenderPath(bool full) {
 	return songPath;
 }
 
-std::string CrystalClient::getSongCmdStr(std::string songOffset, std::string songPath, std::string tempPath, std::string time, std::string path) {
-	std::stringstream stream;
-	stream << "ffmpeg";
-	stream << " -y -ss ";
-	stream << songOffset;
-	stream << " -i \"" << songPath << "\"";
-	stream << " -i \"" << tempPath << "\"";
-	stream << " -t " << time;
-	//stream << " -b:a " << audioBitrate << "k"; //bitrate
-	stream << " -c:v copy ";
-	stream << "\"" << path << "\"";
-
-	return stream.str();
+void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
+	auto corner = CCDirector::sharedDirector()->getScreenTop();
+	int anchorY = ((anchorPos - 1) * 15) + 10;
+	label->setPosition(5, corner - anchorY);
 }
 
+void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+  float fC = fV * fS; // Chroma
+  float fHPrime = fmod(fH / 60.0, 6);
+  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+  float fM = fV - fC;
+  
+  if(0 <= fHPrime && fHPrime < 1) {
+    fR = fC;
+    fG = fX;
+    fB = 0;
+  } else if(1 <= fHPrime && fHPrime < 2) {
+    fR = fX;
+    fG = fC;
+    fB = 0;
+  } else if(2 <= fHPrime && fHPrime < 3) {
+    fR = 0;
+    fG = fC;
+    fB = fX;
+  } else if(3 <= fHPrime && fHPrime < 4) {
+    fR = 0;
+    fG = fX;
+    fB = fC;
+  } else if(4 <= fHPrime && fHPrime < 5) {
+    fR = fX;
+    fG = 0;
+    fB = fC;
+  } else if(5 <= fHPrime && fHPrime < 6) {
+    fR = fC;
+    fG = 0;
+    fB = fX;
+  } else {
+    fR = 0;
+    fG = 0;
+    fB = 0;
+  }
+  
+  fR += fM;
+  fG += fM;
+  fB += fM;
+}
