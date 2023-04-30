@@ -56,6 +56,7 @@ void CrystalClient::toggle() {
     if (m_visible) {
 		log::info("called toggle");
 		Crystal::saveMods(Crystal::profile);
+		saveKeybinds();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
     this->show(!m_visible);
@@ -212,6 +213,7 @@ void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
 	label->setPosition(5, corner - anchorY);
+	label->setAnchorPoint({0, 0.5});
 }
 
 void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {

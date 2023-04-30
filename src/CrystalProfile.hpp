@@ -75,6 +75,7 @@ struct CrystalProfile {
     bool editorZoom = false;
     bool loadfail = false;
     
+    bool testmode = true;
     bool customMessage = false;
     char message[64];
     bool fps = false;
@@ -93,6 +94,25 @@ struct CrystalProfile {
     bool pauseCountdown = false;
     bool clock = false;
     bool igt = false;
+
+    int POStestmode = 0;
+    int POScustomMessage = 0;
+    int POSfps = 0;
+    int POScps = 0;
+    int POSjumps = 0;
+    int POScheatIndicate = 0;
+    int POSlastDeath = 0;
+    int POSattempts = 0;
+    int POSbestRun = 0;
+    int POSrunFrom = 0;
+    int POSnoclipAcc = 0;
+    int POSnoclipDeath = 0;
+    int POStotalAtt = 0;
+    int POSlvlData = 0;
+    int POSmacroStatus = 0;
+    int POSpauseCountdown = 0;
+    int POSclock = 0;
+    int POSigt = 0;
 
     bool RGBAccent = false;
     bool borders = false;
@@ -118,7 +138,4 @@ namespace Crystal {
     static inline CrystalProfile profile;
     void saveMods(CrystalProfile const& data);
     CrystalProfile loadMods();
-    std::string transformJSON(bool input);
-    std::string transformJSON(int input);
-    std::string transformJSON(float input);
 }

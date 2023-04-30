@@ -16,6 +16,7 @@ protected:
     void setupFonts(const char* filepath, float size);
     void setupPlatform();
     static void ImToggleable(const char* label, bool* toggle);
+    static void ImSelectable(const char* label, int* toggle, int value);
     static void ImExtendedToggleable(const char* str_id, bool* v);
 
     void drawGUI();
@@ -41,6 +42,7 @@ public:
     void setAnchoredPosition(CCNode* label, int anchorPos);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
+    static void getTextPos(CCNode* label, int anchor);
 
     // setup ImGui
     void setup();

@@ -108,6 +108,7 @@ void fps_shower_init();
     bool g_disable_render = false;
     float g_left_over = 0.f;
     float fps_left_over = 0.f;
+    float t_left_over = 0.f;
 
     // Display
     bool attempts;
@@ -138,6 +139,13 @@ void fps_shower_init();
 
     CCSprite* rightButton;
     CCSprite* leftButton;
+
+    int nextTR = 1;
+    int nextTL = 1;
+    int nextBR = 1;
+    int nextBL = 1;
+
+    const char* positionList[4] = { "Top Left", "Top Right", "Bottom Left", "Bottom Right" };
 
     // Rainbow Icons
     cocos2d::_ccColor3B col;
