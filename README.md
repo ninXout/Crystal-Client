@@ -1,19 +1,7 @@
-# Crystal Client
+# ImGui Hook for Geode
 
-Crystal Client is a MacOS mod menu for Geometry Dash.
+Template to use for creating a ImGui menu in Geode. Write all ImGui code in ImGuiHook::DrawGUI.
+Comes with support for keyboard and mouse input and comes fully ready to use.
 
-## Installation
-
-**Option 1 (Recommended):** Download it from the Geode Mod Index
-
-**Option 2:** Download the newest release from the Releases tab, and put it into your Geode Mods Folder.
-
-(Right-Click the Geometry Dash app > Show Package Contents > Contents > geode > mods)
-
-## FAQ
-
-**How do you open the mod menu?**
-Press TAB to open the menu, press TAB again to close.
-
-**When will X feature be added?**
-Features will be added whenever I feel that I have time. If you have a feature you would like to suggest, it is recommended that you join my [discord server](https://discord.gg/xV5dekWHTd) and ask in the #suggestions channel, but you can also open a [new issue](https://github.com/ninXout/Crystal-Client/issues/new).
+This was done by stripping down mat's DevTools ImGui implementation down to just the necessities.
+Special Thanks to Mat/matcool, HJFod, and the rest of the Geode Team.

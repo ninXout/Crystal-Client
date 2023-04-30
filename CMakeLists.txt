@@ -6,7 +6,6 @@ project(CrystalClient VERSION 1.0.0)
 
 file(GLOB_RECURSE SOURCES
     src/*.cpp
-    src/*.hpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -45,7 +44,6 @@ elseif(APPLE)
 elseif(ANDROID)
     target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
-
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 target_link_libraries(${PROJECT_NAME} libfmod.dylib)
