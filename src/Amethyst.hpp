@@ -35,7 +35,7 @@ namespace AmethystReplay {
         double accel;
         void apply(PlayerObject* player) {
             player->m_yAccel = accel;
-            player->m_position.x = xpos;
+            //player->m_position.x = xpos;
             player->m_position.y = ypos;
         }
     };

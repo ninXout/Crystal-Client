@@ -75,6 +75,7 @@ void fps_shower_init();
     bool rendering;
     bool withAudio;
     int lastTime;
+    float DTime;
     int currentPindex = 0;
     int currentRindex = 0;
     int currentIndex = 0;

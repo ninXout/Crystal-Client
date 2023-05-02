@@ -14,6 +14,10 @@ struct CrystalProfile {
     bool noclipP1 = false;
     bool noclipP2 = false;
     bool tintOnDeath = false;
+    bool resetOnAccuracy = false;
+    bool resetOnDeath = false;
+    float resetAcc = 0;
+    int resetDeath = 0;
     bool deathEffect = false;
     bool instantdeath = false;
     bool autoreset = false;

@@ -38,8 +38,8 @@ public:
     static std::string getRenderPath(bool full);
     static cocos2d::enumKeyCodes shortcutKey(int key);
     float getTimeForXPos(PlayLayer*);
-    void arrangeText(int arrayLength);
-    void setAnchoredPosition(CCNode* label, int anchorPos);
+    void arrangeText(int arrayLength, PlayLayer* menulay);
+    void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     static void getTextPos(CCNode* label, int anchor);

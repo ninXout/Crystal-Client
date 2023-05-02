@@ -209,11 +209,14 @@ std::string CrystalClient::getRenderPath(bool full) {
 	return songPath;
 }
 
-void CrystalClient::setAnchoredPosition(CCNode* label, int anchorPos) {
+void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
 	label->setPosition(5, corner - anchorY);
 	label->setAnchorPoint({0, 0.5});
+	label->setScale(0.4);
+	label->setOpacity(100);
+	layer->addChild(label, 1000);
 }
 
 void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
