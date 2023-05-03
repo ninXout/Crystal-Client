@@ -13,6 +13,7 @@ using namespace Shortcuts;
 using namespace Variables;
 using namespace Crystal;
 using namespace CrystalTheme;
+using namespace AmethystReplay;
 
 void CrystalClient::drawGUI() {
     ImGui::Begin("Player");
@@ -191,7 +192,7 @@ void CrystalClient::drawGUI() {
     //ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", profile.macroname, IM_ARRAYSIZE(profile.macroname));
     if (ImGui::Button("Save Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/" + (std::string)profile.macroname + ".thyst";
+		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
 		std::fstream myfile(filename.c_str(), std::ios::app);
 		myfile << pushes.size();
 		myfile << "\n";
@@ -246,7 +247,7 @@ void CrystalClient::drawGUI() {
 	}
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/" + (std::string)profile.macroname + ".thyst";
+		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
         std::string line;
 		std::fstream file;
 		file.open(filename, std::ios::in);
@@ -516,6 +517,13 @@ class $modify(CCKeyboardDispatcher) {
 		if (down && key == KEY_F && profile.framestep && PlayLayer::get()) {
 			shouldUpdate = true;
 			PlayLayer::get()->update(1.f / profile.TPS);
+			stepData.push_back(AmethystReplay::create());
+			shouldUpdate = false;
+		}
+		if (down && key == KEY_D && profile.framestep && PlayLayer::get()) {
+			shouldUpdate = true;
+			PlayLayer::get()->update((1.f / profile.TPS) * -1);
+			stepData[currentFrame].apply(PlayLayer::get()->m_player1);
 			shouldUpdate = false;
 		}
         if (!CrystalClient::get()->isRendering) return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
@@ -539,6 +547,15 @@ class $modify(MenuLayer) {
 		//Crystal::write((geode::Mod::get()->getSaveDir() / "GH_config.dat"), profile);
 		//Crystal::saveMods(profile);
 		profile = Crystal::loadMods();
+		if (!ghc::filesystem::exists(macros)) {
+			ghc::filesystem::create_directory(macros);
+		}
+		if (!ghc::filesystem::exists(cb)) {
+			ghc::filesystem::create_directory(cb);
+		}
+		if (!ghc::filesystem::exists(conf)) {
+			ghc::filesystem::create_directory(conf);
+		}
 		loadKeybinds();
 		return true;
 	}
@@ -889,10 +906,10 @@ class $modify(GJBaseGameLayer) {
             pushData.push_back(AmethystReplay::create());
         }
         if (profile.clickBot) {
-            if (!inited) {
+            if (!Clickbot::inited) {
                 FMOD::System_Create(&Clickbot::system);
                 Clickbot::system->init(1024 * 2, FMOD_INIT_NORMAL, nullptr);
-                inited = true;
+                Clickbot::inited = true;
             }
 
             Clickbot::now = std::chrono::system_clock::now();
@@ -1162,47 +1179,48 @@ class $modify(Main, PlayLayer) {
 
 		PlayLayer::resetLevel();
 
-		if (m_isPracticeMode && profile.record) {
-			if (checkpoints.size() > 0) checkpoints.back().apply(GJBaseGameLayer::get()->m_player1);
+		if (PlayLayer::get()->m_isPracticeMode && profile.record) {
+        if (checkpoints.size() > 0) checkpoints.back().apply(GJBaseGameLayer::get()->m_player1);
 
-			if (checkpointFrames.size() == 0) checkpointFrames.push_back(0);
-			currentOffset = checkpointFrames.back();
+        if (checkpointFrames.size() == 0) checkpointFrames.push_back(0);
+        currentOffset = checkpointFrames.back();
 
-			currentFrame = (int)(m_time * profile.TPS) + currentOffset;
+        currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
 
-			if (framesData.size() > 0) {
-				while (framesData.size() >= currentFrame && framesData.size() != 0) {
-					framesData.pop_back();
-				}
-			}
+        if (framesData.size() > 0) {
+            while (framesData.size() >= currentFrame && framesData.size() != 0) {
+                framesData.pop_back();
+            }
+        }
 
-			if (pushes.size() > 0) {
-				while (pushes.back() >= currentFrame && pushes.size() != 0) {
-					pushData.pop_back();
-					pushes.pop_back();
-				}
-			}
+        if (pushes.size() > 0) {
+            while (pushes.back() >= currentFrame && pushes.size() != 0) {
+                pushData.pop_back();
+                pushes.pop_back();
+            }
+        }
 
-			if (releases.size() > 0) {
-				while (releases.back() >= currentFrame && releases.size() != 0) {
-					releaseData.pop_back();
-					releases.pop_back();
-				}
-			}
+        if (releases.size() > 0) {
+            while (releases.back() >= currentFrame && releases.size() != 0) {
+                releaseData.pop_back();
+                releases.pop_back();
+            }
+        }
 
-			if (pushing) {
-				pushData.push_back(AmethystReplay::create());
-				pushes.push_back(currentFrame);
-			}
+        if (pushing) {
+            pushData.push_back(AmethystReplay::create());
+            pushes.push_back(currentFrame);
+        }
 
-		} else {
-			currentPindex = 0;
-			currentRindex = 0;
-			currentIndex = 0;
-			currentFrame = 0;
-			currentOffset = 0;
-			if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, true);
-		}
+    } else {
+        currentPindex = 0;
+        currentRindex = 0;
+        currentIndex = 0;
+        currentFrame = 0;
+        currentOffset = 0;
+        if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, true);
+    }
+
 		if (m_checkpoints->count() == 0) {
         	g_activated_objects.clear();
         	g_activated_objects_p2.clear();
@@ -1571,33 +1589,33 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 
-		currentFrame = (int)(m_time * profile.TPS) + currentOffset;
+		currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
 
-        if (profile.record && lastTime != (int)(m_time * 60)) {
-			framesData.push_back(AmethystReplay::create());
-			lastTime = (int)(m_time * 60);
-		}
+    //if (profile.record && lastTime != (int)(m_time * 60)) {
+        //framesData.push_back(AmethystReplay::create());
+        //lastTime = (int)(m_time * 60);
+    //}
 
-        if (profile.replay && pushes.size() > 0 && ((m_player1->getPositionX() / m_levelLength) * 100) <= 100) {
-            if (currentPindex > pushes.size()) currentPindex--;
-            if (currentRindex > releases.size()) currentRindex--;
+    if (profile.replay && pushes.size() > 0) {
+        if (currentPindex > pushes.size()) currentPindex--;
+        if (currentRindex > releases.size()) currentRindex--;
 
-            if (pushes[currentPindex] <= currentFrame) {
-                GJBaseGameLayer::get()->pushButton(1, true);
-                if (currentMacroType == 1) {
-                    //pushData[currentPindex].apply(GJBaseGameLayer::get()->m_player1);
-                }
-                currentPindex++;
-            }
-
-            if (releases[currentRindex] <= currentFrame) {
-                GJBaseGameLayer::get()->releaseButton(1, true);
-                if (currentMacroType == 1) {
-                    //releaseData[currentRindex].apply(GJBaseGameLayer::get()->m_player1);
-                }
-                currentRindex++;
-            }
+        if (pushes[currentPindex] <= currentFrame) {
+            GJBaseGameLayer::get()->pushButton(1, true);
+            //if (currentMacroType == 1) {
+                //pushData[currentPindex].apply(GJBaseGameLayer::get()->m_player1);
+            //}
+            currentPindex++;
         }
+
+        if (releases[currentRindex] <= currentFrame) {
+            GJBaseGameLayer::get()->releaseButton(1, true);
+            //if (currentMacroType == 1) {
+                //releaseData[currentRindex].apply(GJBaseGameLayer::get()->m_player1);
+            //}
+            currentRindex++;
+        }
+    }
 
 		if (s_showOnDeath) {
 			if (!s_drawOnDeath || !Crystal::profile.hitboxes) return;
@@ -2017,6 +2035,22 @@ struct json::Serialize<CrystalProfile> {
         ret["autoclick"] = Crystal::profile.autoclick;
         ret["ACpushframe"] = Crystal::profile.ACpushframe;
         ret["ACrelframe"] = Crystal::profile.ACrelframe;
+		ret["testmode"] = Crystal::profile.testmode;
+		ret["customMessage"] = Crystal::profile.customMessage;
+		ret["fps"] = Crystal::profile.fps;
+		ret["cps"] = Crystal::profile.cps;
+		ret["jumps"] = Crystal::profile.jumps;
+		ret["cheatIndicate"] = Crystal::profile.cheatIndicate;
+		ret["lastDeath"] = Crystal::profile.lastDeath;
+		ret["attempts"] = Crystal::profile.attempts;
+		ret["bestRun"] = Crystal::profile.bestRun;
+		ret["runFrom"] = Crystal::profile.runFrom;
+		ret["noclipAcc"] = Crystal::profile.noclipAcc;
+		ret["noclipDeath"] = Crystal::profile.noclipDeath;
+		ret["totalAtt"] = Crystal::profile.totalAtt;
+		ret["lvlData"] = Crystal::profile.lvlData;
+		ret["macroStatus"] = Crystal::profile.macroStatus;
+		ret["clock"] = Crystal::profile.clock;
         return ret;
     }
     
@@ -2024,13 +2058,13 @@ struct json::Serialize<CrystalProfile> {
 
 void Crystal::saveMods(CrystalProfile const& data) {
     std::fstream jsonOutFile;
-	jsonOutFile.open(geode::Mod::get()->getSaveDir().append("GH_config.json"), std::ios::out);
+	jsonOutFile.open(geode::Mod::get()->getConfigDir().append("Config").append("GH_config.json"), std::ios::out);
 	jsonOutFile << json::Serialize<CrystalProfile>::to_json(profile).dump();
 	jsonOutFile.close();
 }
 
 CrystalProfile Crystal::loadMods() {
-    std::fstream input(geode::Mod::get()->getSaveDir().append("GH_config.json"));
+    std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append("GH_config.json"));
     if (input && !input.eof()) {
 		auto json = json2::parse(input);
         return CrystalProfile {
@@ -2087,7 +2121,23 @@ CrystalProfile Crystal::loadMods() {
             .layout = json["layout"],
             .autoclick = json["autoclick"],
             .ACpushframe = json["ACpushframe"],
-            .ACrelframe = json["ACrelframe"]
+            .ACrelframe = json["ACrelframe"],
+			.testmode = json["testmode"],
+			.customMessage = json["customMessage"],
+			.fps = json["fps"],
+			.cps = json["cps"],
+			.jumps = json["jumps"],
+			.cheatIndicate = json["cheatIndicate"],
+			.lastDeath = json["lastDeath"],
+			.attempts = json["attempts"],
+			.bestRun = json["bestRun"],
+			.runFrom = json["runFrom"],
+			.noclipAcc = json["noclipAcc"],
+			.noclipDeath = json["noclipDeath"],
+			.totalAtt = json["totalAtt"],
+			.lvlData = json["lvlData"],
+			.macroStatus = json["macroStatus"],
+			.clock = json["clock"]
         };
     }
     return Crystal::profile;

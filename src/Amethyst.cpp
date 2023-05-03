@@ -5,6 +5,25 @@
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
 namespace fs = ghc::filesystem;
+using namespace Crystal;
+
+void AmethystReplay::resetActions() {
+    
+}
+
+
+void AmethystReplay::updateAmethyst() {
+    
+}
+
+void AmethystReplay::addAction(bool push) {
+    pushing = push;
+    if (push) {
+        
+    } else {
+        
+    }
+}
 
 AmethystReplay::AmethystFrame AmethystReplay::create() {
     AmethystReplay::AmethystFrame newframe;
@@ -31,7 +50,7 @@ CheckpointData store() {
 std::string Clickbot::pickRandomClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "clicks";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "clicks";
     for (const auto & entry : fs::directory_iterator(path))
     {
         clicks.push_back(entry.path().string());
@@ -41,7 +60,7 @@ std::string Clickbot::pickRandomClick() {
 std::string Clickbot::pickRandomSoftClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "softClicks";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softClicks";
     for (const auto & entry : fs::directory_iterator(path))
     {
         clicks.push_back(entry.path().string());
@@ -51,7 +70,7 @@ std::string Clickbot::pickRandomSoftClick() {
 std::string Clickbot::pickRandomRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "releases";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "releases";
     for (const auto & entry : fs::directory_iterator(path))
         releases.push_back(entry.path().string());
     return releases[rand() % releases.size()];
@@ -59,7 +78,7 @@ std::string Clickbot::pickRandomRelease() {
 std::string Clickbot::pickRandomSoftRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "softReleases";
+    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softReleases";
     for (const auto & entry : fs::directory_iterator(path))
         releases.push_back(entry.path().string());
     return releases[rand() % releases.size()];

@@ -76,26 +76,16 @@ void fps_shower_init();
     bool withAudio;
     int lastTime;
     float DTime;
-    int currentPindex = 0;
-    int currentRindex = 0;
-    int currentIndex = 0;
-    int currentFrame = 0;
-    int currentOffset = 0;
-    std::vector<int> pushes;
-    std::vector<int> releases;
-    std::vector<AmethystReplay::AmethystFrame> pushData;
-    std::vector<AmethystReplay::AmethystFrame> releaseData;
-    std::vector<AmethystReplay::AmethystFrame> framesData;
-    std::vector<CheckpointData> checkpoints;
-    std::vector<int> checkpointFrames;
-    std::vector<int> FrameOffset;
+    std::vector<AmethystReplay::AmethystFrame> stepData;
 
-    bool pushing;
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
     double renderTime;
-    inline extern bool inited = false;
     int timeRate;
+
+    auto macros = Mod::get()->getConfigDir().append("Amethyst").append("Macros");
+    auto cb = Mod::get()->getConfigDir().append("Amethyst").append("ClickBot");
+    auto conf = Mod::get()->getConfigDir().append("Config");
 
     // Auto-Deafen
     bool notDeafened = true;

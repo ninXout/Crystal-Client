@@ -1,5 +1,6 @@
 #pragma once
 #include <Geode/Geode.hpp>
+#include "CrystalProfile.hpp"
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
@@ -35,11 +36,31 @@ namespace AmethystReplay {
         double accel;
         void apply(PlayerObject* player) {
             player->m_yAccel = accel;
-            //player->m_position.x = xpos;
+            player->m_position.x = xpos;
             player->m_position.y = ypos;
         }
     };
 
+    static inline std::vector<int> pushes;
+    static inline std::vector<int> releases;
+    static inline std::vector<AmethystReplay::AmethystFrame> pushData;
+    static inline std::vector<AmethystReplay::AmethystFrame> releaseData;
+    static inline std::vector<AmethystReplay::AmethystFrame> framesData;
+    static inline std::vector<CheckpointData> checkpoints;
+    static inline std::vector<int> checkpointFrames;
+    static inline std::vector<int> FrameOffset;
+
+    static inline int currentPindex = 0;
+    static inline int currentRindex = 0;
+    static inline int currentIndex = 0;
+    static inline int currentFrame = 0;
+    static inline int currentOffset = 0;
+
+    static inline bool pushing = false;
+
+    void resetActions();
+    void updateAmethyst();
+    void addAction(bool push);
     AmethystFrame create();
 }
 
@@ -52,6 +73,7 @@ namespace Clickbot {
     static inline bool firstClick = false;
     static inline std::chrono::system_clock::time_point start, now;
     static inline std::chrono::duration<double> cycleTime;
+    static inline bool inited = false;
 
     static inline FMOD::System* system;
     static inline FMOD::Channel* clickChannel;
