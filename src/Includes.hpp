@@ -50,6 +50,3 @@
 
 using namespace Shortcuts;
 using namespace Variables;
-using namespace Crystal;
-using namespace CrystalTheme;
-using namespace AmethystReplay;

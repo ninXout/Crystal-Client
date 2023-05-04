@@ -6,17 +6,21 @@
 #include "ImGui.hpp"
 #include "Includes.hpp"
 #include "Hacks.hpp"
+#include "CrystalTheme.hpp"
 
 USE_GEODE_NAMESPACE();
 
 using namespace Shortcuts;
 using namespace Variables;
 using namespace Crystal;
-using namespace CrystalTheme;
 using namespace AmethystReplay;
 
 void CrystalClient::drawGUI() {
-    ImGui::Begin("Player");
+	ImGuiWindowFlags window_flags = 0;
+	if (theme.invisBG) window_flags |= ImGuiWindowFlags_NoBackground;
+	if (theme.titlebar) window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+    ImGui::Begin("Player", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Noclip", &Crystal::profile.noclip);
 	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Noclip Player 1", &Crystal::profile.noclipP1);
@@ -61,7 +65,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Invisible Player", &Crystal::profile.invisibleplayer);
 	ImGui::End();
 
-	ImGui::Begin("Icon");
+	ImGui::Begin("Icon", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Rainbow Icon", &Crystal::profile.rainbowIcon);
 	if (ImGui::BeginPopupModal("Rainbow Icon", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Rainbow Player Color 1", &Crystal::profile.rainbowP1);
@@ -76,7 +80,7 @@ void CrystalClient::drawGUI() {
 	}
 	ImGui::End();
 
-	ImGui::Begin("Level");
+	ImGui::Begin("Level", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Hitbox Viewer", &Crystal::profile.hitboxes);
 	if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Show Hitboxes on Death", &Crystal::profile.onDeath);
@@ -116,7 +120,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Layout Mode", &Crystal::profile.layout);
 	CrystalClient::ImToggleable("AutoClicker", &Crystal::profile.autoclick);
     ImGui::End();
-    ImGui::Begin("Display");
+    ImGui::Begin("Display", NULL, window_flags);
 	CrystalClient::ImToggleable("Testmode Label", &Crystal::profile.testmode);
 	CrystalClient::ImExtendedToggleable("Custom Message", &Crystal::profile.customMessage);
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -151,18 +155,39 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
     ImGui::End();
-    ImGui::Begin("Customization");
-    //ImGui::ColorEdit4("Accent Color", LightColour, ImGuiColorEditFlags_NoInputs);
-    //ImGui::ColorEdit4("Base Color", BGColour, ImGuiColorEditFlags_NoInputs);
-    CrystalClient::ImToggleable("RGB Accent Color", &profile.RGBAccent);
-    CrystalClient::ImToggleable("Borders", &profile.borders);
-    CrystalClient::ImToggleable("Rounded Windows", &profile.rounded);
+    ImGui::Begin("Customization", NULL, window_flags);
+    ImGui::ColorEdit4("Accent Color", theme.LightColour, ImGuiColorEditFlags_NoInputs);
+    ImGui::ColorEdit4("Base Color", theme.BGColour, ImGuiColorEditFlags_NoInputs);
+    CrystalClient::ImToggleable("RGB Accent Color", &theme.RGBAccent);
+    CrystalClient::ImToggleable("Borders", &theme.borders);
+    CrystalClient::ImToggleable("Rounded Windows", &theme.rounded);
+	CrystalClient::ImToggleable("No Title Bar", &theme.titlebar);
+	CrystalClient::ImToggleable("Invisible BG", &theme.invisBG);
+	CrystalClient::ImExtendedToggleable("Different Titlebar Color", &theme.diffTitleBar);
+	if (ImGui::BeginPopupModal("Different Titlebar Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::ColorEdit4("Titlebar Color", theme.TitleColour, ImGuiColorEditFlags_NoInputs);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	ImGui::InputFloat("Border Rounding", &theme.borderRounding);
+	ImGui::InputFloat("Scrollbar Size", &theme.scrollbarSize);
+	ImGui::InputFloat("Scrollbar Rounding", &theme.scrollbarRounding);
+	ImGui::InputText("##Theme Name", themeName, IM_ARRAYSIZE(themeName));
+	if (ImGui::Button("Save Theme")) Crystal::saveTheme(theme, std::string(themeName));
+	ImGui::SameLine();
+	if (ImGui::Button("Load Theme")) theme = Crystal::loadTheme(std::string(themeName));
     ImGui::End();
-    ImGui::Begin("Bypasses");
-    //ImGui::InputFloat("Editor Grid Size", &gridSize, 0.001f, 1000.000f, "%.3f");
-	CrystalClient::ImToggleable("ACTUAL anticheat", &profile.anticheat);
+    ImGui::Begin("Bypasses", NULL, window_flags);
+	CrystalClient::ImToggleable("Anticheat Bypass", &profile.anticheat);
+	CrystalClient::ImToggleable("Unlock All", &profile.unlockAll);
+	CrystalClient::ImToggleable("Verify Bypass", &profile.verify);
+	CrystalClient::ImToggleable("Copy Bypass", &profile.copy);
+	CrystalClient::ImToggleable("Editor Zoom Bypass", &profile.editorZoom);
+	CrystalClient::ImToggleable("Load Failed Bypass", &profile.loadfail);
     ImGui::End();
-    ImGui::Begin("Global");
+    ImGui::Begin("Global", NULL, window_flags);
 	ImGui::PushItemWidth(100);
     ImGui::InputFloat("##FPS Bypass", &profile.FPS);
 	ImGui::PopItemWidth();
@@ -181,7 +206,7 @@ void CrystalClient::drawGUI() {
     ImGui::InputFloat("Speedhack", &profile.speed);
     CCDirector::sharedDirector()->getScheduler()->setTimeScale(profile.speed);
     ImGui::End();
-    ImGui::Begin("Amethyst [BETA]");
+    ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
     CrystalClient::ImToggleable("Record", &profile.record);
 	ImGui::SameLine();
     CrystalClient::ImToggleable("Replay", &profile.replay);
@@ -319,7 +344,7 @@ void CrystalClient::drawGUI() {
 		//newQueue.clear();
 	//}
     ImGui::End();
-    ImGui::Begin("Shortcuts");
+    ImGui::Begin("Shortcuts", NULL, window_flags);
     if (ImGui::Button("Open Songs Folder")) {
         system("open ~/Library/Caches");
     }
@@ -350,7 +375,7 @@ void CrystalClient::drawGUI() {
 		ImGui::Separator();
 	}
     ImGui::End();
-	ImGui::Begin("Variable Changer");
+	ImGui::Begin("Variable Changer", NULL, window_flags);
     ImGui::Combo("Variable", &currentVar, playerVars, IM_ARRAYSIZE(playerVars));
 	ImGui::InputFloat("Value", &currentValue);
     if (ImGui::Button("Add Change")) {
@@ -368,61 +393,60 @@ void CrystalClient::drawGUI() {
 		ImGui::Separator();
 	}
     ImGui::End();
-	ImGui::Begin("Internal Renderer");
+	ImGui::Begin("Internal Renderer", NULL, window_flags);
 	CrystalClient::ImToggleable("Render Recording", &rendering);
 	CrystalClient::ImToggleable("Include Sound", &withAudio);
 	ImGui::End();
-	ImGui::ShowDemoWindow();
 }
 
 void CrystalClient::addTheme() {
     ImGuiStyle * style = &ImGui::GetStyle();
     ImVec4* colours = ImGui::GetStyle().Colors;
 
-    if (profile.RGBAccent) {
-        LightColour[0] = LightColour[0] + rDir;
-        LightColour[1] = LightColour[1] + gDir;
-        LightColour[2] = LightColour[2] + bDir;
+    if (theme.RGBAccent) {
+        theme.LightColour[0] = theme.LightColour[0] + theme.rDir;
+        theme.LightColour[1] = theme.LightColour[1] + theme.gDir;
+        theme.LightColour[2] = theme.LightColour[2] + theme.bDir;
 
-        if (LightColour[0] >= 1 || LightColour[0] <= 0) { rDir = rDir * -1; }
-        if (LightColour[1] >= 1 || LightColour[1] <= 0) { gDir = gDir * -1; }
-        if (LightColour[2] >= 1 || LightColour[2] <= 0) { bDir = bDir * -1; }
+        if (theme.LightColour[0] >= 1 || theme.LightColour[0] <= 0) { theme.rDir = theme.rDir * -1; }
+        if (theme.LightColour[1] >= 1 || theme.LightColour[1] <= 0) { theme.gDir = theme.gDir * -1; }
+        if (theme.LightColour[2] >= 1 || theme.LightColour[2] <= 0) { theme.bDir = theme.bDir * -1; }
     }
 
-    DarkColour[0] = (LightColour[0] * 0.5f);
-    DarkColour[1] = (LightColour[1] * 0.5f);
-    DarkColour[2] = (LightColour[2] * 0.5f);
-    DarkColour[3] = LightColour[3];
-    VeryLightColour[0] = (LightColour[0] * 1.5f);
-    VeryLightColour[1] = (LightColour[1] * 1.5f);
-    VeryLightColour[2] = (LightColour[2] * 1.5f);
-    VeryLightColour[3] = LightColour[3];
+    theme.DarkColour[0] = (theme.LightColour[0] * 0.5f);
+    theme.DarkColour[1] = (theme.LightColour[1] * 0.5f);
+    theme.DarkColour[2] = (theme.LightColour[2] * 0.5f);
+    theme.DarkColour[3] = theme.LightColour[3];
+    theme.VeryLightColour[0] = (theme.LightColour[0] * 1.5f);
+    theme.VeryLightColour[1] = (theme.LightColour[1] * 1.5f);
+    theme.VeryLightColour[2] = (theme.LightColour[2] * 1.5f);
+    theme.VeryLightColour[3] = theme.LightColour[3];
 
     style->FrameRounding = 4.0f;
     style->GrabRounding = 4.0f;
     style->Alpha = 1.f;
-    style->WindowRounding = profile.rounded ? 12.f : 0.f;
+    style->WindowRounding = theme.borderRounding;
     style->FrameRounding = 4.f;
-    style->ScrollbarSize = 15.f;
-    style->ScrollbarRounding = 12.f;
-    style->PopupRounding = 4.f;
+    style->ScrollbarSize = theme.scrollbarSize;
+    style->ScrollbarRounding = theme.scrollbarRounding;
+    style->PopupRounding = theme.borderRounding;
     style->WindowBorderSize = 1.5f;
-    colours[ImGuiCol_TitleBg] = RGBAtoIV4(BGColour);
-    colours[ImGuiCol_TitleBgActive] = RGBAtoIV4(BGColour);
-    colours[ImGuiCol_WindowBg] = RGBAtoIV4(BGColour);
-    colours[ImGuiCol_Border] = RGBAtoIV4(profile.borders ? LightColour : BGColour);
-    colours[ImGuiCol_FrameBg] = RGBAtoIV4(DarkColour);
-    colours[ImGuiCol_FrameBgHovered] = RGBAtoIV4(DarkColour);
-    colours[ImGuiCol_FrameBgActive] = RGBAtoIV4(LightColour);
-    colours[ImGuiCol_PlotHistogram] = RGBAtoIV4(LightColour);
-    colours[ImGuiCol_Button] = RGBAtoIV4(LightColour);
-    colours[ImGuiCol_ButtonHovered] = RGBAtoIV4(VeryLightColour);
-    colours[ImGuiCol_Header] = RGBAtoIV4(DarkColour);
-    colours[ImGuiCol_HeaderHovered] = RGBAtoIV4(LightColour);
-    colours[ImGuiCol_HeaderActive] = RGBAtoIV4(VeryLightColour);
-    colours[ImGuiCol_SliderGrab] = RGBAtoIV4(LightColour);
-    colours[ImGuiCol_SliderGrabActive] = RGBAtoIV4(VeryLightColour);
-    colours[ImGuiCol_CheckMark] = RGBAtoIV4(VeryLightColour);
+    colours[ImGuiCol_TitleBg] = CrystalTheme::RGBAtoIV4(theme.diffTitleBar ? theme.TitleColour : theme.BGColour);
+    colours[ImGuiCol_TitleBgActive] = CrystalTheme::RGBAtoIV4(theme.BGColour);
+    colours[ImGuiCol_WindowBg] = CrystalTheme::RGBAtoIV4(theme.BGColour);
+    colours[ImGuiCol_Border] = CrystalTheme::RGBAtoIV4(theme.borders ? theme.LightColour : theme.BGColour);
+    colours[ImGuiCol_FrameBg] = CrystalTheme::RGBAtoIV4(theme.DarkColour);
+    colours[ImGuiCol_FrameBgHovered] = CrystalTheme::RGBAtoIV4(theme.DarkColour);
+    colours[ImGuiCol_FrameBgActive] = CrystalTheme::RGBAtoIV4(theme.LightColour);
+    colours[ImGuiCol_PlotHistogram] = CrystalTheme::RGBAtoIV4(theme.LightColour);
+    colours[ImGuiCol_Button] = CrystalTheme::RGBAtoIV4(theme.LightColour);
+    colours[ImGuiCol_ButtonHovered] = CrystalTheme::RGBAtoIV4(theme.VeryLightColour);
+    colours[ImGuiCol_Header] = CrystalTheme::RGBAtoIV4(theme.DarkColour);
+    colours[ImGuiCol_HeaderHovered] = CrystalTheme::RGBAtoIV4(theme.LightColour);
+    colours[ImGuiCol_HeaderActive] = CrystalTheme::RGBAtoIV4(theme.VeryLightColour);
+    colours[ImGuiCol_SliderGrab] = CrystalTheme::RGBAtoIV4(theme.LightColour);
+    colours[ImGuiCol_SliderGrabActive] = CrystalTheme::RGBAtoIV4(theme.VeryLightColour);
+    colours[ImGuiCol_CheckMark] = CrystalTheme::RGBAtoIV4(theme.VeryLightColour);
 }
 
 void CrystalClient::getTextPos(CCNode* label, int anchor) {
@@ -547,6 +571,7 @@ class $modify(MenuLayer) {
 		//Crystal::write((geode::Mod::get()->getSaveDir() / "GH_config.dat"), profile);
 		//Crystal::saveMods(profile);
 		profile = Crystal::loadMods();
+		theme = Crystal::loadTheme("GH_theme.json");
 		if (!ghc::filesystem::exists(macros)) {
 			ghc::filesystem::create_directory(macros);
 		}
@@ -747,7 +772,7 @@ class $modify(CCScheduler) {
 
 			float totaldt = 1.f / (profile.FPS * (profile.TPS / 60)) / nspeedhack;
 
-			if (profile.deltaLock) return CCScheduler::update(totaldt);
+			if (profile.deltaLock) f3 = totaldt;
 
 			g_disable_render = true;
 
@@ -925,7 +950,7 @@ class $modify(GJBaseGameLayer) {
             }
             
             Clickbot::system->playSound(Clickbot::clickSound, nullptr, true, &Clickbot::clickChannel);
-            Clickbot::clickChannel->setVolume((float)(250 / 100));
+            Clickbot::clickChannel->setVolume((float)(profile.CBvolume / 100));
             Clickbot::clickChannel->setPaused(false);
             Clickbot::system->update();
         }
@@ -958,7 +983,7 @@ class $modify(GJBaseGameLayer) {
 			
 			
 			Clickbot::system->playSound(Clickbot::releaseSound, nullptr, true, &Clickbot::releaseChannel);
-			Clickbot::releaseChannel->setVolume((float)(250 / 100));
+			Clickbot::releaseChannel->setVolume((float)(profile.CBvolume / 100));
 			Clickbot::releaseChannel->setPaused(false);
 			Clickbot::system->update();
 		}
@@ -1585,7 +1610,10 @@ class $modify(Main, PlayLayer) {
 		} else {
 			if (!profile.framestep || (Crystal::profile.framestep && shouldUpdate)) {
 				PlayLayer::update(f4);
-				//if (rendering) recordOverride();
+				if (rendering && lastTime != (int)(m_time * 60)) {
+					captureScreen();
+					lastTime = (int)(m_time * 60);
+				}
 			}
 		}
 
@@ -1685,7 +1713,7 @@ class $modify(Main, PlayLayer) {
 		//FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
 		if (withAudio) {
 			lastTime = 0;
-			std::string rendercmd = "ffmpeg -framerate 60 -y -i " + CrystalClient::getRenderPath(true) + "frame_%4d.png -i " + (std::string)PlayLayer::get()->m_level->getAudioFileName() + " -shortest -pix_fmt yuv420p " + CrystalClient::getRenderPath(true) + "output.mp4";
+			std::string rendercmd = "ffmpeg -framerate 60 -y -i " + CrystalClient::getRenderPath(true) + "frame_%4d.png -i " + (std::string)PlayLayer::get()->m_level->getAudioFileName() + " -shortest -vcodec libx264 " + CrystalClient::getRenderPath(true) + "output.mp4";
 			std::string fullcmd = "osascript -e 'tell app \"Terminal\" to do script \"" + rendercmd + "\"'";
 			auto renderprocess = system(fullcmd.c_str());
 		}
@@ -2141,4 +2169,63 @@ CrystalProfile Crystal::loadMods() {
         };
     }
     return Crystal::profile;
+}
+
+template<>
+struct json::Serialize<CrystalTheme> {
+    static json::Value to_json(CrystalTheme const& value) {
+        auto ret = json::Object();
+        ret["BGColour-Red"] = value.BGColour[0];
+        ret["BGColour-Green"] = value.BGColour[1];
+        ret["BGColour-Blue"] = value.BGColour[2];
+        ret["BGColour-Alpha"] = value.BGColour[3];
+        ret["LightColour-Red"] = value.LightColour[0];
+        ret["LightColour-Green"] = value.LightColour[1];
+        ret["LightColour-Blue"] = value.LightColour[2];
+        ret["LightColour-Alpha"] = value.LightColour[3];
+        ret["TitleColour-Red"] = value.TitleColour[0];
+        ret["TitleColour-Green"] = value.TitleColour[1];
+        ret["TitleColour-Blue"] = value.TitleColour[2];
+        ret["TitleColour-Alpha"] = value.TitleColour[3];
+        ret["borderRounding"] = value.borderRounding;
+        ret["scrollbarSize"] = value.scrollbarSize;
+        ret["scrollbarRounding"] = value.scrollbarRounding;
+        ret["RGBAccent"] = value.RGBAccent;
+        ret["borders"] = value.borders;
+        ret["rounded"] = value.rounded;
+        ret["titlebar"] = value.titlebar;
+        ret["invisBG"] = value.invisBG;
+        ret["diffTitleBar"] = value.diffTitleBar;
+        return ret;
+    }
+    
+};
+
+void Crystal::saveTheme(CrystalTheme const& data, std::string Sfilename) {
+    std::fstream jsonOutFile;
+	jsonOutFile.open(geode::Mod::get()->getConfigDir().append("Config").append(Sfilename), std::ios::out);
+	jsonOutFile << json::Serialize<CrystalTheme>::to_json(data).dump();
+	jsonOutFile.close();
+}
+
+CrystalTheme Crystal::loadTheme(std::string Lfilename) {
+    std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append(Lfilename));
+    if (input && !input.eof()) {
+		auto json = json2::parse(input);
+        return CrystalTheme {
+            .BGColour = { json["BGColour-Red"], json["BGColour-Green"], json["BGColour-Blue"], json["BGColour-Alpha"] },
+            .LightColour = { json["LightColour-Red"], json["LightColour-Green"], json["LightColour-Blue"], json["LightColour-Alpha"] },
+            .TitleColour = { json["TitleColour-Red"], json["TitleColour-Green"], json["TitleColour-Blue"], json["TitleColour-Alpha"] },
+            .borderRounding = json["borderRounding"],
+            .scrollbarSize = json["scrollbarSize"],
+            .scrollbarRounding = json["scrollbarRounding"],
+            .RGBAccent = json["RGBAccent"],
+            .borders = json["borders"],
+            .rounded = json["rounded"],
+            .titlebar = json["titlebar"],
+            .invisBG = json["invisBG"],
+            .diffTitleBar = json["diffTitleBar"]
+        };
+    }
+    return theme;
 }

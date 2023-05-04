@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "json.hpp"
 #include "Amethyst.hpp"
+#include "CrystalTheme.hpp"
 
 using json2 = nlohmann::json;
 
@@ -118,10 +119,6 @@ struct CrystalProfile {
     int POSclock = 0;
     int POSigt = 0;
 
-    bool RGBAccent = false;
-    bool borders = false;
-    bool rounded = false;
-
     bool noTransition = false;
     bool speedhack = false;
     float speed = 1.0;
@@ -142,4 +139,6 @@ namespace Crystal {
     static inline CrystalProfile profile;
     void saveMods(CrystalProfile const& data);
     CrystalProfile loadMods();
+    void saveTheme(CrystalTheme const& data, std::string Sfilename);
+    CrystalTheme loadTheme(std::string Lfilename);
 }

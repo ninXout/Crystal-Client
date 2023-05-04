@@ -136,6 +136,8 @@ void fps_shower_init();
     int nextBR = 1;
     int nextBL = 1;
 
+    char themeName[32];
+
     const char* positionList[4] = { "Top Left", "Top Right", "Bottom Left", "Bottom Right" };
 
     // Rainbow Icons

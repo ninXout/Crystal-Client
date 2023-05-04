@@ -50,25 +50,3 @@ public:
     void show(bool visible);
     void toggle();
 };
-
-namespace CrystalTheme {
-    static inline float rDir = -0.05;
-    static inline float gDir = 0.05;
-    static inline float bDir = -0.05;
-
-    static inline float BGColour[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
-    static inline float LightColour[4] = { 0.262715f,
-                            0.624691f,
-                            0.818605f,
-                            1.0f };
-    static inline float DarkColour[4];
-    static inline float VeryLightColour[4];
-
-    static ImVec4 RGBAtoIV4(float rgb[4]) {
-        float newr = rgb[0];
-        float newg = rgb[1];
-        float newb = rgb[2];
-        float newa = rgb[3];
-        return ImVec4(newr, newg, newb, newa);
-    }
-}

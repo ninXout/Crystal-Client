@@ -7,6 +7,7 @@
 #include "Includes.hpp"
 #include "json.hpp"
 #include "CrystalProfile.hpp"
+#include "CrystalTheme.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -54,8 +55,8 @@ void CrystalClient::toggle() {
 		platform->showCursor();
 	}
     if (m_visible) {
-		log::info("called toggle");
 		Crystal::saveMods(Crystal::profile);
+		Crystal::saveTheme(theme, "GH_theme.json");
 		saveKeybinds();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
