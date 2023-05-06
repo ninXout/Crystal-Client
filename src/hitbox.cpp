@@ -2,11 +2,9 @@
 #include <Geode/Modify.hpp>
 #include "CrystalProfile.hpp"
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 #include "HitboxNode.hpp"
-
-USE_GEODE_NAMESPACE();
 using namespace tulip;
 
 HitboxNode::HitboxNode() : m_thickness(0.5), m_trailLength(400), m_drawTrail(false), m_noLimitTrail(false) {

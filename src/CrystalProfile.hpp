@@ -119,6 +119,8 @@ struct CrystalProfile {
     int POSclock = 0;
     int POSigt = 0;
 
+    bool safeMode = false;
+    bool autoSafeMode = false;
     bool noTransition = false;
     bool speedhack = false;
     float speed = 1.0;

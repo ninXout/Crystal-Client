@@ -29,7 +29,7 @@ AmethystReplay::AmethystFrame AmethystReplay::create() {
     AmethystReplay::AmethystFrame newframe;
     newframe.xpos = GJBaseGameLayer::get()->m_player1->m_position.x;
     newframe.ypos = GJBaseGameLayer::get()->m_player1->m_position.y;
-    newframe.accel = GJBaseGameLayer::get()->m_player1->m_yAccel;
+    newframe.accel = GJBaseGameLayer::get()->m_player1->m_yVelocity;
     return newframe;
 }
 
@@ -38,8 +38,8 @@ CheckpointData store() {
     newcp.xpos = GJBaseGameLayer::get()->m_player1->m_position.x;
     newcp.ypos = GJBaseGameLayer::get()->m_player1->m_position.y;
     newcp.rot = GJBaseGameLayer::get()->m_player1->getRotation();
-    newcp.yaccel = GJBaseGameLayer::get()->m_player1->m_yAccel;
-    newcp.xaccel = GJBaseGameLayer::get()->m_player1->m_xAccel;
+    newcp.yaccel = GJBaseGameLayer::get()->m_player1->m_yVelocity;
+    newcp.xaccel = GJBaseGameLayer::get()->m_player1->m_xVelocity;
     newcp.jump_accel = GJBaseGameLayer::get()->m_player1->m_jumpAccel;
     newcp.isUpsideDown = GJBaseGameLayer::get()->m_player1->m_isUpsideDown;
     newcp.vehicle_size = GJBaseGameLayer::get()->m_player1->m_vehicleSize;

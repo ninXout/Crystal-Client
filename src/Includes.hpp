@@ -24,6 +24,7 @@
 #include <Geode/modify/UILayer.hpp>
 #include <Geode/modify/ObjectToolbox.hpp>
 #include <Geode/modify/LevelTools.hpp>
+#include <Geode/modify/GJGameLevel.hpp>
 #include <Geode/loader/Dirs.hpp>
 #include <vector>
 #include <fstream>

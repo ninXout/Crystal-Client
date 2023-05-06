@@ -5,7 +5,7 @@
 #include <Geode/utils/cocos.hpp>
 #include <unordered_map>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 class CrystalClient {
 protected:

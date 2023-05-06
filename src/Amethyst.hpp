@@ -18,8 +18,8 @@ struct CheckpointData {
         player->setRotation(rot);
         player->m_position.x = xpos;
         player->m_position.y = ypos;
-        player->m_yAccel = yaccel;
-        player->m_xAccel = xaccel;
+        player->m_yVelocity = yaccel;
+        player->m_xVelocity = xaccel;
         player->m_jumpAccel = jump_accel;
         player->m_isUpsideDown = isUpsideDown;
         player->m_vehicleSize = vehicle_size;
@@ -35,7 +35,7 @@ namespace AmethystReplay {
         float ypos;
         double accel;
         void apply(PlayerObject* player) {
-            player->m_yAccel = accel;
+            player->m_yVelocity = accel;
             player->m_position.x = xpos;
             player->m_position.y = ypos;
         }
@@ -53,7 +53,7 @@ namespace AmethystReplay {
     static inline int currentPindex = 0;
     static inline int currentRindex = 0;
     static inline int currentIndex = 0;
-    static inline int currentFrame = 0;
+    static inline float currentFrame = 0;
     static inline int currentOffset = 0;
 
     static inline bool pushing = false;

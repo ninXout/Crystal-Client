@@ -8,7 +8,7 @@
 #include "Hacks.hpp"
 #include "CrystalTheme.hpp"
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 using namespace Shortcuts;
 using namespace Variables;
@@ -214,6 +214,14 @@ void CrystalClient::drawGUI() {
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Delta Lock", &profile.deltaLock);
 	ImGui::InputFloat("ClickBot Volume", &profile.CBvolume);
+	CrystalClient::ImExtendedToggleable("Safe Mode", &profile.safeMode);
+	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImToggleable("Auto Safe Mode", &profile.autoSafeMode);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
     //ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", profile.macroname, IM_ARRAYSIZE(profile.macroname));
     if (ImGui::Button("Save Macro")) {
@@ -544,6 +552,14 @@ class $modify(CCKeyboardDispatcher) {
 			stepData.push_back(AmethystReplay::create());
 			shouldUpdate = false;
 		}
+		if (down && key == KEY_G && profile.framestep && PlayLayer::get()) {
+			for (int i = 0; i < 10; i++) {
+				shouldUpdate = true;
+				PlayLayer::get()->update(1.f / profile.TPS);
+				stepData.push_back(AmethystReplay::create());
+				shouldUpdate = false;
+			}
+		}
 		if (down && key == KEY_D && profile.framestep && PlayLayer::get()) {
 			shouldUpdate = true;
 			PlayLayer::get()->update((1.f / profile.TPS) * -1);
@@ -823,6 +839,14 @@ class $modify(EditLevelLayer) {
 			ok->m_lowDetailModeToggled = true;
 		} 
 		return EditLevelLayer::create(ok);
+	}
+};
+
+class $modify(GJGameLevel) {
+	void savePercentage(int percentage, bool practice, int clicks, int attemptTime, bool vfDChk) {
+		if (profile.safeMode && !profile.autoSafeMode) return;
+		if (profile.safeMode && profile.autoSafeMode && bad == "Cheating") return;
+		GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
 	}
 };
 
@@ -2079,6 +2103,8 @@ struct json::Serialize<CrystalProfile> {
 		ret["lvlData"] = Crystal::profile.lvlData;
 		ret["macroStatus"] = Crystal::profile.macroStatus;
 		ret["clock"] = Crystal::profile.clock;
+		ret["safeMode"] = Crystal::profile.safeMode;
+		ret["autoSafeMode"] = Crystal::profile.autoSafeMode;
         return ret;
     }
     
@@ -2165,7 +2191,9 @@ CrystalProfile Crystal::loadMods() {
 			.totalAtt = json["totalAtt"],
 			.lvlData = json["lvlData"],
 			.macroStatus = json["macroStatus"],
-			.clock = json["clock"]
+			.clock = json["clock"],
+			.safeMode = json["safeMode"],
+			.autoSafeMode = json["autoSafeMode"],
         };
     }
     return Crystal::profile;
