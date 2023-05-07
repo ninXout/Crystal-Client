@@ -122,6 +122,7 @@ struct CrystalProfile {
     bool safeMode = false;
     bool autoSafeMode = false;
     bool noTransition = false;
+    bool lockCursor = false;
     bool speedhack = false;
     float speed = 1.0;
     bool FPSbypass = false;

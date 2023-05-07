@@ -10,6 +10,24 @@ void fps_shower_init();
 
     ImFont* m_defaultFont  = nullptr;
 
+    std::vector<int> GUIpositions = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+    };
+
     // StartPos Switcher
     std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
     int g_startPosIndex;
@@ -72,6 +90,7 @@ void fps_shower_init();
     static inline bool s_noLimitTrail = false;
 
     // Amethyst
+    bool gameStarted;
     bool rendering;
     bool withAudio;
     int lastTime;
