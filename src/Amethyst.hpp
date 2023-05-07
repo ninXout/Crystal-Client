@@ -41,13 +41,13 @@ namespace AmethystReplay {
         }
     };
 
-    static inline std::vector<int> pushes;
-    static inline std::vector<int> releases;
+    static inline std::vector<float> pushes;
+    static inline std::vector<float> releases;
     static inline std::vector<AmethystReplay::AmethystFrame> pushData;
     static inline std::vector<AmethystReplay::AmethystFrame> releaseData;
     static inline std::vector<AmethystReplay::AmethystFrame> framesData;
     static inline std::vector<CheckpointData> checkpoints;
-    static inline std::vector<int> checkpointFrames;
+    static inline std::vector<float> checkpointFrames;
     static inline std::vector<int> FrameOffset;
 
     static inline int currentPindex = 0;

@@ -841,7 +841,7 @@ class $modify(CCScheduler) {
 
 			float totaldt = 1.f / (profile.FPS * (profile.TPS / 60)) / nspeedhack;
 
-			if (profile.deltaLock) f3 = totaldt;
+			if (profile.deltaLock) return CCScheduler::update(totaldt);
 
 			g_disable_render = true;
 
@@ -1285,9 +1285,9 @@ class $modify(Main, PlayLayer) {
         if (checkpoints.size() > 0) checkpoints.back().apply(GJBaseGameLayer::get()->m_player1);
 
         if (checkpointFrames.size() == 0) checkpointFrames.push_back(0);
-        currentOffset = checkpointFrames.back();
+        currentFrame = checkpointFrames.back();
 
-        currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
+        //currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
 
         if (framesData.size() > 0) {
             while (framesData.size() >= currentFrame && framesData.size() != 0) {
@@ -1716,6 +1716,8 @@ class $modify(Main, PlayLayer) {
 		}
         drawer->clear();
 
+		if (gameStarted) currentFrame += f4;
+
 		if (Crystal::profile.respawnfix) {
 			if (!smoothOut) {
 				return update(f4);
@@ -1736,8 +1738,7 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-
-		currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
+		//currentFrame = (int)(PlayLayer::get()->m_time * profile.TPS) + currentOffset;
 
 		if (profile.replay && pushes.size() > 0) {
 			if (currentPindex > pushes.size()) currentPindex--;
@@ -1891,6 +1892,7 @@ class $modify(Main, PlayLayer) {
 	}
 
 	void startGame() {
+		PlayLayer::startGame();
 		gameStarted = true;
 	}
 
