@@ -11,6 +11,7 @@
 #include <Geode/modify/GameManager.hpp>
 #include <Geode/modify/GameObject.hpp>
 #include <Geode/modify/GameSoundManager.hpp>
+#include <Geode/modify/GameLevelManager.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/GJGameLevel.hpp>
 #include <Geode/modify/HardStreak.hpp>
@@ -51,3 +52,4 @@
 
 using namespace Shortcuts;
 using namespace Variables;
+using namespace geode::cocos;

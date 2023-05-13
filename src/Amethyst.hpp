@@ -14,6 +14,7 @@ struct CheckpointData {
     bool isUpsideDown;
     float vehicle_size;
     float player_speed;
+    GameObject* snapped_obj;
     void apply(PlayerObject* player) {
         player->setRotation(rot);
         player->m_position.x = xpos;
@@ -24,10 +25,11 @@ struct CheckpointData {
         player->m_isUpsideDown = isUpsideDown;
         player->m_vehicleSize = vehicle_size;
         player->m_playerSpeed = player_speed;
+        player->m_objectSnappedTo = snapped_obj;
     }
 };
 
-CheckpointData store();
+CheckpointData store(PlayerObject* player);
 
 namespace AmethystReplay {
     struct AmethystFrame {
@@ -41,22 +43,22 @@ namespace AmethystReplay {
         }
     };
 
-    static inline std::vector<float> pushes;
-    static inline std::vector<float> releases;
-    static inline std::vector<AmethystReplay::AmethystFrame> pushData;
-    static inline std::vector<AmethystReplay::AmethystFrame> releaseData;
-    static inline std::vector<AmethystReplay::AmethystFrame> framesData;
-    static inline std::vector<CheckpointData> checkpoints;
+    static inline std::vector<float> P1pushes;
+    static inline std::vector<float> P1releases;
+    static inline std::vector<float> P2pushes;
+    static inline std::vector<float> P2releases;
     static inline std::vector<float> checkpointFrames;
-    static inline std::vector<int> FrameOffset;
+    static inline std::vector<CheckpointData> P1checkpoints;
+    static inline std::vector<CheckpointData> P2checkpoints;
 
-    static inline int currentPindex = 0;
-    static inline int currentRindex = 0;
-    static inline int currentIndex = 0;
+    static inline int currentP1index = 0;
+    static inline int currentR1index = 0;
+    static inline int currentP2index = 0;
+    static inline int currentR2index = 0;
     static inline float currentFrame = 0;
-    static inline int currentOffset = 0;
 
-    static inline bool pushing = false;
+    static inline bool P1pushing = false;
+    static inline bool P2pushing = false;
 
     void resetActions();
     void updateAmethyst();

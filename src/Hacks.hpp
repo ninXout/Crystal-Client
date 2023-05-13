@@ -97,6 +97,13 @@ void fps_shower_init();
     float DTime;
     std::vector<AmethystReplay::AmethystFrame> stepData;
 
+
+    inline int g_frameCount;
+    inline double g_speedMod = 1.0;
+
+    inline std::vector<std::function<void()>> g_updates;
+    void newFPSTimer();
+
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
     double renderTime;
@@ -104,6 +111,8 @@ void fps_shower_init();
 
     auto macros = Mod::get()->getConfigDir().append("Amethyst").append("Macros");
     auto cb = Mod::get()->getConfigDir().append("Amethyst").append("ClickBot");
+    auto framesFol = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").append("Frames");
+    auto renderer = Mod::get()->getConfigDir().append("Amethyst").append("Renderer");
     auto conf = Mod::get()->getConfigDir().append("Config");
 
     // Auto-Deafen

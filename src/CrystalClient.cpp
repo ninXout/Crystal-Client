@@ -58,6 +58,7 @@ void CrystalClient::toggle() {
 		Crystal::saveMods(Crystal::profile);
 		Crystal::saveTheme(theme, "GH_theme.json");
 		saveKeybinds();
+		initPatches();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
     this->show(!m_visible);
@@ -259,4 +260,58 @@ void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& 
   fR += fM;
   fG += fM;
   fB += fM;
+}
+
+void CrystalClient::addTransparentBG(CCNode* layer) {
+	auto winSize = CCDirector::sharedDirector()->getWinSize();
+        
+	auto bg = CCSprite::create("GJ_gradientBG.png");
+	auto bgSize = bg->getTextureRect().size;
+	bg->setAnchorPoint({ 0.0f, 0.0f });
+	bg->setScaleX((winSize.width + 10.0f) / bgSize.width);
+	bg->setScaleY((winSize.height + 10.0f) / bgSize.height);
+	bg->setPosition({ -5.0f, -5.0f });
+	bg->setColor(ccc3(255, 255, 255));
+	
+	layer->addChild(bg, -2);
+}
+
+void CrystalClient::initPatches() {
+	// Patches
+    /*std::vector<std::vector<const char*>> objLimit; = {{'\x7c'}, {'\xeb'}};
+    std::vector<std::vector<const char*>> scaleHack = {{'\x7c'}, {'\xeb'}};
+    std::vector<std::vector<const char*>> customObjLimit1 = {{'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}}; //0x1d67c
+    std::vector<std::vector<const char*>> customObjLimit2 = {{'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}}; //0x1d869
+    std::vector<std::vector<const char*>> customObjLimit3 = {{'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}}; //0x1d72d
+	*/
+
+	// scale hack
+	if (Crystal::profile.scalehack) {
+		auto res1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
+		auto res2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+	} else {
+		auto res1_2= Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\x7c'});
+		auto res2_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\x7c'});
+	}
+
+	if (Crystal::profile.objlimit) {
+		auto res5 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
+		auto res6 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
+		auto res7 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+	} else {
+		auto res5_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\x7c'});
+		auto res6_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\x7c'});
+		auto res7_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\x7c'});
+	}
+
+	// custom object
+	if (Crystal::profile.customobjlimit) {
+		auto res3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+		auto res4 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+		auto res8 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+	} else {
+		auto res3_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+		auto res4_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+		auto res8_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});	
+	}
 }

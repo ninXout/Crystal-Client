@@ -17,7 +17,7 @@ void AmethystReplay::updateAmethyst() {
 }
 
 void AmethystReplay::addAction(bool push) {
-    pushing = push;
+    P1pushing = push;
     if (push) {
         
     } else {
@@ -33,17 +33,18 @@ AmethystReplay::AmethystFrame AmethystReplay::create() {
     return newframe;
 }
 
-CheckpointData store() {
+CheckpointData store(PlayerObject* player) {
     CheckpointData newcp;
-    newcp.xpos = GJBaseGameLayer::get()->m_player1->m_position.x;
-    newcp.ypos = GJBaseGameLayer::get()->m_player1->m_position.y;
-    newcp.rot = GJBaseGameLayer::get()->m_player1->getRotation();
-    newcp.yaccel = GJBaseGameLayer::get()->m_player1->m_yVelocity;
-    newcp.xaccel = GJBaseGameLayer::get()->m_player1->m_xVelocity;
-    newcp.jump_accel = GJBaseGameLayer::get()->m_player1->m_jumpAccel;
-    newcp.isUpsideDown = GJBaseGameLayer::get()->m_player1->m_isUpsideDown;
-    newcp.vehicle_size = GJBaseGameLayer::get()->m_player1->m_vehicleSize;
-    newcp.player_speed = GJBaseGameLayer::get()->m_player1->m_playerSpeed;
+    newcp.xpos = player->m_position.x;
+    newcp.ypos = player->m_position.y;
+    newcp.rot = player->getRotation();
+    newcp.yaccel = player->m_yVelocity;
+    newcp.xaccel = player->m_xVelocity;
+    newcp.jump_accel = player->m_jumpAccel;
+    newcp.isUpsideDown = player->m_isUpsideDown;
+    newcp.vehicle_size = player->m_vehicleSize;
+    newcp.player_speed = player->m_playerSpeed;
+    newcp.snapped_obj = player->m_objectSnappedTo;
     return newcp;
 }
 

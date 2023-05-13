@@ -75,6 +75,9 @@ struct CrystalProfile {
 
     bool anticheat = false;
     bool unlockAll = false;
+    bool scalehack = false;
+    bool objlimit = false;
+    bool customobjlimit = false;
     bool verify = false;
     bool copy = false;
     bool editorZoom = false;
@@ -123,6 +126,7 @@ struct CrystalProfile {
     bool autoSafeMode = false;
     bool noTransition = false;
     bool lockCursor = false;
+    bool transparentBG = false;
     bool speedhack = false;
     float speed = 1.0;
     bool FPSbypass = false;

@@ -43,6 +43,9 @@ public:
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     static void getTextPos(CCNode* label, int anchor);
+    void addTransparentBG(CCNode* layer);
+    
+    void initPatches();
 
     // setup ImGui
     void setup();
