@@ -5,59 +5,63 @@
 #include <Geode/utils/cocos.hpp>
 #include <unordered_map>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
-enum class HighlightMode {
-    Selected,
-    Hovered,
-};
-
-class CrystalClient : public cocos2d::CCLayer, cocos2d::CCIMEDelegate {
+class CrystalClient {
 protected:
     bool m_visible = false;
     bool m_setup = false;
     ImFont* m_defaultFont  = nullptr;
 
-    void setupFonts();
+    void setupFonts(const char* filepath, float size);
     void setupPlatform();
-
     static void ImToggleable(const char* label, bool* toggle);
+    static void ImSelectable(const char* label, int* toggle, int value);
     static void ImExtendedToggleable(const char* str_id, bool* v);
-    void drawPages();
+
+    void drawGUI();
     void draw();
-    void keyDown(cocos2d::enumKeyCodes key) override;
-	void keyUp(cocos2d::enumKeyCodes key) override;
-    void insertText(const char* text, int len) override;
-	void deleteBackward() override;
+    void addTheme();
 
     void newFrame();
     void renderDrawData(ImDrawData*);
 
 public:
-    bool isMenuOpen = false;
-    float g = 0;
-
-    static std::string getRenderPath(bool full);
-    static std::string getSongCmdStr(std::string songOffset, std::string songPath, std::string tempPath, std::string time, std::string path);
-    static cocos2d::enumKeyCodes shortcutKey(int key);
-    float getTimeForXPos(PlayLayer*);
-    void loadShortcuts();
-    void saveShortcuts();
-    void loadMods();
-    void saveMods();
-    void arrangeText(int arrayLength);
-    void openMenu();
-    void closeMenu();
-    void setAnchoredPosition(CCNode* label, int anchorPos);
-    void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
-    cocos2d::_ccColor3B getRainbow(float offset);
-    void applyTheme();
-    static bool getMod(const char* name);
-    static void setMod(const char* name, bool b);
+    bool isRendering = false;
 
     static CrystalClient* get();
 
     void render();
+    void saveToFile();
+    void loadFromFile();
+
+    void firstLoad(CCNode* layer);
+
+    static std::string getRenderPath(bool full);
+    static cocos2d::enumKeyCodes shortcutKey(int key);
+    float getTimeForXPos(PlayLayer*);
+    void arrangeText(int arrayLength, PlayLayer* menulay, bool first);
+    void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
+    void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
+    cocos2d::_ccColor3B getRainbow(float offset);
+    static void getTextPos(CCNode* label, int anchor);
+    void addTransparentBG(CCNode* layer);
+    
+    void initPatches();
+    void refreshPatches();
+
+    Result<geode::Patch *> scaleHack1;
+    Result<geode::Patch *> scaleHack2;
+
+    Result<geode::Patch *> objLimit1;
+    Result<geode::Patch *> objLimit2;
+    Result<geode::Patch *> objLimit3;
+
+    Result<geode::Patch *> customObjLimit1;
+    Result<geode::Patch *> customObjLimit2;
+    Result<geode::Patch *> customObjLimit3;
+
+    bool shouldLoadFont = false;
 
     // setup ImGui
     void setup();

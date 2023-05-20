@@ -1,8 +1,14 @@
+
 #include <imgui_internal.h>
 #include "CrystalClient.hpp"
 #include <Geode/loader/Log.hpp>
+#include <Geode/loader/Mod.hpp>
 #include "ImGui.hpp"
-#include "subprocess.h"
+#include "Includes.hpp"
+#include "json.hpp"
+#include "CrystalProfile.hpp"
+#include "CrystalTheme.hpp"
+#include "Shortcuts.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -11,28 +17,20 @@ CrystalClient* CrystalClient::get() {
 
 void CrystalClient::draw() {
     if (m_visible) {
-        this->applyTheme();
-
         ImGui::PushFont(m_defaultFont);
-        this->drawPages();
+        this->addTheme();
+        this->drawGUI();
         ImGui::PopFont();
     }
 }
 
-void CrystalClient::setupFonts() {
-    static const ImWchar* def_ranges   = ImGui::GetIO().Fonts->GetGlyphRangesDefault();
-    
-    static constexpr auto add_font = [](
-    ) {
-        auto& io = ImGui::GetIO();
-        ImFontConfig config;
-        config.MergeMode = true;
-        auto* result = io.Fonts->AddFontFromFileTTF("geode/unzipped/ninxout.crystalclient/resources/ninxout.crystalclient/Verdana.ttf", 14.0f);
-        io.Fonts->Build();
-        return result;
-    };
-
-    m_defaultFont = add_font();
+void CrystalClient::setupFonts(const char* filepath, float size) {
+    auto& io = ImGui::GetIO();
+    ImFontConfig config;
+    config.MergeMode = true;
+    auto* result = io.Fonts->AddFontFromFileTTF(filepath, size);
+    io.Fonts->Build();
+    m_defaultFont = result;
 }
 
 void CrystalClient::setup() {
@@ -41,17 +39,30 @@ void CrystalClient::setup() {
 
     IMGUI_CHECKVERSION();
     
-    ImGui::CreateContext();
-    
-    auto& io = ImGui::GetIO();
-
-    this->setupFonts();
+    auto ctx = ImGui::CreateContext();
+        
+    this->setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
     this->setupPlatform();
 }
 
 void CrystalClient::show(bool visible) {
-    m_visible = visible;
-    isMenuOpen = visible;
+	m_visible = visible;
+	isRendering = visible;
+}
+
+void CrystalClient::toggle() {
+	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
+    if (!m_visible) {
+		ImGui::LoadIniSettingsFromDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
+		platform->showCursor();
+	}
+    if (m_visible) {
+		ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
+		Crystal::saveMods(Crystal::profile);
+		initPatches();
+        if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
+    }
+    this->show(!m_visible);
 }
 
 void CrystalClient::ImToggleable(const char* str_id, bool* v) {
@@ -112,7 +123,7 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
     //ImGui::SetItemAllowOverlap();
     ImGui::SameLine();
-	ImGui::PushStyleColor(0, *v ? ImVec4(255,255,255,255) : ImVec4(0,0,0,0));
+	ImGui::PushStyleColor(0, *v ? colors[ImGuiCol_Button] : ImVec4(255,255,255,255));
     ImGui::PushStyleColor(21, ImVec4(0,0,0,0));
     if (ImGui::ArrowButton(str_id, 1))
         ImGui::OpenPopup(str_id);
@@ -201,18 +212,135 @@ std::string CrystalClient::getRenderPath(bool full) {
 	return songPath;
 }
 
-std::string CrystalClient::getSongCmdStr(std::string songOffset, std::string songPath, std::string tempPath, std::string time, std::string path) {
-	std::stringstream stream;
-	stream << "ffmpeg";
-	stream << " -y -ss ";
-	stream << songOffset;
-	stream << " -i \"" << songPath << "\"";
-	stream << " -i \"" << tempPath << "\"";
-	stream << " -t " << time;
-	//stream << " -b:a " << audioBitrate << "k"; //bitrate
-	stream << " -c:v copy ";
-	stream << "\"" << path << "\"";
-
-	return stream.str();
+void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first) {
+	auto corner = CCDirector::sharedDirector()->getScreenTop();
+	int anchorY = ((anchorPos - 1) * 15) + 10;
+	label->setPosition(5, corner - anchorY);
+	label->setAnchorPoint({0, 0.5});
+	label->setScale(0.4);
+	label->setOpacity(100);
+	if (first) layer->addChild(label, 1000);
 }
 
+void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+  float fC = fV * fS; // Chroma
+  float fHPrime = fmod(fH / 60.0, 6);
+  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+  float fM = fV - fC;
+  
+  if(0 <= fHPrime && fHPrime < 1) {
+    fR = fC;
+    fG = fX;
+    fB = 0;
+  } else if(1 <= fHPrime && fHPrime < 2) {
+    fR = fX;
+    fG = fC;
+    fB = 0;
+  } else if(2 <= fHPrime && fHPrime < 3) {
+    fR = 0;
+    fG = fC;
+    fB = fX;
+  } else if(3 <= fHPrime && fHPrime < 4) {
+    fR = 0;
+    fG = fX;
+    fB = fC;
+  } else if(4 <= fHPrime && fHPrime < 5) {
+    fR = fX;
+    fG = 0;
+    fB = fC;
+  } else if(5 <= fHPrime && fHPrime < 6) {
+    fR = fC;
+    fG = 0;
+    fB = fX;
+  } else {
+    fR = 0;
+    fG = 0;
+    fB = 0;
+  }
+  
+  fR += fM;
+  fG += fM;
+  fB += fM;
+}
+
+void CrystalClient::addTransparentBG(CCNode* layer) {
+	auto winSize = CCDirector::sharedDirector()->getWinSize();
+        
+	auto bg = CCSprite::create("GJ_gradientBG.png");
+	auto bgSize = bg->getTextureRect().size;
+	bg->setAnchorPoint({ 0.0f, 0.0f });
+	bg->setScaleX((winSize.width + 10.0f) / bgSize.width);
+	bg->setScaleY((winSize.height + 10.0f) / bgSize.height);
+	bg->setPosition({ -5.0f, -5.0f });
+	bg->setColor(ccc3(255, 255, 255));
+	
+	layer->addChild(bg, -2);
+}
+
+void CrystalClient::initPatches() {
+	// scale hack
+	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
+	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+
+	// object limit
+	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
+	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
+	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+
+	// custom object
+	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+}
+
+void CrystalClient::refreshPatches() {
+	/*
+	if (Crystal::profile.scalehack) {
+		scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
+		scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+	} else {
+		Mod::get()->unpatch(scaleHack1);
+		Mod::get()->unpatch(scaleHack2);
+	}
+
+	if (Crystal::profile.objlimit) {
+		objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
+		objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
+		objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+	} else {
+		Mod::get()->unpatch(objLimit1);
+		Mod::get()->unpatch(objLimit2);
+		Mod::get()->unpatch(objLimit3);
+	}
+
+	if (Crystal::profile.customobjlimit) {
+		customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+		customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+		customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+	} else {
+		Mod::get()->unpatch(customObjLimit1);
+		Mod::get()->unpatch(customObjLimit2);
+		Mod::get()->unpatch(customObjLimit3);
+	}
+	*/
+}
+
+void CrystalClient::firstLoad(CCNode* layer) {
+	keybinds.push_back({39, 6});
+	keybinds.push_back({40, 7});
+	if (layer) {
+		auto alert = geode::createQuickPopup(
+			"Hi!",            // title
+			"Thank you for installing Crystal Client. You can open the mod menu by pressing TAB and you can report any bugs or suggestions in my discord server. Enjoy!",   // content
+			"OK", "Join Discord Server",      // buttons
+			[](auto, bool btn2) {
+				if (btn2) {
+					CCApplication::sharedApplication()->openURL("https://discord.gg/xV5dekWHTd");
+				}
+			},
+			false
+		);
+		alert->m_scene = layer;
+		alert->show();
+	}
+}

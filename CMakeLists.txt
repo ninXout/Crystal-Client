@@ -1,18 +1,17 @@
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(CrystalClient VERSION 1.0.0)
 
-set(IMGUI_COCOS_TARGET geode-sdk)
-
-file(GLOB SOURCES
-	src/*.cpp
-    src/*.hpp
+file(GLOB_RECURSE SOURCES
+    src/*.cpp
 )
 
-# Set up the mod binary
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+# This must be precompiled or cocos2d's glew.h takes over
+# target_precompile_headers(${PROJECT_NAME} PUBLIC GLEW/glew.h)
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
@@ -24,12 +23,28 @@ set(GEODE_LINK_NIGHTLY ON)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
 include(cmake/CPM.cmake)
-CPMAddPackage("gh:matcool/gd-imgui-cocos#f8d86e6")
 
-target_link_libraries(CrystalClient imgui-cocos)
+CPMAddPackage("gh:ocornut/imgui#c191faf")
 
-target_link_libraries(CrystalClient "-framework OpenGL")
+target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR})
+
+target_sources(${PROJECT_NAME} PRIVATE
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+)
+
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/glew32.lib)
+elseif(APPLE)
+    target_link_libraries(${PROJECT_NAME} "-framework OpenGL -framework Cocoa")
+elseif(ANDROID)
+    target_link_libraries(${PROJECT_NAME} GLESv2)
+endif()
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
-
+target_link_libraries(${PROJECT_NAME} libfmod.dylib)
 create_geode_file(${PROJECT_NAME})
