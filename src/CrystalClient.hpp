@@ -35,17 +35,33 @@ public:
     void saveToFile();
     void loadFromFile();
 
+    void firstLoad(CCNode* layer);
+
     static std::string getRenderPath(bool full);
     static cocos2d::enumKeyCodes shortcutKey(int key);
     float getTimeForXPos(PlayLayer*);
-    void arrangeText(int arrayLength, PlayLayer* menulay);
-    void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer);
+    void arrangeText(int arrayLength, PlayLayer* menulay, bool first);
+    void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     static void getTextPos(CCNode* label, int anchor);
     void addTransparentBG(CCNode* layer);
     
     void initPatches();
+    void refreshPatches();
+
+    Result<geode::Patch *> scaleHack1;
+    Result<geode::Patch *> scaleHack2;
+
+    Result<geode::Patch *> objLimit1;
+    Result<geode::Patch *> objLimit2;
+    Result<geode::Patch *> objLimit3;
+
+    Result<geode::Patch *> customObjLimit1;
+    Result<geode::Patch *> customObjLimit2;
+    Result<geode::Patch *> customObjLimit3;
+
+    bool shouldLoadFont = false;
 
     // setup ImGui
     void setup();

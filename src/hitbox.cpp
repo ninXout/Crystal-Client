@@ -34,11 +34,12 @@ void HitboxNode::drawCircleHitbox(CCPoint const& center, float radius, ccColor4B
 void HitboxNode::drawPolygonHitbox(std::vector<CCPoint> const& points, ccColor4B col) {
 	auto color1 = ccc4FFromccc4B(col);
 	cocos2d::_ccColor4F colorA;
-	if (Crystal::profile.fillHitbox) {
-		colorA = ccc4FFromccc4B(ccc4(col.r, col.g, col.b, Crystal::profile.fillOpacity));
-	} else {
-		colorA = ccc4FFromccc4B(ccc4(0, 0, 0, 0));
-	}
+	//if (Crystal::profile.fillHitbox) {
+		//colorA = ccc4FFromccc4B(ccc4(col.r, col.g, col.b, Crystal::profile.fillOpacity));
+	//} else {
+		//colorA = ccc4FFromccc4B(ccc4(0, 0, 0, 0));
+	//}
+	colorA = ccc4FFromccc4B(ccc4(0, 0, 0, 0));
 
 	this->drawPolygon(const_cast<CCPoint*>(points.data()), points.size(), colorA, m_thickness, color1);
 }

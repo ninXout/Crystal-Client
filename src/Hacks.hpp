@@ -97,7 +97,6 @@ void fps_shower_init();
     float DTime;
     std::vector<AmethystReplay::AmethystFrame> stepData;
 
-
     inline int g_frameCount;
     inline double g_speedMod = 1.0;
 
@@ -129,6 +128,11 @@ void fps_shower_init();
     float fps_left_over = 0.f;
     float t_left_over = 0.f;
 
+    double m_resetInterval;
+	std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
+    float frame_time_sum = 0.f;
+    int frame_count = 0;
+
     // Display
     bool attempts;
     CCLabelBMFont* g_atts;
@@ -155,6 +159,7 @@ void fps_shower_init();
     CCLabelBMFont* g_message;
     CCLabelBMFont* g_macro;
     CCLabelBMFont* g_clock;
+    CCLabelBMFont* g_fps;
 
     CCSprite* rightButton;
     CCSprite* leftButton;

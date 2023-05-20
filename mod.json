@@ -1,13 +1,14 @@
 {
 	"geode": "1.0.0",
-	"version": "v3.0.0-beta.1",
+	"version": "v3.0.0",
 	"id": "ninxout.crystalclient",
 	"name": "Crystal Client",
 	"developer": "ninXout and Nosu",
 	"description": "Premium Cross-Platform Modded Client",
 	"resources": {
         "files": [
-            "resources/Lexend.ttf"
+            "resources/Lexend.ttf",
+			"resources/ffmpeg"
         ]
     }
 }

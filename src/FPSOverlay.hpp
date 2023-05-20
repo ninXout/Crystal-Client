@@ -8,10 +8,8 @@ class FPSOverlay : public cocos2d::CCNode {
     cocos2d::extension::CCScale9Sprite* m_backdrop;
     int m_frames;
     double m_accumulate;
-    double m_resetInterval;
-	std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
-    float frame_time_sum = 0.f;
-    int frame_count = 0;
+    
+    
 
  public:
     static FPSOverlay* sharedState() {
@@ -61,21 +59,6 @@ class FPSOverlay : public cocos2d::CCNode {
     }
 
     void updateLabel(float dt) {
-		const auto now = std::chrono::high_resolution_clock::now();
-
-		const std::chrono::duration<float> diff = now - previous_frame;
-		frame_time_sum += diff.count();
-		frame_count++;
-
-		if (std::chrono::duration<float>(now - last_update).count() > 1.0f) {
-			last_update = now;
-			const auto fps = static_cast<int>(std::roundf(static_cast<float>(frame_count) / frame_time_sum));
-			frame_time_sum = 0.f;
-			frame_count = 0;
-			m_label->setString((std::to_string(fps) + " FPS").c_str());
-            m_backdrop->setContentSize(getBackdropSize());
-		}
-
-		previous_frame = now;
+		
     }
 };

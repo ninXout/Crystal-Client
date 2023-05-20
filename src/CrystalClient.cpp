@@ -8,6 +8,7 @@
 #include "json.hpp"
 #include "CrystalProfile.hpp"
 #include "CrystalTheme.hpp"
+#include "Shortcuts.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -40,7 +41,7 @@ void CrystalClient::setup() {
     
     auto ctx = ImGui::CreateContext();
         
-    this->setupFonts("geode/unzipped/ninxout.crystalclient/resources/ninxout.crystalclient/Lexend.ttf", 14.0f);
+    this->setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
     this->setupPlatform();
 }
 
@@ -52,12 +53,12 @@ void CrystalClient::show(bool visible) {
 void CrystalClient::toggle() {
 	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
     if (!m_visible) {
+		ImGui::LoadIniSettingsFromDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		platform->showCursor();
 	}
     if (m_visible) {
+		ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		Crystal::saveMods(Crystal::profile);
-		Crystal::saveTheme(theme, "GH_theme.json");
-		saveKeybinds();
 		initPatches();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
@@ -122,7 +123,7 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
     //ImGui::SetItemAllowOverlap();
     ImGui::SameLine();
-	ImGui::PushStyleColor(0, *v ? ImVec4(255,255,255,255) : ImVec4(0,0,0,0));
+	ImGui::PushStyleColor(0, *v ? colors[ImGuiCol_Button] : ImVec4(255,255,255,255));
     ImGui::PushStyleColor(21, ImVec4(0,0,0,0));
     if (ImGui::ArrowButton(str_id, 1))
         ImGui::OpenPopup(str_id);
@@ -211,14 +212,14 @@ std::string CrystalClient::getRenderPath(bool full) {
 	return songPath;
 }
 
-void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer) {
+void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
 	label->setPosition(5, corner - anchorY);
 	label->setAnchorPoint({0, 0.5});
 	label->setScale(0.4);
 	label->setOpacity(100);
-	layer->addChild(label, 1000);
+	if (first) layer->addChild(label, 1000);
 }
 
 void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
@@ -277,41 +278,69 @@ void CrystalClient::addTransparentBG(CCNode* layer) {
 }
 
 void CrystalClient::initPatches() {
-	// Patches
-    /*std::vector<std::vector<const char*>> objLimit; = {{'\x7c'}, {'\xeb'}};
-    std::vector<std::vector<const char*>> scaleHack = {{'\x7c'}, {'\xeb'}};
-    std::vector<std::vector<const char*>> customObjLimit1 = {{'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}}; //0x1d67c
-    std::vector<std::vector<const char*>> customObjLimit2 = {{'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}, {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}}; //0x1d869
-    std::vector<std::vector<const char*>> customObjLimit3 = {{'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}, {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}}; //0x1d72d
-	*/
-
 	// scale hack
+	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
+	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+
+	// object limit
+	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
+	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
+	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+
+	// custom object
+	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+}
+
+void CrystalClient::refreshPatches() {
+	/*
 	if (Crystal::profile.scalehack) {
-		auto res1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
-		auto res2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+		scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
+		scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
 	} else {
-		auto res1_2= Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\x7c'});
-		auto res2_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\x7c'});
+		Mod::get()->unpatch(scaleHack1);
+		Mod::get()->unpatch(scaleHack2);
 	}
 
 	if (Crystal::profile.objlimit) {
-		auto res5 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
-		auto res6 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
-		auto res7 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+		objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
+		objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
+		objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
 	} else {
-		auto res5_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\x7c'});
-		auto res6_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\x7c'});
-		auto res7_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\x7c'});
+		Mod::get()->unpatch(objLimit1);
+		Mod::get()->unpatch(objLimit2);
+		Mod::get()->unpatch(objLimit3);
 	}
 
-	// custom object
 	if (Crystal::profile.customobjlimit) {
-		auto res3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
-		auto res4 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
-		auto res8 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+		customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
+		customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
+		customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
 	} else {
-		auto res3_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
-		auto res4_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
-		auto res8_2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});	
+		Mod::get()->unpatch(customObjLimit1);
+		Mod::get()->unpatch(customObjLimit2);
+		Mod::get()->unpatch(customObjLimit3);
+	}
+	*/
+}
+
+void CrystalClient::firstLoad(CCNode* layer) {
+	keybinds.push_back({39, 6});
+	keybinds.push_back({40, 7});
+	if (layer) {
+		auto alert = geode::createQuickPopup(
+			"Hi!",            // title
+			"Thank you for installing Crystal Client. You can open the mod menu by pressing TAB and you can report any bugs or suggestions in my discord server. Enjoy!",   // content
+			"OK", "Join Discord Server",      // buttons
+			[](auto, bool btn2) {
+				if (btn2) {
+					CCApplication::sharedApplication()->openURL("https://discord.gg/xV5dekWHTd");
+				}
+			},
+			false
+		);
+		alert->m_scene = layer;
+		alert->show();
 	}
 }
