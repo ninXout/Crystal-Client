@@ -60,6 +60,8 @@ void CrystalClient::toggle() {
 		ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		Crystal::saveMods(Crystal::profile);
 		initPatches();
+		//if (!Crystal::profile.speedhack) Crystal::profile.speed = 1;
+		//CCDirector::sharedDirector()->getScheduler()->setTimeScale(Crystal::profile.speed);
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
     this->show(!m_visible);
@@ -281,6 +283,7 @@ void CrystalClient::initPatches() {
 	// scale hack
 	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
 	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+	//auto respawn = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x072419), {'\x00'});
 
 	// object limit
 	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});

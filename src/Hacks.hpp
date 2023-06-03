@@ -107,6 +107,7 @@ void fps_shower_init();
     static int currentMacroType = 0;
     double renderTime;
     int timeRate;
+    int lastMacroTime;
 
     auto macros = Mod::get()->getConfigDir().append("Amethyst").append("Macros");
     auto cb = Mod::get()->getConfigDir().append("Amethyst").append("ClickBot");
@@ -140,8 +141,6 @@ void fps_shower_init();
     int clickscount;
     int releasecount;
 
-    CCLabelBMFont* g_run;
-    CCLabelBMFont* g_bestRun;
     bool currentRun;
     bool bestRun;
     int bestEnd;
@@ -157,6 +156,8 @@ void fps_shower_init();
     CCLabelBMFont* g_tatts;
     CCLabelBMFont* g_death;
     CCLabelBMFont* g_message;
+    CCLabelBMFont* g_run;
+    CCLabelBMFont* g_bestRun;
     CCLabelBMFont* g_macro;
     CCLabelBMFont* g_clock;
     CCLabelBMFont* g_fps;

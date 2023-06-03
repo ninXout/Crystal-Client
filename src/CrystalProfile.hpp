@@ -10,6 +10,14 @@
 
 using json2 = nlohmann::json;
 
+enum LabelPos
+{
+	TR,
+	TL,
+	BR,
+	BL
+};
+
 struct CrystalProfile {
     bool noclip = false;
     bool noclipP1 = false;
@@ -23,6 +31,10 @@ struct CrystalProfile {
     bool instantdeath = false;
     bool autoreset = false;
     float autoresetnum = 0;
+    bool hitboxMultiply = false;
+    float multiplySolids = 1;
+    float multiplyHazards = 1;
+    float multiplySpecial = 1;
     bool respawnfix = false;
     bool practiceorbfix = false;
     bool nopulse = false;
@@ -38,6 +50,8 @@ struct CrystalProfile {
     bool rainbowP1wave = false;
     bool rainbowP2wave = false;
     float rainbowspeed = 0;
+    bool rainbowGlowP1 = false;
+    bool rainbowGlowP2 = false;
     bool samedual = false;
 
     bool hitboxes = false;
@@ -103,24 +117,31 @@ struct CrystalProfile {
     bool clock = false;
     bool igt = false;
 
-    int POStestmode = 0;
-    int POScustomMessage = 0;
-    int POSfps = 0;
-    int POScps = 0;
-    int POSjumps = 0;
-    int POScheatIndicate = 0;
-    int POSlastDeath = 0;
-    int POSattempts = 0;
-    int POSbestRun = 0;
-    int POSrunFrom = 0;
-    int POSnoclipAcc = 0;
-    int POSnoclipDeath = 0;
-    int POStotalAtt = 0;
-    int POSlvlData = 0;
-    int POSmacroStatus = 0;
-    int POSpauseCountdown = 0;
-    int POSclock = 0;
-    int POSigt = 0;
+    bool displays[14];
+    CCLabelBMFont* displayNodes[14];
+    LabelPos displayPositions[14] = {TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL};
+    const char* displayOptions[4] = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"};
+    float displaySpace = 15.0f;
+    float displayScale = 20.0f;
+    float displayOpacity = 50.0f;
+
+    /*
+    customMessage
+    fps
+    cps
+    jumps
+    cheatIndicate
+    lastDeath
+    attempts
+    bestRun
+    runFrom
+    noclipAcc
+    noclipDeath
+    totalAtt
+    lvlData
+    macroStatus
+    clock
+    */
 
     bool safeMode = false;
     bool autoSafeMode = false;
@@ -140,6 +161,10 @@ struct CrystalProfile {
     bool clickBot = false;
     float CBvolume = 100;
     char macroname[64];
+    bool macroBuffer = false;
+    std::vector<cocos2d::CCRect> regularPath;
+    std::vector<cocos2d::CCRect> clicksPath;
+    std::vector<cocos2d::CCRect> releasesPath;
 
     float rDir = -0.05;
     float gDir = 0.05;
