@@ -6,6 +6,8 @@
 #include "ImGui.hpp"
 #include "Includes.hpp"
 #include "Hacks.hpp"
+#include "Renderer.hpp"
+#include "subprocess.hpp"
 
 using namespace geode::prelude;
 
@@ -469,6 +471,11 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Include Sound", &profile.includeAudio);
 	ImGui::InputTextWithHint("Video Name", "Video Name", profile.rendername, IM_ARRAYSIZE(profile.rendername));
 	ImGui::End();
+	ImGui::Begin("Plugins", NULL, window_flags);
+	for (int p = 0; p < pluginBools.size(); p++) {
+		CrystalClient::ImToggleable(plugins[p], pluginBools[p]);
+	}
+	ImGui::End();
 }
 
 void CrystalClient::addTheme() {
@@ -521,32 +528,6 @@ void CrystalClient::addTheme() {
     colours[ImGuiCol_SliderGrab] = CrystalProfile::RGBAtoIV4(profile.LightColour);
     colours[ImGuiCol_SliderGrabActive] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
     colours[ImGuiCol_CheckMark] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
-}
-
-void CrystalClient::getTextPos(CCNode* label, int anchor) {
-	auto win_size = CCDirector::sharedDirector()->getWinSize();
-	// tl, tr, bl, br
-	if (anchor == 1) {
-		nextTL++;
-		label->setPositionX(0.f);
-		label->setAnchorPoint(ccp(0.f, 1.f));
-		label->setPositionY(win_size.height - (2.f * nextTL));
-	} else if (anchor == 2) {
-		nextTR++;
-		label->setPositionX(win_size.width);
-		label->setAnchorPoint(ccp(0.f, 1.f));
-		label->setPositionY(win_size.height - (2.f * nextTR));
-	} else if (anchor == 3) {
-		nextBL++;
-		label->setPositionX(0.f);
-		label->setAnchorPoint(ccp(0.f, 0.f));
-		label->setPositionY(4.f * nextBL);
-	} else {
-		nextBR++;
-		label->setPositionX(win_size.width);
-		label->setAnchorPoint(ccp(0.f, 0.f));
-		label->setPositionY(4.f * nextBR);
-	}
 }
 
 cocos2d::_ccColor3B CrystalClient::getRainbow(float offset) {
@@ -685,6 +666,16 @@ class $modify(CCKeyboardDispatcher) {
 
 $execute {
 	CrystalClient::get()->initPatches();
+
+	new EventListener(+[](const char* pluginName) {
+        CrystalClient::get()->plugins.push_back(pluginName);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<const char*>("ninxout.crystalclient/addPluginName"));
+
+	new EventListener(+[](bool* theAction) {
+        CrystalClient::get()->pluginBools.push_back(theAction);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<bool*>("ninxout.crystalclient/addPluginBool"));
 }
 
 class $modify(CCDirector) {
@@ -875,6 +866,40 @@ class $modify(EditorUI) {
 				}
 			}
 		} 
+	}
+
+	void moveObject(GameObject* obj, cocos2d::CCPoint pos) {
+		EditorUI::moveObject(obj, pos);
+		if (s_drawer) {
+			s_drawer->clear();
+			for (int s = 0; s < profile.regularPath.size(); s++) {
+				s_drawer->addToPlayer1Queue(profile.regularPath[s]);
+			}
+			if (GJBaseGameLayer::get()->m_player1) {
+				s_drawer->drawForPlayer1(GJBaseGameLayer::get()->m_player1);
+			}
+			if (GJBaseGameLayer::get()->m_player2) {
+				s_drawer->drawForPlayer2(GJBaseGameLayer::get()->m_player2);
+			}
+
+			float xp = GJBaseGameLayer::get()->m_player1->getPositionX();
+
+			for (int s = pos.x - 5; s < pos.x + 6; ++s) {
+				if (s < 0) continue;
+				if (s >= GJBaseGameLayer::get()->m_sectionObjects->count()) break;
+				auto section = static_cast<CCArray*>(GJBaseGameLayer::get()->m_sectionObjects->objectAtIndex(s));
+				for (size_t i = 0; i < section->count(); ++i) {
+					auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
+
+					if (s_onlyHitboxes) obj->setOpacity(0);
+
+					if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
+					if (!obj->m_active) continue;
+
+					s_drawer->drawForObject(obj);
+				}
+			}
+		}
 	}
 
 	void scrollWheel(float y, float x) {
@@ -1607,6 +1632,8 @@ class $modify(Main, PlayLayer) {
 
 		CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, img->getData(), dataLen, NULL);
 
+		//process.send(img->getData(), dataLen);
+		//process.wait();
 
 		return CGImageCreate(
 			width, height, 
@@ -1901,7 +1928,8 @@ class $modify(Main, PlayLayer) {
 			}
 			//PlayLayer::update(f4);
 			if (profile.renderer && lastTime != (int)(m_time * 60)) {
-				captureScreen();
+				//captureScreen();
+				Renderer::updateRenderer();
 				lastTime = (int)(m_time * 60);
 			}
 		}
@@ -1995,18 +2023,6 @@ class $modify(Main, PlayLayer) {
 	}
 
     void startMusic() {
-		CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
-		CGEventRef saveCommandDown = CGEventCreateKeyboardEvent(source, (CGKeyCode)0x02, true);
-		CGEventSetFlags(saveCommandDown, kCGEventFlagMaskCommand);
-		CGEventSetFlags(saveCommandDown, kCGEventFlagMaskShift);
-		CGEventRef saveCommandUp = CGEventCreateKeyboardEvent(source, (CGKeyCode)0x02, false);
-
-		CGEventPost(kCGAnnotatedSessionEventTap, saveCommandDown);
-		CGEventPost(kCGAnnotatedSessionEventTap, saveCommandUp);
-
-		CFRelease(saveCommandUp);
-		CFRelease(saveCommandDown);
-		CFRelease(source);
 		if (Crystal::profile.pracmusic) {
 			auto p = m_isPracticeMode;
 			m_isPracticeMode = false; // pretend there is no practice mode
@@ -2015,14 +2031,6 @@ class $modify(Main, PlayLayer) {
 		} else {
 			PlayLayer::startMusic();
 		}
-	}
-
-	std::string getOffsetTime(float time) {
-		std::stringstream ret;
-		ret << "00:";
-		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time / 60)) << ":";
-		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time) % 60);
-		return ret.str();
 	}
 
 	std::string exec(std::string command) {
@@ -2054,12 +2062,25 @@ class $modify(Main, PlayLayer) {
 		std::string basicNAME = (std::string)renderer + "/new.mp4";
 		if (profile.renderer) {
 			std::stringstream rendercmd;
-			rendercmd << "cd \"" + std::string(Mod::get()->getResourcesDir()) + "\" && ./ffmpeg -framerate 60 -y -i \"" + (std::string)framesFol + "/frame_%4d.png\"";
-			if (profile.includeAudio) rendercmd << " -ss " + getOffsetTime(PlayLayer::get()->m_levelSettings->m_songOffset) + " -i " + (std::string)PlayLayer::get()->m_level->getAudioFileName();
-			rendercmd << " -t " + std::to_string(PlayLayer::get()->m_time) + " -pix_fmt yuv420p -vb 20M -c:v libx264 \"" + (std::string)renderer + "/" + (std::string)profile.rendername + ".mp4\"";
-			std::string fullcmd = "osascript -e 'tell app \"Terminal\" to do script \"" + rendercmd.str() + "\"'";
-			auto renderprocess = system(fullcmd.c_str());
-			//renderprocess = exec(rendercmd);
+			rendercmd << "cd \"" + std::string(Mod::get()->getResourcesDir()) + "\" && ./ffmpeg -framerate 60 -y -f rawvideo -i -";
+			//if (profile.includeAudio) rendercmd << " -ss " + getOffsetTime(PlayLayer::get()->m_levelSettings->m_songOffset) + " -i " + (std::string)PlayLayer::get()->m_level->getAudioFileName();
+			rendercmd << " -t " + std::to_string(PlayLayer::get()->m_time) + " -pix_fmt rgba -vb 20M -c:v libx264 \"" + (std::string)renderer + "/" + (std::string)profile.rendername + ".mp4\"";
+			//std::string fullcmd = "osascript -e 'tell app \"Terminal\" to do script \"" + rendercmd.str() + "\"'";
+			//auto renderprocess = system(fullcmd.c_str());
+			AchievementNotifier::sharedState()->notifyAchievement(
+                "Crystal Internal Renderer",
+                "Rendering Video... Please wait, this may take a while.",
+                nullptr,
+                false
+            );
+			//auto renderprocess = exec(rendercmd.str());
+			//std::string finalMessage = "Finished Rendering " + (const char*)profile.rendername + ".mp4";
+			AchievementNotifier::sharedState()->notifyAchievement(
+                "Crystal Internal Renderer",
+                "Finished Rendering!",
+                nullptr,
+                false
+            );
 		}
 		coins.clear();
 		if (!shouldQuit && Crystal::profile.confirmQuit && !m_hasLevelCompleteMenu) {
@@ -2105,7 +2126,15 @@ class $modify(Main, PlayLayer) {
 	}
 
     static inline tulip::HitboxNode* drawer;
-
+/*
+	void startThread() {
+		std::stringstream rendercmd;
+		rendercmd << "cd \"" + std::string(Mod::get()->getResourcesDir()) + "\" && ./ffmpeg -framerate 60 -y -f rawvideo -i -";
+		if (profile.includeAudio) rendercmd << " -ss " + getOffsetTime(PlayLayer::get()->m_levelSettings->m_songOffset) + " -i " + songPath;
+		rendercmd << " -t " + std::to_string(PlayLayer::get()->m_time) + " -pix_fmt rgba -vb 20M -c:v libx264 \"" + (std::string)renderer + "/" + (std::string)profile.rendername + ".mp4\"";
+		if (profile.renderer) process = Popen(rendercmd.str().c_str(), input{PIPE}, output{PIPE});
+	}
+*/
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
@@ -2145,6 +2174,9 @@ class $modify(Main, PlayLayer) {
 		}
 
 		PlayLayer::init(gl);
+
+		Renderer::beginRender();
+		//std::thread idk(&startThread, this).detach();
 
 		for (int d = 0; d < 13; d++) {
 			profile.displayNodes[d]->setVisible(profile.displays[d]);

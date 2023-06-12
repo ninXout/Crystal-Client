@@ -4,6 +4,7 @@
 #include <cocos2d.h>
 #include <Geode/utils/cocos.hpp>
 #include <unordered_map>
+#include <dispatch/dispatch.h>
 
 using namespace geode::prelude;
 
@@ -44,7 +45,6 @@ public:
     void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
-    static void getTextPos(CCNode* label, int anchor);
     void addTransparentBG(CCNode* layer);
     
     void initPatches();
@@ -62,6 +62,9 @@ public:
     Result<geode::Patch *> customObjLimit3;
 
     bool shouldLoadFont = false;
+
+    std::vector<const char*> plugins;
+    std::vector<bool*> pluginBools;
 
     // setup ImGui
     void setup();

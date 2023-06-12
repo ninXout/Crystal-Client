@@ -1,5 +1,6 @@
 #include "Includes.hpp"
 #include <streambuf>
+#include "subprocess.hpp"
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
@@ -97,12 +98,6 @@ void fps_shower_init();
     float DTime;
     std::vector<AmethystReplay::AmethystFrame> stepData;
 
-    inline int g_frameCount;
-    inline double g_speedMod = 1.0;
-
-    inline std::vector<std::function<void()>> g_updates;
-    void newFPSTimer();
-
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
     double renderTime;
@@ -114,6 +109,8 @@ void fps_shower_init();
     auto framesFol = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").append("Frames");
     auto renderer = Mod::get()->getConfigDir().append("Amethyst").append("Renderer");
     auto conf = Mod::get()->getConfigDir().append("Config");
+
+    //subprocess::Popen process;
 
     // Auto-Deafen
     bool notDeafened = true;
