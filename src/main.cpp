@@ -6,6 +6,7 @@
 #include "ImGui.hpp"
 #include "Includes.hpp"
 #include "Hacks.hpp"
+#include <random>
 
 using namespace geode::prelude;
 
@@ -121,6 +122,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Ignore ESC", &Crystal::profile.ignoreESC);
 	CrystalClient::ImToggleable("Confirm Quit", &Crystal::profile.confirmQuit);
 	CrystalClient::ImToggleable("Auto LDM", &Crystal::profile.autoldm);
+	CrystalClient::ImToggleable("Auto Song Downloader", &Crystal::profile.autoSong);
 	CrystalClient::ImToggleable("Flipped Dual Controls", &Crystal::profile.flippedcontrol);
 	CrystalClient::ImToggleable("Mirrored Dual Controls", &Crystal::profile.mirrorcontrol);
 	CrystalClient::ImToggleable("Start Pos Switcher", &Crystal::profile.startpos);
@@ -292,6 +294,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Verify Bypass", &profile.verify);
 	CrystalClient::ImToggleable("Copy Bypass", &profile.copy);
 	CrystalClient::ImToggleable("Editor Zoom Bypass", &profile.editorZoom);
+	CrystalClient::ImToggleable("Level Edit Bypass", &profile.levelEdit);
 	CrystalClient::ImToggleable("Load Failed Bypass", &profile.loadfail);
     ImGui::End();
     ImGui::Begin("Global", NULL, window_flags);
@@ -322,6 +325,8 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImToggleable("Lock Cursor", &profile.lockCursor);
 	CrystalClient::ImToggleable("Transparent BG", &profile.transparentBG);
+	CrystalClient::ImToggleable("Demon List Button", &profile.buttonDL);
+	CrystalClient::ImToggleable("Challenge List Button", &profile.buttonCL);
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
     CrystalClient::ImToggleable("Record", &profile.record);
@@ -715,6 +720,9 @@ class $modify(MenuLayer) {
 		std::string renderInit = "chmod +x " + std::string(Mod::get()->getResourcesDir() / "ffmpeg");
 		system(renderInit.c_str());
 		profile = Crystal::loadMods(this);
+
+		ben = 0;
+
 		return true;
 	}
 };
@@ -952,7 +960,9 @@ class $modify(EditLevelLayer) {
 	bool init(GJGameLevel* ed) {
         EditLevelLayer::init(ed);
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+
+		ben = 1;
 
         return true;
     }
@@ -1082,7 +1092,7 @@ class $(MyGameObject, GameObject) {
 
 class $modify(LevelTools) {
 	static bool verifyLevelIntegrity(gd::string mg, int de) {
-		if (profile.loadfail) return true;
+		if (profile.loadfail || profile.levelEdit) return true;
 		return LevelTools::verifyLevelIntegrity(mg, de);
 	}
 };
@@ -1205,7 +1215,9 @@ class $modify(LevelInfoLayer) {
 	bool init(GJGameLevel* level) {
         LevelInfoLayer::init(level);
         
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+
+		ben = 0;
 
         return true;
  
@@ -1216,6 +1228,16 @@ class $modify(PauseLayer) {
 	static PauseLayer* create(bool isPaused) {
 		auto pause = PauseLayer::create(isPaused);
 		if (profile.hidepause) pause->setVisible(false);
+		if (ben != 1 && Crystal::profile.levelEdit) {
+			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
+			auto menu = CCMenu::create();
+			auto editorClick = CCMenuItemSpriteExtra::create(editorSprite, pause, menu_selector(PauseLayer::goEdit));
+				menu->addChild(editorClick);
+				menu->setPosition({22.750f, 92.5f});
+				menu->setScale(0.768f);
+				menu->setAnchorPoint({0.5f, 0.5f});
+			pause->addChild(menu, 0);
+		}
 		return pause;
 	}
 
@@ -1715,7 +1737,7 @@ class $modify(Main, PlayLayer) {
 		auto point = CGEventGetLocation(ourEvent);
 		CFRelease(ourEvent);
 
-		if (!CrystalClient::get()->isRendering && profile.lockCursor && !m_hasCompletedLevel) CGWarpMouseCursorPosition(point);
+		if (!CrystalClient::get()->isRendering && Crystal::profile.lockCursor && !m_hasCompletedLevel) CGWarpMouseCursorPosition(point);
 
 		frames += f4;
 
@@ -2367,7 +2389,7 @@ class $modify(CreatorLayer) {
 	virtual bool init() {
         CreatorLayer::init();
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
 
         return true;
     }
@@ -2377,7 +2399,7 @@ class $modify(LeaderboardsLayer) {
     bool init(LeaderboardState state) {
         LeaderboardsLayer::init(state);
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
 
         return true;
     }
@@ -2387,7 +2409,7 @@ class $modify(LocalLevelManager) {
 	bool init() {
 		LocalLevelManager::init();
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
 
         return true;
     }
@@ -2397,81 +2419,92 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 	bool init() {
 		LevelSearchLayer::init();
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
 
-		auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
-			return strncmp(lbl->getString(), "Trending", 8) == 0;
-		})->getParent()->getParent()->getParent();
+		if (Crystal::profile.buttonDL || Crystal::profile.buttonCL) {
+			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
+				return strncmp(thing->getString(), "Filters", 7) == 0;
+			})->removeFromParentAndCleanup(true);
 
-		auto bg = findFirstChildRecursive<CCNode>(this, [](CCNode* n) {
-			return n->getContentSize().height == 115.0f;
-		});
+			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
+				return strncmp(thing->getString(), "Quick Search", 12) == 0;
+			})->removeFromParentAndCleanup(true);
 
-		findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-			return strncmp(thing->getString(), "Filters", 7) == 0;
-		})->removeFromParentAndCleanup(true);
+			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
+				return strncmp(lbl->getString(), "Trending", 8) == 0;
+			})->getParent()->getParent()->getParent();
 
-		findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-			return strncmp(thing->getString(), "Quick Search", 12) == 0;
-		})->removeFromParentAndCleanup(true);
+			auto mpos = menu->getPosition();
+			menu->setPositionY(mpos.y - 17.5);
+		}
 
-		auto mpos = menu->getPosition();
-		auto bsize = bg->getContentSize();
+		if (Crystal::profile.buttonDL) {
+			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
+				return strncmp(lbl->getString(), "Trending", 8) == 0;
+			})->getParent()->getParent()->getParent();
 
-		bg->setContentSize(CCSize(bsize.width, bsize.height + 35.0));
-		menu->setPositionY(mpos.y - 17.5);
+			auto button_sprite = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
 
-		auto button_sprite = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
-		auto button_sprite2 = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
+			auto demon_button = CCMenuItemSpriteExtra::create(button_sprite, this, menu_selector(ModifiedSearchLayer::onDemonList));
+			auto demon_label = CCLabelBMFont::create("Demon List", "bigFont.fnt");
+			auto demon_icon = CCSprite::createWithSpriteFrameName("rankIcon_all_001.png");
 
-		auto demon_button = CCMenuItemSpriteExtra::create(button_sprite, this, menu_selector(ModifiedSearchLayer::onDemonList));
-		auto demon_label = CCLabelBMFont::create("Demon List", "bigFont.fnt");
-		auto demon_icon = CCSprite::createWithSpriteFrameName("rankIcon_all_001.png");
+			demon_button->addChild(demon_label);
+			demon_button->addChild(demon_icon);
 
-		demon_button->addChild(demon_label);
-		demon_button->addChild(demon_icon);
+			demon_label->setScale(0.55);
+			demon_label->setPosition(ccp(70, 17));
+			demon_icon->setPosition(ccp(140, 16));
+			demon_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(0))->getPosition() + ccp(0, 35));
 
-		demon_label->setScale(0.55);
-		demon_label->setPosition(ccp(70, 17));
-		demon_icon->setPosition(ccp(140, 16));
-		demon_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(0))->getPosition() + ccp(0, 35));
+			menu->addChild(demon_button);
+		} 
+		
+		if (Crystal::profile.buttonCL) {
+			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
+				return strncmp(lbl->getString(), "Trending", 8) == 0;
+			})->getParent()->getParent()->getParent();
 
+			auto button_sprite2 = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
+			
+			auto challenge_button = CCMenuItemSpriteExtra::create(button_sprite2, this, menu_selector(ModifiedSearchLayer::onChallengeList));
+			auto challenge_label = CCLabelBMFont::create("Challenge List", "bigFont.fnt");
+			auto challenge_icon = CCSprite::createWithSpriteFrameName("rankIcon_top100_001.png");
 
-		auto challenge_button = CCMenuItemSpriteExtra::create(button_sprite2, this, menu_selector(ModifiedSearchLayer::onChallengeList));
-		auto challenge_label = CCLabelBMFont::create("Challenge List", "bigFont.fnt");
-		auto challenge_icon = CCSprite::createWithSpriteFrameName("rankIcon_top100_001.png");
+			challenge_button->addChild(challenge_label);
+			challenge_button->addChild(challenge_icon);
 
-		challenge_button->addChild(challenge_label);
-		challenge_button->addChild(challenge_icon);
+			challenge_label->setScale(0.45);
+			challenge_label->setPosition(ccp(70, 17));
+			challenge_icon->setPosition(ccp(145, 16));
+			challenge_icon->setScale(0.8);
+			challenge_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(1))->getPosition() + ccp(0, 35));
 
-		challenge_label->setScale(0.45);
-		challenge_label->setPosition(ccp(70, 17));
-		challenge_icon->setPosition(ccp(145, 16));
-		challenge_icon->setScale(0.8);
-		challenge_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(1))->getPosition() + ccp(0, 35));
-
-		menu->addChild(demon_button);
-		menu->addChild(challenge_button);
-
-        return true;
-    }
+			menu->addChild(challenge_button);
+		}
+		return true;
+	}
 
 	void onDemonList(CCObject*) {
-		m_searchInput->onClickTrackNode(false);
-		auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3141), ""));
+		if (Crystal::profile.buttonDL) {
+			m_searchInput->onClickTrackNode(false);
+			auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3141), ""));
 
-		auto s = CCScene::create();
-		s->addChild(p);
-		CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
+			auto s = CCScene::create();
+			s->addChild(p);
+			CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
+		}
 	}
 
 	void onChallengeList(CCObject*) {
-		m_searchInput->onClickTrackNode(false);
-		auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3142), ""));
+		if (Crystal::profile.buttonCL) {
+			m_searchInput->onClickTrackNode(false);
+			auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3142), ""));
 
-		auto s = CCScene::create();
-		s->addChild(p);
-		CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
+			auto s = CCScene::create();
+			s->addChild(p);
+			CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
+		}
 	}
 };
 
@@ -2482,9 +2515,9 @@ class $(GameLevelManager) {
 
 		if (url == "http://www.boomlings.com/database/getGJLevels21.php") {
 			auto thing = atoi(query.substr(query.find("page=") + 5).c_str());
-			if (query.find("type=3141") != std::string::npos) {
+			if (query.find("type=3141") != std::string::npos && Crystal::profile.buttonDL) {
 				url = std::string("http://absolllute.com/api/mega_hack/demonlist/page") + std::to_string(thing) + ".txt";
-			} else if (query.find("type=3142") != std::string::npos) {
+			} else if (query.find("type=3142") != std::string::npos && Crystal::profile.buttonCL) {
 				url = std::string("http://absolllute.com/api/mega_hack/challengelist/page") + std::to_string(thing) + ".txt";
 			}
 		}
@@ -2497,10 +2530,28 @@ class $modify(LevelBrowserLayer) {
 	bool init(GJSearchObject* search) {
 		LevelBrowserLayer::init(search);
 
-        if (profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
+        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
 
         return true;
     }
+};
+
+class $modify(CustomSongWidget) {
+	bool init(SongInfoObject* so, LevelSettingsObject* ls, bool a, bool b , bool c , bool d, bool hideBackground) {
+		CustomSongWidget::init(so,ls, a, b, c, d, hideBackground);
+	
+		if (Crystal::profile.autoSong) {
+			auto button = findFirstChildRecursive<CCMenuItemSpriteExtra>(this, [](CCNode* n) {
+				return n->getPositionY() == -180.0f;
+		});
+
+        if (button) {
+			button->activate();
+		}
+	}
+
+		return true;
+	}
 };
 
 template<>
@@ -2550,6 +2601,7 @@ struct json::Serialize<CrystalProfile> {
         ret["ignoreESC"] = Crystal::profile.ignoreESC;
         ret["confirmQuit"] = Crystal::profile.confirmQuit;
         ret["autoldm"] = Crystal::profile.autoldm;
+		ret["autoSong"] = Crystal::profile.autoSong;
         ret["flippedcontrol"] = Crystal::profile.flippedcontrol;
         ret["mirrorcontrol"] = Crystal::profile.mirrorcontrol;
         ret["startpos"] = Crystal::profile.startpos;
@@ -2610,11 +2662,16 @@ struct json::Serialize<CrystalProfile> {
 		ret["verify"] = Crystal::profile.verify;
 		ret["copy"] = Crystal::profile.copy;
 		ret["editorZoom"] = Crystal::profile.editorZoom;
+		ret["levelEdit"] = Crystal::profile.levelEdit;
 		ret["loadfail"] = Crystal::profile.loadfail;
 		ret["FPS"] = Crystal::profile.FPS;
 		ret["FPSbypass"] = Crystal::profile.FPSbypass;
 		ret["TPS"] = Crystal::profile.TPS;
 		ret["TPSbypass"] = Crystal::profile.TPSbypass;
+		ret["lockCursor"] = Crystal::profile.lockCursor;
+		ret["transparentBG"] = Crystal::profile.transparentBG;
+		ret["buttonDL"] = Crystal::profile.buttonDL;
+		ret["buttonCL"] = Crystal::profile.buttonCL;
 		ret["keybindsSize"] = keybinds.size();
 		for (int i = 0; i < keybinds.size(); i++) {
 			ret[std::to_string(i).c_str()]["key"] = keybinds[i].activeKey;
@@ -2743,6 +2800,7 @@ CrystalProfile Crystal::loadMods(CCNode* layer) {
 				.FPSbypass = json["FPSbypass"],
 				.TPS = json["TPS"],
 				.TPSbypass = json["TPSbypass"],
+				.lockCursor = json["lockCursor"]
 			};
 		} else {
 			ghc::filesystem::remove(Mod::get()->getConfigDir() / "Config" / "GH_config.json");

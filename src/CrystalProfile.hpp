@@ -72,6 +72,7 @@ struct CrystalProfile {
     bool ignoreESC = false;
     bool confirmQuit = false;
     bool autoldm = false;
+    bool autoSong = false;
     bool flippedcontrol = false;
     bool mirrorcontrol = false;
     bool startpos = false;
@@ -95,6 +96,7 @@ struct CrystalProfile {
     bool verify = false;
     bool copy = false;
     bool editorZoom = false;
+    bool levelEdit = false;
     bool loadfail = false;
     
     bool testmode = true;
@@ -148,6 +150,8 @@ struct CrystalProfile {
     bool noTransition = false;
     bool lockCursor = false;
     bool transparentBG = false;
+    bool buttonDL = false;
+    bool buttonCL = false;
     bool speedhack = false;
     float speed = 1.0;
     bool FPSbypass = false;

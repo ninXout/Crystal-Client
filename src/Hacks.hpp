@@ -67,6 +67,9 @@ void fps_shower_init();
     // Respawn
     int smoothOut = 0;
 
+    // Level Edit Bypass
+    int ben = 0;
+
     // Practice Orb Bugfix
     std::vector<GameObject*> g_activated_objects;
     std::vector<GameObject*> g_activated_objects_p2;
