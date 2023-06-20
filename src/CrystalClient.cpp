@@ -9,6 +9,7 @@
 #include "CrystalProfile.hpp"
 #include "CrystalTheme.hpp"
 #include "Shortcuts.hpp"
+#include "Bypass.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -60,6 +61,7 @@ void CrystalClient::toggle() {
 		ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		Crystal::saveMods(Crystal::profile);
 		initPatches();
+		Bypass::newFPSTimer();
 		//if (!Crystal::profile.speedhack) Crystal::profile.speed = 1;
 		//CCDirector::sharedDirector()->getScheduler()->setTimeScale(Crystal::profile.speed);
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();

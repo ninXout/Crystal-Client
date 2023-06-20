@@ -125,7 +125,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Auto Song Downloader", &Crystal::profile.autoSong);
 	CrystalClient::ImToggleable("Flipped Dual Controls", &Crystal::profile.flippedcontrol);
 	CrystalClient::ImToggleable("Mirrored Dual Controls", &Crystal::profile.mirrorcontrol);
-	CrystalClient::ImToggleable("Start Pos Switcher", &Crystal::profile.startpos);
+	CrystalClient::ImToggleable("StartPos Switcher", &Crystal::profile.startpos);
+	CrystalClient::ImToggleable("Checkpoint Switcher", &Crystal::profile.checkpointswitch);
 	CrystalClient::ImToggleable("Frame Stepper", &Crystal::profile.framestep);
 	CrystalClient::ImToggleable("Load from Last Checkpoint", &Crystal::profile.lastCheckpoint);
 	CrystalClient::ImToggleable("No Glow", &Crystal::profile.noglow);
@@ -528,32 +529,6 @@ void CrystalClient::addTheme() {
     colours[ImGuiCol_CheckMark] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
 }
 
-void CrystalClient::getTextPos(CCNode* label, int anchor) {
-	auto win_size = CCDirector::sharedDirector()->getWinSize();
-	// tl, tr, bl, br
-	if (anchor == 1) {
-		nextTL++;
-		label->setPositionX(0.f);
-		label->setAnchorPoint(ccp(0.f, 1.f));
-		label->setPositionY(win_size.height - (2.f * nextTL));
-	} else if (anchor == 2) {
-		nextTR++;
-		label->setPositionX(win_size.width);
-		label->setAnchorPoint(ccp(0.f, 1.f));
-		label->setPositionY(win_size.height - (2.f * nextTR));
-	} else if (anchor == 3) {
-		nextBL++;
-		label->setPositionX(0.f);
-		label->setAnchorPoint(ccp(0.f, 0.f));
-		label->setPositionY(4.f * nextBL);
-	} else {
-		nextBR++;
-		label->setPositionX(win_size.width);
-		label->setAnchorPoint(ccp(0.f, 0.f));
-		label->setPositionY(4.f * nextBR);
-	}
-}
-
 cocos2d::_ccColor3B CrystalClient::getRainbow(float offset) {
 	float R;
 	float G;
@@ -690,6 +665,16 @@ class $modify(CCKeyboardDispatcher) {
 
 $execute {
 	CrystalClient::get()->initPatches();
+
+	new EventListener(+[](const char* pluginName) {
+        CrystalClient::get()->plugins.push_back(pluginName);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<const char*>("ninxout.crystalclient/addPluginName"));
+
+    new EventListener(+[](bool* theAction) {
+        CrystalClient::get()->pluginBools.push_back(theAction);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<bool*>("ninxout.crystalclient/addPluginBool"));
 }
 
 class $modify(CCDirector) {
@@ -1283,17 +1268,6 @@ class $modify(PlayerObject) {
         	if (ring->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(ring);
     	}
 	}
-	void saveToCheckpoint(PlayerCheckpoint* g) {
-		PlayerObject::saveToCheckpoint(g);
-		if (Crystal::profile.checkpointswitch) {
-			g->retain();
-            g_checkpointsPos.push_back(g->getPosition());
-            g_checkpointsIG.push_back(g);
-            g_checkpointIndex += 1;
-            auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpointsIG.size());
-            g_checkpointText->setString(label.c_str());
-		}
-	}
 	void playerDestroyed(bool idk) {
 		PlayerObject::playerDestroyed(idk);
 		s_drawOnDeath = true;
@@ -1306,51 +1280,63 @@ class $modify(PlayerObject) {
 	}
 };
 
+class $modify(CheckpointObject) {
+	static CheckpointObject* create() {
+		auto cpo = CheckpointObject::create();
+		g_checkpoints.push_back({cpo, static_cast<CCNode*>(cpo)->getPosition()});
+		g_checkpointIndex += 1;
+		auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
+		g_startPosText->setString(label.c_str());
+		return cpo;
+	}
+};
+
 class $modify(Main, PlayLayer) {
     void updateIndex(bool increment) {
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
 		auto win_size = CCDirector::sharedDirector()->getWinSize();
-		if (m_isTestMode) {
-			g_startPosText->setOpacity(255);
-			g_startPosText->setPosition(win_size.width / 2, corner - 275);
+
+		if (m_isPracticeMode && profile.checkpointswitch && (!m_isTestMode && !CCDirector::sharedDirector()->getKeyboardDispatcher()->getShiftKeyPressed())) {
+			if (increment) {
+				g_checkpointIndex++;
+			} else {
+				g_checkpointIndex--;
+			}
+
+			if (g_checkpointIndex == g_checkpoints.size()) {
+				g_checkpointIndex = -1;
+			} else if (g_checkpointIndex < -1) {
+				g_checkpointIndex = g_checkpoints.size() - 1;
+			}
+
+			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
+			g_startPosText->setString(label.c_str());
+
+			if (g_checkpointIndex == -1) {
+				m_startPosCheckpoint = nullptr;
+				m_playerStartPosition = ccp(0, 105);
+			} else {
+				m_startPosCheckpoint = g_checkpoints[g_checkpointIndex].first;
+				m_playerStartPosition = g_checkpoints[g_checkpointIndex].second;
+			}
 		}
 
-		if (increment) {
-			g_startPosIndex++;
-			if (m_isPracticeMode) g_checkpointIndex++;
-		} else {
-			g_startPosIndex--;
-			if (m_isPracticeMode) g_checkpointIndex--;
-		}
+		if (m_isTestMode && profile.startpos) {
+			if (increment) {
+				g_startPosIndex++;
+			} else {
+				g_startPosIndex--;
+			}
 
-		if (g_startPosIndex == g_startPoses.size()) {
-			g_startPosIndex = -1;
-		} else if (g_startPosIndex < -1) {
-			g_startPosIndex = g_startPoses.size() - 1;
-		}
+			if (g_startPosIndex == g_startPoses.size()) {
+				g_startPosIndex = -1;
+			} else if (g_startPosIndex < -1) {
+				g_startPosIndex = g_startPoses.size() - 1;
+			}
 
-
-
-		auto colorPulseBegin = CCTintTo::create(0.0, 0, 255, 0);
-		auto colorPulseEnd = CCTintTo::create(0.5, 255, 255, 255);
-
-		auto opacityPulseBegin = CCFadeTo::create(0.0, 255);
-		auto opacityPulseEnd = CCFadeTo::create(0.5, 50);
-
-		if (m_isTestMode) {
 			auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
 			g_startPosText->setString(label.c_str());
-			auto opacityPulseBegin = CCFadeTo::create(0, 255);
-			auto opacityPulseWait = CCFadeTo::create(0.4, 255);
-			auto opacityPulseEnd = CCFadeTo::create(0.3, 0);
 
-			//g_startPosText->runAction(opacityPulseBegin);
-			//g_startPosText->runAction(opacityPulseWait);
-			//g_startPosText->runAction(opacityPulseEnd);
-		}
-
-		if (m_isTestMode) {
-			m_startPosCheckpoint = nullptr;
 			if (g_startPosIndex == -1) {
 				m_startPos = nullptr;
 				m_playerStartPosition = ccp(0, 105);
@@ -1361,13 +1347,6 @@ class $modify(Main, PlayLayer) {
 		}
 
 		resetLevel();
-		if (m_isPracticeMode) {
-			GameSoundManager::sharedManager()->stopBackgroundMusic();
-			m_player1->loadFromCheckpoint(g_checkpointsIG[g_checkpointIndex]);
-		}
-		if (m_isTestMode) g_startPosText->setOpacity(50);
-		if (m_isPaused)
-			GameSoundManager::sharedManager()->stopBackgroundMusic();
 	}
 
     void addObject(GameObject* g) {
@@ -1385,6 +1364,13 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 	}	
+
+	void loadFromCheckpoint(CheckpointObject* cpo) {
+		if (Crystal::profile.checkpointswitch) {
+			cpo = g_checkpoints[g_checkpointIndex].first;
+		}
+		PlayLayer::loadFromCheckpoint(cpo);
+	}
 
     void updateVisibility() {
 		if (!g_disable_render) PlayLayer::updateVisibility();
@@ -2017,18 +2003,6 @@ class $modify(Main, PlayLayer) {
 	}
 
     void startMusic() {
-		CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
-		CGEventRef saveCommandDown = CGEventCreateKeyboardEvent(source, (CGKeyCode)0x02, true);
-		CGEventSetFlags(saveCommandDown, kCGEventFlagMaskCommand);
-		CGEventSetFlags(saveCommandDown, kCGEventFlagMaskShift);
-		CGEventRef saveCommandUp = CGEventCreateKeyboardEvent(source, (CGKeyCode)0x02, false);
-
-		CGEventPost(kCGAnnotatedSessionEventTap, saveCommandDown);
-		CGEventPost(kCGAnnotatedSessionEventTap, saveCommandUp);
-
-		CFRelease(saveCommandUp);
-		CFRelease(saveCommandDown);
-		CFRelease(source);
 		if (Crystal::profile.pracmusic) {
 			auto p = m_isPracticeMode;
 			m_isPracticeMode = false; // pretend there is no practice mode
@@ -2131,21 +2105,14 @@ class $modify(Main, PlayLayer) {
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		if (Crystal::profile.startpos) {
+		if (Crystal::profile.startpos || Crystal::profile.checkpointswitch) {
 			rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 			leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
 			g_startPosText = CCLabelBMFont::create("0/0", "bigFont.fnt");
 			g_startPosIndex = -1;
 			g_startPoses = {};
-			
-		}
-		if (Crystal::profile.checkpointswitch) {
-			CPrightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
-			CPleftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
-			g_checkpointText = CCLabelBMFont::create("0/0", "bigFont.fnt");
 			g_checkpointIndex = -1;
-			g_checkpointsIG = {};
-			
+			g_checkpoints = {};
 		}
 
 		for (int d = 0; d < 13; d++) {
@@ -2209,7 +2176,7 @@ class $modify(Main, PlayLayer) {
 
 		currentFrame = 0;
 		
-		if (Crystal::profile.startpos) {
+		if (Crystal::profile.startpos || Crystal::profile.checkpointswitch) {
 			g_startPosText->setPosition(win_size.width / 2, corner - 275);
 			g_startPosText->setScale(0.5);
 			g_startPosText->setOpacity(50);
@@ -2224,41 +2191,9 @@ class $modify(Main, PlayLayer) {
 			
 			leftButton->setOpacity(50);
 
-			if (!m_isTestMode) {
-				g_startPosText->setVisible(false);
-				rightButton->setVisible(false);
-				leftButton->setVisible(false);
-			}
 			addChild(g_startPosText, 1000);
 			addChild(rightButton, 1000);
 			addChild(leftButton, 1000);
-		}
-		if (Crystal::profile.checkpointswitch) {
-			g_checkpointText->setPosition(252 , corner - 275);
-			if (g_startPoses.size() > 9) {
-				//g_checkpointText->setPosition(245 , corner - 275);
-			}
-			g_checkpointText->setScale(0.5);
-			g_checkpointText->setOpacity(50);
-			CPrightButton->::Main::setPosition(220 , corner - 275);
-			CPrightButton->setScale(0.5);
-
-			CPrightButton->setOpacity(50);
-			CPleftButton->::Main::setPosition(310 , corner - 275);
-			CPleftButton->setRotation(180);
-			CPleftButton->setScale(0.5);
-
-			CPleftButton->setOpacity(50);
-
-			if (!m_isPracticeMode) {/*
-				g_checkpointText->setVisible(false);
-				CPrightButton->setVisible(false);
-				CPleftButton->setVisible(false);
-				*/
-			}
-			addChild(g_checkpointText, 1000);
-			addChild(CPrightButton, 1000);
-			addChild(CPleftButton, 1000);
 		}
 		if (Crystal::profile.progressBar) {
 			m_percentLabel->setPositionX(CCDirector::sharedDirector()->getWinSize().width / 2);

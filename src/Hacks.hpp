@@ -1,5 +1,7 @@
 #include "Includes.hpp"
 #include <streambuf>
+#include "subprocess.hpp"
+#include "Renderer.hpp"
 
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
@@ -28,6 +30,11 @@ void fps_shower_init();
         15
     };
 
+    CCTexture2D* renderingTexture;
+    GLint m_pOldFBO;
+    GLuint m_pFBO;
+    GLint m_pOldRBO;
+
     // StartPos Switcher
     std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
     int g_startPosIndex;
@@ -40,10 +47,8 @@ void fps_shower_init();
     bool rounded;
 
     // Checkpoint Switcher
-    std::vector<PlayerCheckpoint*> g_checkpointsIG;
-    std::vector<CCPoint> g_checkpointsPos;
+    std::vector<std::pair<CheckpointObject*, CCPoint>> g_checkpoints;
     int g_checkpointIndex;
-    CCLabelBMFont* g_checkpointText;
     CCSprite* CPrightButton;
     CCSprite* CPleftButton;
 
@@ -100,12 +105,6 @@ void fps_shower_init();
     float DTime;
     std::vector<AmethystReplay::AmethystFrame> stepData;
 
-    inline int g_frameCount;
-    inline double g_speedMod = 1.0;
-
-    inline std::vector<std::function<void()>> g_updates;
-    void newFPSTimer();
-
     const char* macroTypes[3] = { "No Player Physics", "Physics on Click", "Physics every Frame" };
     static int currentMacroType = 0;
     double renderTime;
@@ -117,6 +116,8 @@ void fps_shower_init();
     auto framesFol = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").append("Frames");
     auto renderer = Mod::get()->getConfigDir().append("Amethyst").append("Renderer");
     auto conf = Mod::get()->getConfigDir().append("Config");
+
+    //subprocess::Popen process;
 
     // Auto-Deafen
     bool notDeafened = true;
@@ -131,6 +132,13 @@ void fps_shower_init();
     float g_left_over = 0.f;
     float fps_left_over = 0.f;
     float t_left_over = 0.f;
+
+    static int s_localFPS = 60;
+    static int s_cascades = 0;
+    static int s_skipMultiplier = 1;
+    inline int g_frameCount;
+    inline std::vector<std::function<void()>> g_updates;
+    void newFPSTimer();
 
     double m_resetInterval;
 	std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;

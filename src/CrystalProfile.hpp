@@ -7,8 +7,11 @@
 #include "json.hpp"
 #include "Amethyst.hpp"
 #include "CrystalTheme.hpp"
+#include "../include/Plugin.hpp"
+#include <imgui.h>
 
 using json2 = nlohmann::json;
+using namespace geode::prelude;
 
 enum LabelPos
 {
@@ -197,6 +200,14 @@ struct CrystalProfile {
     bool renderer = false;
     bool includeAudio = true;
     char rendername[64];
+
+    int bitrate = 50000; //K
+    int audioBitrate = 192; //K
+    std::string codec = "h264";
+
+    int targetWidth = 3840;
+    int targetHeight = 2160;
+    int targetFPS = 60;
 
     static ImVec4 RGBAtoIV4(float rgb[4]) {
         float newr = rgb[0];
