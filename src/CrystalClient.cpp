@@ -1,4 +1,3 @@
-
 #include <imgui_internal.h>
 #include "CrystalClient.hpp"
 #include <Geode/loader/Log.hpp>
@@ -9,7 +8,6 @@
 #include "CrystalProfile.hpp"
 #include "CrystalTheme.hpp"
 #include "Shortcuts.hpp"
-#include "Bypass.hpp"
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -61,7 +59,6 @@ void CrystalClient::toggle() {
 		ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		Crystal::saveMods(Crystal::profile);
 		initPatches();
-		Bypass::newFPSTimer();
 		//if (!Crystal::profile.speedhack) Crystal::profile.speed = 1;
 		//CCDirector::sharedDirector()->getScheduler()->setTimeScale(Crystal::profile.speed);
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
@@ -83,7 +80,7 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v) {
 	ImGui::SetItemAllowOverlap();
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y));
-	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), str_id);
+	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
 	if (ImGui::IsItemClicked()) *v = !*v;
 	ImGuiContext& gg = *GImGui;
 	float ANIM_SPEED = 0.085f;
@@ -113,7 +110,7 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
 	//ImGui::SetItemAllowOverlap();
 	//ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y));
-	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), str_id);
+	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
 	if (ImGui::IsItemClicked()) *v = !*v;
 	ImGuiContext& gg = *GImGui;
 	float ANIM_SPEED = 0.085f;
@@ -330,6 +327,11 @@ void CrystalClient::refreshPatches() {
 	*/
 }
 
+void GameTime() {
+	std::chrono::steady_clock::time_point startTime;
+	startTime = std::chrono::steady_clock::now();
+}
+
 void CrystalClient::firstLoad(CCNode* layer) {
 	keybinds.push_back({39, 6});
 	keybinds.push_back({40, 7});
@@ -337,6 +339,24 @@ void CrystalClient::firstLoad(CCNode* layer) {
 		auto alert = geode::createQuickPopup(
 			"Hi!",            // title
 			"Thank you for installing Crystal Client. You can open the mod menu by pressing TAB and you can report any bugs or suggestions in my discord server. Enjoy!",   // content
+			"OK", "Join Discord Server",      // buttons
+			[](auto, bool btn2) {
+				if (btn2) {
+					CCApplication::sharedApplication()->openURL("https://discord.gg/xV5dekWHTd");
+				}
+			},
+			false
+		);
+		alert->m_scene = layer;
+		alert->show();
+	}
+}
+
+void CrystalClient::noImage(CCNode* layer) {
+	if (layer) {
+		auto alert = geode::createQuickPopup(
+			"Oops",            // title
+			"You are using BetterBG from Crystal but there's no image for it. Please put whatever image with the name background.jpg on GD/Contents/geode/config/ninxout.crystalclient/BetterBG. Thanks for using Crystal <3",   // content
 			"OK", "Join Discord Server",      // buttons
 			[](auto, bool btn2) {
 				if (btn2) {

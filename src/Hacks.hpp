@@ -63,6 +63,8 @@ void fps_shower_init();
     bool finished;
     bool resetaccuracy;
     bool would_die;
+    bool dying = false;
+    bool deaath = false;
 
     // Noclip Deaths
     int noclip_deaths = 0;
@@ -71,9 +73,6 @@ void fps_shower_init();
 
     // Respawn
     int smoothOut = 0;
-
-    // Level Edit Bypass
-    int ben = 0;
 
     // Practice Orb Bugfix
     std::vector<GameObject*> g_activated_objects;
@@ -116,6 +115,7 @@ void fps_shower_init();
     auto framesFol = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").append("Frames");
     auto renderer = Mod::get()->getConfigDir().append("Amethyst").append("Renderer");
     auto conf = Mod::get()->getConfigDir().append("Config");
+    auto betterBG = Mod::get()->getConfigDir().append("BetterBG");
 
     //subprocess::Popen process;
 
@@ -145,12 +145,22 @@ void fps_shower_init();
     float frame_time_sum = 0.f;
     int frame_count = 0;
 
+    // CPS Display
+    bool holding;
+    float click_time_sum = 0.f;
+    int clickscount;
+    int click_count;
+
+    std::string cipy;
+    std::chrono::time_point<std::chrono::high_resolution_clock> previous, last;
+
     // Display
     bool attempts;
     CCLabelBMFont* g_atts;
     bool percentcustom;
-    int clickscount;
     int releasecount;
+    float fixa = 0.0f;
+    float timee = 0.0f;
 
     bool currentRun;
     bool bestRun;
@@ -159,6 +169,8 @@ void fps_shower_init();
     int bestEnd2;
     int bestStart2;
     std::string display = "Best Run: " + std::to_string(bestStart) + " to " + std::to_string(bestEnd);
+    std::chrono::time_point<std::chrono::high_resolution_clock> tiem;
+    bool isTiemOn = false;
 
     CCLabelBMFont* g_levelInfo;
     CCLabelBMFont* g_clicks;
@@ -196,6 +208,7 @@ void fps_shower_init();
     int clickframe;
 
     // Unorganized
+    std::string image;
     float pulse = 2;
     float zoom = 1;
     float v_tracking;
@@ -220,6 +233,4 @@ void fps_shower_init();
     float speedhack = 1;
     bool shouldUpdate = false;
     float newDT;
-    bool author;
-    bool hideID;
     bool lastDeath;

@@ -37,6 +37,7 @@ public:
     void loadFromFile();
 
     void firstLoad(CCNode* layer);
+    void noImage(CCNode* layer);
 
     static std::string getRenderPath(bool full);
     static cocos2d::enumKeyCodes shortcutKey(int key);
@@ -45,7 +46,8 @@ public:
     void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
-    void addTransparentBG(CCNode* layer);
+    static void addTransparentBG(CCNode* layer);
+    void GameTime();
     
     void initPatches();
     void refreshPatches();

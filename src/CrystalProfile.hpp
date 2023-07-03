@@ -103,13 +103,13 @@ struct CrystalProfile {
     bool loadfail = false;
     
     bool testmode = true;
-    bool customMessage = false;
-    char message[64];
+    std::string message;
+    char messageBuffer[64];
+    bool customMessage = false; // all this shit has to be here even if they arent used for some fucking reason
     bool fps = false;
     bool cps = false;
     bool jumps = false;
     bool cheatIndicate = false;
-    bool lastDeath = false;
     bool attempts = false;
     bool bestRun = false;
     bool runFrom = false;
@@ -117,18 +117,31 @@ struct CrystalProfile {
     bool noclipDeath = false;
     bool totalAtt = false;
     bool lvlData = false;
-    bool macroStatus = false;
-    bool pauseCountdown = false;
+    bool macroStatus = false; // because without them json crashes (?????)
+    bool tclicks = false;
+    bool sclicks = false;
+    bool oclicks = false;
+    bool rclicks = false;
+    bool tjumps = false;
+    bool ajumps = false;
+    bool tattoo = false;
+    bool redDying = false;
+    bool redDeath = false;
+    bool hideID = false;
+    bool author = false;
     bool clock = false;
+    bool ipm = false;
+    bool iat = false;
+    bool ilt = false;
     bool igt = false;
 
-    bool displays[14];
-    CCLabelBMFont* displayNodes[14];
-    LabelPos displayPositions[14] = {TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL};
+    std::array<bool, 15> displays;
+    std::array<LabelPos, 15> displayPositions;
+    CCLabelBMFont* displayNodes[15];
     const char* displayOptions[4] = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"};
     float displaySpace = 15.0f;
-    float displayScale = 20.0f;
-    float displayOpacity = 50.0f;
+    std::array<float, 15> displayScale;
+    std::array<float, 15> displayOpacity;
 
     /*
     customMessage
@@ -153,8 +166,10 @@ struct CrystalProfile {
     bool noTransition = false;
     bool lockCursor = false;
     bool transparentBG = false;
+    bool translists = false;
     bool buttonDL = false;
     bool buttonCL = false;
+    bool betterbg = false;
     bool speedhack = false;
     float speed = 1.0;
     bool FPSbypass = false;
