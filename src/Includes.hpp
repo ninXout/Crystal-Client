@@ -49,6 +49,7 @@
 #include "CrystalProfile.hpp"
 #include "Shortcuts.hpp"
 #include "CrystalClient.hpp"
+#include "Icon.hpp"
 
 using namespace Shortcuts;
 using namespace Variables;

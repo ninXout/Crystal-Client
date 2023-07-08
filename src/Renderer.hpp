@@ -17,6 +17,8 @@ public:
     void begin();
     void end();
     void capture(std::mutex& lock, std::vector<u8>& data, volatile bool& lul);
+    CGImageRef CGImageFromCCImage(const void* data, int newDataLen);
+    bool CGImageWriteToFile(CGImageRef image);
 };
 
 struct Recorder {
@@ -36,11 +38,15 @@ struct Recorder {
     float m_song_start_offset;
     bool m_finished_level;
     bool m_include_audio = true;
-    std::string m_ffmpeg_path = "/bin/ffmpeg";
+    std::string m_ffmpeg_path = "ffmpeg";
 
-    void start(const std::string& path);
+    void start(const std::string& path, const std::string& temp);
     void stop();
     void capture_frame();
     void handle_recording(PlayLayer*, float dt);
     void update_song_offset(PlayLayer*);
+    void init_quality();
 };
+
+static inline const char* renderPresets[5] = { "4K", "1080p", "720p", "480p", "Custom" };
+static inline int currentPreset = 0;

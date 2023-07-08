@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include "json.hpp"
 #include "Amethyst.hpp"
-#include "CrystalTheme.hpp"
 #include "../include/Plugin.hpp"
 #include <imgui.h>
+#include "Icon.hpp"
 
 using json2 = nlohmann::json;
 using namespace geode::prelude;
@@ -56,6 +56,79 @@ struct CrystalProfile {
     bool rainbowGlowP1 = false;
     bool rainbowGlowP2 = false;
     bool samedual = false;
+    bool solidGlow = false;
+
+
+    bool P1Color1 = false;
+    bool P1Color2 = false;
+    bool P1Glow = false;
+    bool P1Regular = false;
+    bool P1Wave = false;
+
+    bool P2Color1 = false;
+    bool P2Color2 = false;
+    bool P2Glow = false;
+    bool P2Regular = false;
+    bool P2Wave = false;
+
+
+    std::array<bool, 30> iconEffects;
+
+    // the rest of the colors get stupid so heres some notation
+
+    /*
+    
+        P = player
+        C = color
+        G = glow
+        W = wave trail
+        R = regular trail
+        E = effect color
+
+        For example: FadeP1C1E2 == Fade Color 1 for Player 1 Second Player Color
+
+    */
+
+    float StaticP1C1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP1C2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP2C1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP2C2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float StaticP1CG[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP2CG[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float StaticP1CW[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP2CW[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float StaticP1CR[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float StaticP2CR[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    // fade
+
+    float FadeP1C1E1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1C1E2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1C2E1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1C2E2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float FadeP2C1E1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2C1E2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2C2E1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2C2E2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float FadeP1GE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1GE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2GE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2GE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float FadeP1WE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1WE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2WE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2WE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+
+    float FadeP1RE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP1RE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2RE1[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
+    float FadeP2RE2[4] = { 0.12f, 0.12f, 0.12f, 1.0f };
 
     bool hitboxes = false;
     bool onDeath = false;
@@ -139,7 +212,9 @@ struct CrystalProfile {
     std::array<LabelPos, 15> displayPositions;
     CCLabelBMFont* displayNodes[15];
     const char* displayOptions[4] = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"};
-    float displaySpace = 15.0f;
+    float displaySpaceF = 15.0f;
+    float displayScaleF = 7.5f;
+    float displayOpacityF = 20.0f;
     std::array<float, 15> displayScale;
     std::array<float, 15> displayOpacity;
 
@@ -219,6 +294,8 @@ struct CrystalProfile {
     int bitrate = 50000; //K
     int audioBitrate = 192; //K
     std::string codec = "h264";
+
+    int ss = 0;
 
     int targetWidth = 3840;
     int targetHeight = 2160;

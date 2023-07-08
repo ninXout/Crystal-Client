@@ -19,6 +19,7 @@ protected:
     static void ImToggleable(const char* label, bool* toggle);
     static void ImSelectable(const char* label, int* toggle, int value);
     static void ImExtendedToggleable(const char* str_id, bool* v);
+    static void ImIconEffect(bool* mainBool, bool* staticBool, bool* fadeBool, bool* rainbowBool, float* staticC, float* fade1, float* fade2, const char* categoryName);
 
     void drawGUI();
     void draw();

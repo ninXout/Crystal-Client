@@ -6,7 +6,6 @@
 #include "Includes.hpp"
 #include "json.hpp"
 #include "CrystalProfile.hpp"
-#include "CrystalTheme.hpp"
 #include "Shortcuts.hpp"
 
 CrystalClient* CrystalClient::get() {
@@ -133,6 +132,52 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
     // Adds 220 to each X for positioning and Adds 3 to each Y
 }
 
+void CrystalClient::ImIconEffect(bool* mainBool, bool* staticBool, bool* fadeBool, bool* rainbowBool, float* staticC, float* fade1, float* fade2, const char* categoryName) {
+	const char* newCategoryName;
+	if (categoryName == "Player Color 1") {newCategoryName = "PlayerColor1";}
+	else if (categoryName == "Player Color 2") {newCategoryName = "PlayerColor2";}
+	else {newCategoryName = categoryName;};
+	/*
+	std::string staticString1 = "Static for " + std::string(categoryName);
+	std::string staticString2 = "Static Color for " + std::string(categoryName);
+	std::string fadeString1 = "Fade for " + std::string(categoryName);
+	std::string fadeString2 = "Fade Color 1 for " + std::string(categoryName);
+	std::string fadeString3 = "Fade Color 2 for " + std::string(categoryName);
+	std::string rainString = "Rainbow for " + std::string(categoryName);
+	*/
+	std::string staticString1 = "Static";
+	std::string staticString2 = "Static Color";
+	std::string fadeString1 = "Fade";
+	std::string fadeString2 = "Fade Color 1";
+	std::string fadeString3 = "Fade Color 2";
+	std::string rainString = "Rainbow";
+	CrystalClient::ImExtendedToggleable(categoryName, mainBool);
+	if (ImGui::BeginPopupModal(categoryName, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		CrystalClient::ImExtendedToggleable(staticString1.c_str(), staticBool);
+		if (ImGui::BeginPopupModal(staticString1.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::ColorEdit4(staticString2.c_str(), staticC, ImGuiColorEditFlags_NoInputs);
+			if (ImGui::Button("Close")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		CrystalClient::ImExtendedToggleable(fadeString1.c_str(), fadeBool);
+		if (ImGui::BeginPopupModal(fadeString1.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::ColorEdit4(fadeString2.c_str(), fade1, ImGuiColorEditFlags_NoInputs);
+			ImGui::ColorEdit4(fadeString3.c_str(), fade2, ImGuiColorEditFlags_NoInputs);
+			if (ImGui::Button("Close")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		CrystalClient::ImToggleable(rainString.c_str(), rainbowBool);
+		if (ImGui::Button("Close")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 cocos2d::enumKeyCodes CrystalClient::shortcutKey(int key) {
 	switch (key) {
         case 0: return enumKeyCodes::KEY_Space;
@@ -221,47 +266,6 @@ void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCL
 	label->setScale(0.4);
 	label->setOpacity(100);
 	if (first) layer->addChild(label, 1000);
-}
-
-void CrystalClient::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
-  float fC = fV * fS; // Chroma
-  float fHPrime = fmod(fH / 60.0, 6);
-  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-  float fM = fV - fC;
-  
-  if(0 <= fHPrime && fHPrime < 1) {
-    fR = fC;
-    fG = fX;
-    fB = 0;
-  } else if(1 <= fHPrime && fHPrime < 2) {
-    fR = fX;
-    fG = fC;
-    fB = 0;
-  } else if(2 <= fHPrime && fHPrime < 3) {
-    fR = 0;
-    fG = fC;
-    fB = fX;
-  } else if(3 <= fHPrime && fHPrime < 4) {
-    fR = 0;
-    fG = fX;
-    fB = fC;
-  } else if(4 <= fHPrime && fHPrime < 5) {
-    fR = fX;
-    fG = 0;
-    fB = fC;
-  } else if(5 <= fHPrime && fHPrime < 6) {
-    fR = fC;
-    fG = 0;
-    fB = fX;
-  } else {
-    fR = 0;
-    fG = 0;
-    fB = 0;
-  }
-  
-  fR += fM;
-  fG += fM;
-  fB += fM;
 }
 
 void CrystalClient::addTransparentBG(CCNode* layer) {

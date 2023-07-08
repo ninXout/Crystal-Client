@@ -6,6 +6,7 @@
 #include "ImGui.hpp"
 #include "Includes.hpp"
 #include "Hacks.hpp"
+#include "Icon.hpp"
 #include <random>
 
 using namespace geode::prelude;
@@ -14,6 +15,7 @@ using namespace Shortcuts;
 using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
+using namespace Icon;
 
 void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
@@ -66,6 +68,22 @@ void CrystalClient::drawGUI() {
 	ImGui::End();
 
 	ImGui::Begin("Icon", NULL, window_flags);
+	if (ImGui::BeginMenu("Player 1")) {
+		CrystalClient::ImIconEffect(&profile.P1Color1, &profile.iconEffects[0], &profile.iconEffects[1], &profile.iconEffects[2], profile.StaticP1C1, profile.FadeP1C1E1, profile.FadeP1C1E2, "Player Color 1");
+		CrystalClient::ImIconEffect(&profile.P1Color2, &profile.iconEffects[3], &profile.iconEffects[4], &profile.iconEffects[5], profile.StaticP1C2, profile.FadeP1C2E1, profile.FadeP1C2E2, "Player Color 2");
+		CrystalClient::ImIconEffect(&profile.P1Glow, &profile.iconEffects[6], &profile.iconEffects[7], &profile.iconEffects[8], profile.StaticP1CG, profile.FadeP1GE1, profile.FadeP1GE2, "Icon Glow");
+		CrystalClient::ImIconEffect(&profile.P1Regular, &profile.iconEffects[9], &profile.iconEffects[10], &profile.iconEffects[11], profile.StaticP1CR, profile.FadeP1RE1, profile.FadeP1RE2, "Regular Trail");
+		CrystalClient::ImIconEffect(&profile.P1Wave, &profile.iconEffects[12], &profile.iconEffects[13], &profile.iconEffects[14], profile.StaticP1CW, profile.FadeP1WE1, profile.FadeP1WE2, "Wave Trail");
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("Player 2")) {
+		CrystalClient::ImIconEffect(&profile.P2Color1, &profile.iconEffects[15], &profile.iconEffects[16], &profile.iconEffects[17], profile.StaticP2C1, profile.FadeP2C1E1, profile.FadeP2C1E2, "Player Color 1");
+		CrystalClient::ImIconEffect(&profile.P2Color2, &profile.iconEffects[18], &profile.iconEffects[19], &profile.iconEffects[20], profile.StaticP2C2, profile.FadeP2C2E1, profile.FadeP2C2E2, "Player Color 2");
+		CrystalClient::ImIconEffect(&profile.P2Glow, &profile.iconEffects[21], &profile.iconEffects[22], &profile.iconEffects[23], profile.StaticP2CG, profile.FadeP2GE1, profile.FadeP2GE2, "Icon Glow");
+		CrystalClient::ImIconEffect(&profile.P2Regular, &profile.iconEffects[24], &profile.iconEffects[25], &profile.iconEffects[26], profile.StaticP2CR, profile.FadeP2RE1, profile.FadeP2RE2, "Regular Trail");
+		CrystalClient::ImIconEffect(&profile.P2Wave, &profile.iconEffects[27], &profile.iconEffects[28], &profile.iconEffects[29], profile.StaticP2CW, profile.FadeP2WE1, profile.FadeP2WE2, "Wave Trail");
+		ImGui::EndMenu();
+	}
 	CrystalClient::ImExtendedToggleable("Rainbow Icon", &Crystal::profile.rainbowIcon);
 	if (ImGui::BeginPopupModal("Rainbow Icon", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Rainbow Player Color 1", &Crystal::profile.rainbowP1);
@@ -80,6 +98,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
+	CrystalClient::ImToggleable("Solid Glow Color", &Crystal::profile.solidGlow);
 	ImGui::End();
 
 	ImGui::Begin("Level", NULL, window_flags);
@@ -145,11 +164,14 @@ void CrystalClient::drawGUI() {
     ImGui::End();
     ImGui::Begin("Display", NULL, window_flags);
 	CrystalClient::ImToggleable("Testmode Label", &profile.testmode);
+	ImGui::InputFloat("Display Scale", &profile.displayScaleF);
+	ImGui::InputFloat("Display Opacity", &profile.displayOpacityF);
+	ImGui::InputFloat("Display Spacing", &profile.displaySpaceF);
 	CrystalClient::ImExtendedToggleable("Cheat Indicator", &Crystal::profile.displays[0]);
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[0], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[0]);
-		ImGui::InputFloat("Scale", &profile.displayScale[0]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[0]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[0]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -161,8 +183,8 @@ void CrystalClient::drawGUI() {
 		ImGui::InputTextWithHint("Message", "Custom Message", profile.messageBuffer, IM_ARRAYSIZE(profile.messageBuffer));
 		profile.message = profile.messageBuffer;
 		ImGui::Combo("Position", (int *)&profile.displayPositions[1], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[1]);
-		ImGui::InputFloat("Scale", &profile.displayScale[1]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[1]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[1]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -175,8 +197,8 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImToggleable("Only Clicks", &Crystal::profile.oclicks);
 		CrystalClient::ImToggleable("Reset Clicks Every Attempt", &Crystal::profile.rclicks);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[2], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[2]);
-		ImGui::InputFloat("Scale", &profile.displayScale[2]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[2]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[2]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -185,8 +207,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("FPS Display", &Crystal::profile.displays[3]);
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[3], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[3]);
-		ImGui::InputFloat("Scale", &profile.displayScale[3]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[3]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[3]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -195,8 +217,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Last Death", &Crystal::profile.displays[4]);
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[4], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[4]);
-		ImGui::InputFloat("Scale", &profile.displayScale[4]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[4]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[4]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -206,8 +228,8 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Attempts", &Crystal::profile.tattoo);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[5], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[5]);
-		ImGui::InputFloat("Scale", &profile.displayScale[5]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[5]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[5]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -218,8 +240,8 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImToggleable("Total Jumps", &Crystal::profile.tjumps);
 		CrystalClient::ImToggleable("Attempt Jumps", &Crystal::profile.ajumps);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[6], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[6]);
-		ImGui::InputFloat("Scale", &profile.displayScale[6]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[6]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[6]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -228,8 +250,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Run From", &Crystal::profile.displays[7]);
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[7], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[7]);
-		ImGui::InputFloat("Scale", &profile.displayScale[7]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[7]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[7]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -238,8 +260,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Best Run", &Crystal::profile.displays[8]);
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[8], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[8]);
-		ImGui::InputFloat("Scale", &profile.displayScale[8]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[8]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[8]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -249,8 +271,8 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", &Crystal::profile.redDying);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[9], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[9]);
-		ImGui::InputFloat("Scale", &profile.displayScale[9]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[9]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[9]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -260,8 +282,8 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", &Crystal::profile.redDeath);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[10], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[10]);
-		ImGui::InputFloat("Scale", &profile.displayScale[10]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[10]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[10]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -272,8 +294,8 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImToggleable("Hide ID", &Crystal::profile.hideID);
 		CrystalClient::ImToggleable("Show Author", &Crystal::profile.author);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[11], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[11]);
-		ImGui::InputFloat("Scale", &profile.displayScale[11]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[11]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[11]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -282,8 +304,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Macro Status", &Crystal::profile.displays[12]);
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[12], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[12]);
-		ImGui::InputFloat("Scale", &profile.displayScale[12]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[12]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[12]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -296,8 +318,8 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImToggleable("In-Level Time", &Crystal::profile.ilt);
 		CrystalClient::ImToggleable("In-Game Time", &Crystal::profile.igt);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[13], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		ImGui::InputFloat("Opacity", &profile.displayOpacity[13]);
-		ImGui::InputFloat("Scale", &profile.displayScale[13]);
+		//ImGui::InputFloat("Opacity", &profile.displayOpacity[13]);
+		//ImGui::InputFloat("Scale", &profile.displayScale[13]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -514,6 +536,11 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Render Recording", &profile.renderer);
 	CrystalClient::ImToggleable("Include Sound", &profile.includeAudio);
 	ImGui::InputTextWithHint("Video Name", "Video Name", profile.rendername, IM_ARRAYSIZE(profile.rendername));
+	ImGui::Combo("Render Quality", &currentPreset, renderPresets, IM_ARRAYSIZE(renderPresets));
+	//record.init_quality();
+	ImGui::InputInt("Width", &profile.targetWidth);
+	ImGui::InputInt("Height", &profile.targetHeight);
+	ImGui::InputInt("FPS", &profile.targetFPS);
 	ImGui::End();
 }
 
@@ -569,23 +596,6 @@ void CrystalClient::addTheme() {
     colours[ImGuiCol_CheckMark] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
 }
 
-cocos2d::_ccColor3B CrystalClient::getRainbow(float offset) {
-	float R;
-	float G;
-	float B;
-
-	float hue = fmod(g + offset, 360);
-	float sat = 1;
-	float vc = 1;
-	HSVtoRGB(R, G, B, hue, sat, vc);
-
-	cocos2d::_ccColor3B out;
-	out.r = R*255;
-	out.g = G*255;
-	out.b = B*255;
-	return out;
-}
-
 void CrystalClient::arrangeText(int arrayLength, PlayLayer* menulay, bool first) {
 	auto director = CCDirector::sharedDirector();
 	auto size = director->getWinSize();
@@ -600,65 +610,69 @@ void CrystalClient::arrangeText(int arrayLength, PlayLayer* menulay, bool first)
 				case TR:
 					if (arrayLength == i)
 						thisLabel = tr;
-					tr += 1.1f;
+					tr += 1.0f * profile.displayScaleF;
 					break;
 				case TL:
 					if (arrayLength == i)
 						thisLabel = tl;
-					tl += 1.1f;
+					tl += 1.0f * profile.displayScaleF;
 					break;
 				case BR:
 					if (arrayLength == i)
 						thisLabel = br;
-					br += 1.1f;
+					br += 1.0f * profile.displayScaleF;
 					break;
 				case BL:
 					if (arrayLength == i)
 						thisLabel = bl;
-					bl += 1.1f;
+					bl += 1.0f * profile.displayScaleF;
 					break;
 			}
 		}
 	}
 
 	float height = 0, x = 0;
-	float opacity = profile.displayOpacity[arrayLength];
-	float scale = profile.displayScale[arrayLength];
 
 	switch (profile.displayPositions[arrayLength]) {
 		case TR:
-			height = size.height - 10 - (thisLabel * profile.displaySpace);
+			height = size.height - 10 - (thisLabel * profile.displaySpaceF);
 			x = size.width - 5;
 			break;
 		case TL:
-			height = size.height - 10 - (thisLabel * profile.displaySpace);
+			height = size.height - 10 - (thisLabel * profile.displaySpaceF);
 			x = 5.0f;
 			break;
 		case BR:
-			height = 10.0f + (thisLabel * profile.displaySpace);
+			height = 10.0f + (thisLabel * profile.displaySpaceF);
 			x = size.width - 5;
 			break;
 		case BL:
-			height = 10.0f + (thisLabel * profile.displaySpace);
+			height = 10.0f + (thisLabel * profile.displaySpaceF);
 			x = 5.0f;
 			break;
 	}
 
 	profile.displayNodes[arrayLength]->setPosition(x, height);
 
-	for (int i = 0; i < profile.displayOpacity.size(); i++) {
-    	if (profile.displayOpacity[i] == 0.0f) {
-        	profile.displayOpacity[i] = 20.0f;
-    	}
-    	profile.displayNodes[i]->setOpacity(profile.displayOpacity[i]);
+	if (arrayLength != 0) {
+		profile.displayNodes[arrayLength]->setOpacity(50);
 	}
-	for (int i = 0; i < profile.displayScale.size(); i++) {
-    	if (profile.displayScale[i] == 0.0f) {
-        	profile.displayScale[i] = 0.45f;
-    	}
-    	profile.displayNodes[i]->setScale(profile.displayScale[i]);
+	if (profile.displayScaleF < 0.1f || profile.displayScaleF > 1.5f)
+		profile.displayScaleF = 1.0f;
+
+	float sc = profile.displayScaleF * 0.45f;
+	if (arrayLength == 0)
+	{
+		sc *= 1.8f;
+		profile.displayNodes[arrayLength]->setPosition(x, height + 10);
 	}
 
+	profile.displayNodes[arrayLength]->setScale(sc);
+	if (profile.displayOpacityF < 1)
+		profile.displayOpacityF = 255;
+	else if (profile.displayOpacityF > 255)
+		profile.displayOpacityF = 255;
+	profile.displayNodes[arrayLength]->setOpacity(profile.displayOpacityF);
 	profile.displayNodes[arrayLength]->setAnchorPoint(profile.displayNodes[arrayLength]->getPositionX() > 284.5f
 										? ccp(1.0f, profile.displayNodes[arrayLength]->getAnchorPoint().y)
 										: ccp(0.0f, profile.displayNodes[arrayLength]->getAnchorPoint().y));
@@ -1030,9 +1044,10 @@ class $modify(EditLevelLayer) {
 
 class $modify(GJGameLevel) {
 	void savePercentage(int percentage, bool practice, int clicks, int attemptTime, bool vfDChk) {
-		if (profile.safeMode && !profile.autoSafeMode) return;
-		if (profile.safeMode && profile.autoSafeMode && bad == "Cheating") return;
-		GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
+		if (profile.safeMode && !profile.autoSafeMode) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, false);
+		if (profile.safeMode && profile.autoSafeMode && profile.displayNodes[0]->getColor() == ccc3(255,0,0)) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, false);
+		if (profile.anticheat) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, true);
+		else return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
 	}
 };
 
@@ -1800,12 +1815,121 @@ class $modify(Main, PlayLayer) {
 	}
 
     void update(float f4) {
-		if (g >= 360)
-			g = 0;
-		else
-			g += profile.rainbowspeed;
-		col = CrystalClient::get()->getRainbow(0);
-		colInverse = CrystalClient::get()->getRainbow(180);
+		Icon::update();
+
+	if (cycle >= 1.0) cycle = 0;
+    Icon::cycle += 0.1;
+    auto pl = PlayLayer::get();
+    if (profile.P1Color1) {
+        if (Crystal::profile.iconEffects[0]) {
+            pl->m_player1->setColor(getEffectColor(Static, P1Color1));
+        }
+        if (Crystal::profile.iconEffects[1]) {
+            pl->m_player1->setColor(getEffectColor(Fade, P1Color1));
+        }
+        if (Crystal::profile.iconEffects[2]) {
+            pl->m_player1->setColor(getEffectColor(Rainbow, P1Color1));
+        }
+    }
+    if (profile.P1Color2) {
+        if (Crystal::profile.iconEffects[3]) {
+            pl->m_player1->setSecondColor(getEffectColor(Static, P1Color2));
+        }
+        if (Crystal::profile.iconEffects[4]) {
+            pl->m_player1->setSecondColor(getEffectColor(Fade, P1Color2));
+        }
+        if (Crystal::profile.iconEffects[5]) {
+            pl->m_player1->setSecondColor(getEffectColor(Rainbow, P1Color2));
+        }
+    }
+    if (profile.P1Glow) {
+        if (Crystal::profile.iconEffects[6]) {
+            pl->m_player1->setGlowColor(getEffectColor(Static, P1Glow));
+        }
+        if (Crystal::profile.iconEffects[7]) {
+            pl->m_player1->setGlowColor(getEffectColor(Fade, P1Glow));
+        }
+        if (Crystal::profile.iconEffects[8]) {
+            pl->m_player1->setGlowColor(getEffectColor(Rainbow, P1Glow));
+        }
+    }
+    if (profile.P1Regular) {
+        if (Crystal::profile.iconEffects[9]) {
+            pl->m_player1->m_regularTrail->setColor(getEffectColor(Static, P1RegularTrail));
+        }
+        if (Crystal::profile.iconEffects[10]) {
+            pl->m_player1->m_regularTrail->setColor(getEffectColor(Fade, P1RegularTrail));
+        }
+        if (Crystal::profile.iconEffects[11]) {
+            pl->m_player1->m_regularTrail->setColor(getEffectColor(Rainbow, P1RegularTrail));
+        }
+    }
+    if (profile.P1Wave) {
+        if (Crystal::profile.iconEffects[12]) {
+            pl->m_player1->m_waveTrail->setColor(getEffectColor(Static, P1WaveTrail));
+        }
+        if (Crystal::profile.iconEffects[13]) {
+            pl->m_player1->m_waveTrail->setColor(getEffectColor(Fade, P1WaveTrail));
+        }
+        if (Crystal::profile.iconEffects[14]) {
+            pl->m_player1->m_waveTrail->setColor(getEffectColor(Rainbow, P1WaveTrail));
+        }
+    }
+    if (profile.P2Color1) {
+        if (Crystal::profile.iconEffects[15]) {
+            pl->m_player2->setColor(getEffectColor(Static, P2Color1));
+        }
+        if (Crystal::profile.iconEffects[16]) {
+            pl->m_player2->setColor(getEffectColor(Fade, P2Color1));
+        }
+        if (Crystal::profile.iconEffects[17]) {
+            pl->m_player2->setColor(getEffectColor(Rainbow, P2Color1));
+        }
+    }
+    if (profile.P2Color2) {
+        if (Crystal::profile.iconEffects[18]) {
+            pl->m_player2->setSecondColor(getEffectColor(Static, P2Color2));
+        }
+        if (Crystal::profile.iconEffects[19]) {
+            pl->m_player2->setSecondColor(getEffectColor(Fade, P2Color2));
+        }
+        if (Crystal::profile.iconEffects[20]) {
+            pl->m_player2->setSecondColor(getEffectColor(Rainbow, P2Color2));
+        }
+    }
+    if (profile.P2Glow) {
+        if (Crystal::profile.iconEffects[21]) {
+            pl->m_player2->setGlowColor(getEffectColor(Static, P2Glow));
+        }
+        if (Crystal::profile.iconEffects[22]) {
+            pl->m_player2->setGlowColor(getEffectColor(Fade, P2Glow));
+        }
+        if (Crystal::profile.iconEffects[23]) {
+            pl->m_player2->setGlowColor(getEffectColor(Rainbow, P2Glow));
+        }
+    }
+    if (profile.P2Regular) {
+        if (Crystal::profile.iconEffects[24]) {
+            pl->m_player2->m_regularTrail->setColor(getEffectColor(Static, P2RegularTrail));
+        }
+        if (Crystal::profile.iconEffects[25]) {
+            pl->m_player2->m_regularTrail->setColor(getEffectColor(Fade, P2RegularTrail));
+        }
+        if (Crystal::profile.iconEffects[26]) {
+            pl->m_player2->m_regularTrail->setColor(getEffectColor(Rainbow, P2RegularTrail));
+        }
+    }
+    if (profile.P2Wave) {
+        if (Crystal::profile.iconEffects[27]) {
+            pl->m_player2->m_waveTrail->setColor(getEffectColor(Static, P2WaveTrail));
+        }
+        if (Crystal::profile.iconEffects[28]) {
+            pl->m_player2->m_waveTrail->setColor(getEffectColor(Fade, P2WaveTrail));
+        }
+        if (Crystal::profile.iconEffects[29]) {
+            pl->m_player2->m_waveTrail->setColor(getEffectColor(Rainbow, P2WaveTrail));
+        }
+    }
 
 		CGEventRef ourEvent = CGEventCreate(NULL);
 		auto point = CGEventGetLocation(ourEvent);
@@ -1898,14 +2022,14 @@ class $modify(Main, PlayLayer) {
 			std::string disply = cipy + fixy;
 			std::string dasply = cipy + " CPS";
 
-			if (std::chrono::duration<float>(know - last).count() > 1.0f) {
+			//if (std::chrono::duration<float>(know - last).count() > 1.0f) {
 				last = know;
-				const auto cps = static_cast<int>(std::roundf(static_cast<float>(click_count) / click_time_sum));
+				const auto cps = static_cast<int>(std::roundf(static_cast<float>(click_count) / m_time));
 				click_time_sum = 0.f;
-				click_count = 0;
+				//click_count = 0;
 			
 				cipy = std::to_string(cps);
-			}
+			//}
 
 			if (holding && Crystal::profile.tclicks) {
 				profile.displayNodes[2]->setColor(ccc3(0, 255, 0));
@@ -1996,38 +2120,36 @@ class $modify(Main, PlayLayer) {
 			std::string displayL;
 			std::string levelName = PlayLayer::get()->m_level->m_levelName;
 			std::string levelAuthor = PlayLayer::get()->m_level->m_creatorName;
-			std::string levelID = std::to_string(PlayLayer::get()->m_level->m_levelID);
-			if (Crystal::profile.hideID && !Crystal::profile.author) {
-				displayL = levelName;
-			} else if (Crystal::profile.hideID && Crystal::profile.author) {
-				displayL = levelName + " by " + levelAuthor;
-			}
-			
-			if (levelID == "0") {
+			std::string levelID = std::to_string(PlayLayer::get()->m_level->m_levelID);			
+			if (PlayLayer::get()->m_level->m_levelID == 0) {
 				levelID = "Copy";
 			}
 			if (PlayLayer::get()->m_level->m_levelID < 22 && PlayLayer::get()->m_level->m_levelID > 0) {
 				levelAuthor = "RobTop"; 
 			}
 
-			if (Crystal::profile.author) {
-				displayL = levelName + " by " + levelAuthor + " (" + levelID + ")";
+			if (Crystal::profile.hideID && !Crystal::profile.author) {
+				displayL = levelName;
+			} else if (Crystal::profile.hideID && Crystal::profile.author) {
+				displayL = levelName + " by " + levelAuthor;
 			} else {
 				displayL = levelName + " (" + levelID + ")";
 			}
 			profile.displayNodes[11]->setString(displayL.c_str());
 		}
 		if (profile.displays[12]) {
-            if (profile.replay && !CrystalClient::get()->isRendering) {
+            if (profile.replay && !profile.renderer) {
                 std::string status = "Playing: " + std::to_string(currentP1index) + "/" + std::to_string(P1pushes.size()) + " (Frame " + std::to_string((int)(m_time * profile.TPS)) + ")";
                 profile.displayNodes[12]->setString(status.c_str());
             } else if (profile.record) {
                 std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * profile.TPS));
                 profile.displayNodes[12]->setString(status.c_str());
-            } else if (profile.replay && CrystalClient::get()->isRendering) {
+            } else if (profile.replay && profile.renderer) {
                 std::string status = "Rendering: Video Frame " + std::to_string((int)(m_time * 60));
                 profile.displayNodes[12]->setString(status.c_str());
-            }
+            } else {
+				profile.displayNodes[12]->setString("Not using Amethyst");
+			}
         }
 		if (profile.displays[13]) {
 			auto t = std::time(nullptr);
@@ -2128,7 +2250,7 @@ class $modify(Main, PlayLayer) {
 
 		if (profile.trajectory) drawer->processMainTrajectory(f4);
 
-		if (profile.replay && P1pushes.size() > 0 && currentR1index < P1releases.size()) {
+		if (profile.replay && (P1pushes.size() > 0 || P2pushes.size() > 0)) {
 			if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
 				GJBaseGameLayer::get()->pushButton(1, true);
 				currentP1index++;
@@ -2139,16 +2261,14 @@ class $modify(Main, PlayLayer) {
 				currentR1index++;
 			}
 
-			if (P2pushes.size() > 0) {
-				if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
-					GJBaseGameLayer::get()->pushButton(1, false);
-					currentP2index++;
-				}
+			if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
+				GJBaseGameLayer::get()->pushButton(1, false);
+				currentP2index++;
+			}
 
-				if (P2releases[currentR2index] <= currentFrame && currentR2index < P2releases.size()) {
-					GJBaseGameLayer::get()->releaseButton(1, false);
-					currentR2index++;
-				}
+			if (P2releases[currentR2index] <= currentFrame && currentR2index < P2releases.size()) {
+				GJBaseGameLayer::get()->releaseButton(1, false);
+				currentR2index++;
 			}
 		}
 
@@ -2320,7 +2440,7 @@ class $modify(Main, PlayLayer) {
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
 		if (Crystal::profile.startpos || Crystal::profile.checkpointswitch) {
 			rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
-			leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+			leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
 			g_startPosText = CCLabelBMFont::create("0/0", "bigFont.fnt");
 			g_startPosIndex = -1;
 			g_startPoses = {};
@@ -2329,11 +2449,7 @@ class $modify(Main, PlayLayer) {
 		}
 
 		for (int d = 0; d < 15; d++) {
-			if (Crystal::profile.displays[12]) {
-				profile.displayNodes[d] = CCLabelBMFont::create(" ", "bigFont.fnt");
-			} else {
-				profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
-			}
+			profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
 		}
 
         drawer = tulip::HitboxNode::create();
@@ -2404,9 +2520,15 @@ class $modify(Main, PlayLayer) {
 			rightButton->setOpacity(50);
 			
 			leftButton->::Main::setPosition(win_size.width / 2 + 30, corner - 275);
-			leftButton->setRotation(180);
+			leftButton->setFlipX(true);
 			leftButton->setScale(0.5);
 			leftButton->setOpacity(50);
+
+			if (!m_isTestMode) {
+				g_startPosText->setVisible(false);
+				rightButton->setVisible(false);
+				leftButton->setVisible(false);
+			}
 			
 			addChild(g_startPosText, 1000);
 			addChild(rightButton, 1000);
@@ -2598,7 +2720,7 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 };
 
 class $(GameLevelManager) {
-	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, GJHttpType type) {
+	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, int type) {
 		std::string url(gdurl);
 		std::string query(gdquery);
 
