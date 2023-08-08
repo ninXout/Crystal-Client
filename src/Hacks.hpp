@@ -41,6 +41,26 @@ void fps_shower_init();
     bool borders;
     bool rounded;
 
+    // Checkpoint Switcher
+    std::vector<std::pair<CheckpointObject*, CCPoint>> g_checkpoints;
+    int g_checkpointIndex;
+    CCSprite* CPrightButton;
+    CCSprite* CPleftButton;
+
+    // Noclip Accuracy
+    static float frames, noclipped_frames = 0;
+    bool completed = false;
+    static float limitframes = 0;
+    CCLabelBMFont* text;
+    float percent;
+    bool lenient;
+    float killaccuracy;
+    bool finished;
+    bool resetaccuracy;
+    //bool would_die;
+    bool dying = false;
+    bool deaath = false;
+
     // Amethyst
     AmethystMacro currentMacro;
 
@@ -164,9 +184,6 @@ void fps_shower_init();
     int ss = 0;
     float g = 0;
 
-    // AutoClicker
-    int clickframe;
-
     // Unorganized
     std::string image;
     float pulse = 2;
@@ -190,6 +207,5 @@ void fps_shower_init();
     CCLabelBMFont* g_pauseCount;
     bool inputmirror;
     float speedhack = 1;
-    bool shouldUpdate = false;
     float newDT;
     //bool lastDeath;

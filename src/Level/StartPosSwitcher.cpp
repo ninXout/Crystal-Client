@@ -58,6 +58,9 @@ class $modify(SPPlayLayer, PlayLayer) {
 	}
 
     bool init(GJGameLevel* gj) {
+        auto corner = CCDirector::sharedDirector()->getScreenTop();
+        auto win_size = CCDirector::sharedDirector()->getWinSize();
+
         rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
         leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
         g_startPosText = CCLabelBMFont::create("0/0", "bigFont.fnt");
@@ -70,11 +73,11 @@ class $modify(SPPlayLayer, PlayLayer) {
         g_startPosText->setScale(0.5);
         g_startPosText->setOpacity(50);
 
-        rightButton->::Main::setPosition(win_size.width / 2 - 30, corner - 275);
+        rightButton->::SPPlayLayer::setPosition(win_size.width / 2 - 30, corner - 275);
         rightButton->setScale(0.5);
         rightButton->setOpacity(50);
         
-        leftButton->::Main::setPosition(win_size.width / 2 + 30, corner - 275);
+        leftButton->::SPPlayLayer::setPosition(win_size.width / 2 + 30, corner - 275);
         leftButton->setFlipX(true);
         leftButton->setScale(0.5);
         leftButton->setOpacity(50);
@@ -88,6 +91,8 @@ class $modify(SPPlayLayer, PlayLayer) {
         addChild(g_startPosText, 1000);
         addChild(rightButton, 1000);
         addChild(leftButton, 1000);
+
+        return true;
     }
 
     void update(float dt) {

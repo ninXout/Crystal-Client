@@ -252,14 +252,16 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"));
 	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"));
 	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"));
-	CrystalClient::ImToggleable("Load from Last Checkpoint", &Crystal::profile.lastCheckpoint);
-	CrystalClient::ImToggleable("No Glow", &Crystal::profile.noglow);
-	CrystalClient::ImToggleable("No Mirror Effect", &Crystal::profile.mirror);
-	CrystalClient::ImToggleable("Layout Mode", &Crystal::profile.layout);
-	CrystalClient::ImExtendedToggleable("AutoClicker", &Crystal::profile.autoclick);
+	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"));
+	CrystalClient::ImToggleable("No Glow", setVar<bool>("no_glow"));
+	CrystalClient::ImToggleable("No Mirror Effect", setVar<bool>("no_mirror"));
+	CrystalClient::ImToggleable("Layout Mode", setVar<bool>("layout_mode"));
+	CrystalClient::ImExtendedToggleable("AutoClicker", setVar<bool>("autoclicker"));
 	if (ImGui::BeginPopupModal("AutoClicker", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::InputInt("Push on Frame", &profile.ACpushframe);
-		ImGui::InputInt("Release on Frame", &profile.ACrelframe);
+		CrystalClient::ImToggleable("Autoclick Player 1", setVar<bool>("AC_player1"));
+		CrystalClient::ImToggleable("Autoclick Player 2", setVar<bool>("AC_player2"));
+		ImGui::InputInt("Push on Frame", setVar<int>("AC_pushFrame"));
+		ImGui::InputInt("Release on Frame", setVar<int>("AC_releaseFrame"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -818,57 +820,7 @@ class $modify(GameManager) {
 };
 
 class $(MyGameObject, GameObject) {
-	CCSprite* m_backgroundLayer;
-	bool m_realVisible;
-	cocos2d::_ccColor3B m_realColor;
-
-	void setVisible(bool v) {
-		if (Crystal::profile.layout) {
-			m_fields->m_realVisible = v;
-
-			if (m_objectType == GameObjectType::Decoration) {
-				GameObject::setVisible(false);
-			} else {
-				GameObject::setVisible(v); // for CCParticleSystem (idk why)
-				GameObject::setVisible(true);
-			}
-		} else GameObject::setVisible(v);
-	}
-
-	void revertVisibility() {
-		setVisible(m_fields->m_realVisible);
-	}
-
-	void setOpacity(unsigned char g) {
-		GameObject::setOpacity(g);
-
-		if (Crystal::profile.layout && m_objectType != GameObjectType::Decoration) {
-			CCSpritePlus::setOpacity(255);
-			if (m_glowSprite)
-				m_glowSprite->setOpacity(255);
-		}
-	}
-
-	void setGlowColor(cocos2d::_ccColor3B const& col) {
-		if (Crystal::profile.layout) {
-			GameObject::setGlowColor(ccc3(255, 255, 255));
-		} else {
-			GameObject::setGlowColor(col);
-		}
-	}
-
-	void setObjectColor(const cocos2d::ccColor3B& cor) {
-		if (Crystal::profile.layout && m_objectType != GameObjectType::Decoration) {
-			GameObject::setObjectColor(ccc3(255, 255, 255));
-		} else {
-			GameObject::setObjectColor(cor);
-		}
-	}
-
     virtual void update(float time2) {
-		if (Crystal::profile.noglow) {
-			m_isGlowDisabled = true;
-		}
 		if (Crystal::profile.instantdeath) {
 			m_particleAdded = true;
    			m_hasParticles = false;
@@ -1021,7 +973,7 @@ class $modify(CheckpointObject) {
 			g_checkpoints.push_back({cpo, static_cast<CCNode*>(cpo)->getPosition()});
 			g_checkpointIndex += 1;
 			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
-			g_startPosText->setString(label.c_str());
+			//g_startPosText->setString(label.c_str());
 		}
 		if (profile.record) currentMacro.createCheckpointData();
 		return cpo;
@@ -1029,11 +981,6 @@ class $modify(CheckpointObject) {
 };
 
 class $modify(Main, PlayLayer) {
-    void addObject(GameObject* g) {
-		if (Crystal::profile.noglow) g->m_isGlowDisabled = true;
-		PlayLayer::addObject(g);
-	}	
-
 	void loadFromCheckpoint(CheckpointObject* cpo) {
 		if (Crystal::profile.checkpointswitch) {
 			if (cpo && g_checkpointIndex != -1) {
@@ -1106,14 +1053,6 @@ class $modify(Main, PlayLayer) {
 		
 	}
 */
-    void fullReset() {
-		if (Crystal::profile.lastCheckpoint && m_isPracticeMode) {
-			loadLastCheckpoint();
-			resetLevel();
-		} else {
-			PlayLayer::fullReset();
-		}
-	}
 
     void checkCollisions(PlayerObject* p, float g) {
 		if (profile.anticheat) {
@@ -1124,17 +1063,6 @@ class $modify(Main, PlayLayer) {
 			m_accumulatedKickCounter = 0;
 			m_kickCheckDeltaSnapshot = (float)std::time(nullptr);
 		}
-
-        if (Crystal::profile.autoclick) {
-            clickframe++;
-            if (clickframe == Crystal::profile.ACpushframe) {
-                GJBaseGameLayer::get()->pushButton(1, true);
-            }
-            if (clickframe >= (Crystal::profile.ACpushframe + Crystal::profile.ACrelframe)) {
-                GJBaseGameLayer::get()->releaseButton(1, true);
-                clickframe = 0;
-            }
-        }
 
         PlayLayer::checkCollisions(p, g);
 
@@ -1519,8 +1447,8 @@ class $modify(Main, PlayLayer) {
 
 		if (profile.record || profile.replay) f4 = 1.f / (profile.FPS * (profile.TPS / 60)) / speedhack;
 
-		if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentFrame += f4;
-		if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentTXTFrame++;
+		//if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentFrame += f4;
+		//if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentTXTFrame++;
 
 		PlayLayer::update(f4);
 		if (profile.renderer) record.handle_recording(this, f4);
@@ -1528,17 +1456,6 @@ class $modify(Main, PlayLayer) {
 		//if (profile.trajectory) drawer->processMainTrajectory(f4);
 
 		if (profile.replay && gameStarted) currentMacro.updateReplay(f4);
-
-		if (profile.layout) {
-			auto p = PlayLayer::get()->getChildren()->objectAtIndex(0);
-			auto bg = static_cast<CCSprite*>(p);
-			ccColor3B color = { (GLubyte)(40), (GLubyte)(125), (GLubyte)(255) };
-			bg->setColor(color);
-		}
-	}
-
-    void markCheckpoint() {
-		PlayLayer::markCheckpoint();
 	}
 
 	void removeLastCheckpoint() {
@@ -1587,12 +1504,6 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::onQuit();
 	}
 
-    void toggleFlipped(bool one, bool two) {
-		if (!Crystal::profile.mirror) {
-			PlayLayer::toggleFlipped(one, two);
-		}
-	}
-
 	void startGame() {
 		PlayLayer::startGame();
 		gameStarted = true;
@@ -1601,7 +1512,6 @@ class $modify(Main, PlayLayer) {
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		timee = 0.0f;
-		auto corner = CCDirector::sharedDirector()->getScreenTop();
 
 		for (int d = 0; d < 15; d++) {
 			profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
@@ -1646,7 +1556,6 @@ class $modify(Main, PlayLayer) {
 				}
 			}
 		}
-		auto win_size = CCDirector::sharedDirector()->getWinSize();
 
 		if (profile.clickBot) Clickbot::start = std::chrono::system_clock::now();
 
@@ -1686,17 +1595,17 @@ class $(UILayer) {
 				Crystal::profile.autoclick = true;
 			}
 		} else if (current == 6) {
-			mpl->updateIndex(false);
+			//mpl->updateIndex(false);
 		} else if (current == 7) {
-			mpl->updateIndex(true);
+			//mpl->updateIndex(true);
 		} else if (current == 10) {
 			if (PlayLayer::get()->m_isPracticeMode) PlayLayer::get()->markCheckpoint();
 		} else if (current == 11) {
 			if (PlayLayer::get()->m_isPracticeMode) PlayLayer::get()->removeLastCheckpoint();
 		} else if (current == 13 && profile.framestep) {
-			shouldUpdate = true;
-			mpl->update(1.f / (profile.FPS * (profile.TPS / 60)) / profile.speedhack);
-			shouldUpdate = false;
+			//shouldUpdate = true;
+			//mpl->update(1.f / (profile.FPS * (profile.TPS / 60)) / profile.speedhack);
+			//shouldUpdate = false;
 		}
 	}
 
