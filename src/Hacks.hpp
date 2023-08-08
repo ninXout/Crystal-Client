@@ -85,15 +85,10 @@ void fps_shower_init();
     std::vector<GameObject*> miniPortals;
     std::vector<GameObject*> dualPortals;
     std::vector<GameObject*> speedChanges;
-    std::vector<GameObject*> coins;
     std::vector<StartPosObject*> SPs;
     std::vector<bool> willFlip;
     
     // Hitbox Visualizer
-    static inline bool s_onlyHitboxes = false;
-    static inline bool s_showOnDeath = false;
-    static inline bool s_drawOnDeath = false;
-    static inline bool s_noLimitTrail = false;
 
     // Amethyst
     bool gameStarted;
@@ -219,7 +214,6 @@ void fps_shower_init();
     bool autoreset;
     bool customMessage;
     float rainbowspeed = 5;
-    bool shouldQuit;
     bool overrideFL;
     bool settingRefresh;
     bool instantmaybe;

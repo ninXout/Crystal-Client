@@ -213,45 +213,39 @@ void CrystalClient::drawGUI() {
 	ImGui::End();
 
 	ImGui::Begin("Level", NULL, window_flags);
-	CrystalClient::ImExtendedToggleable("Hitbox Viewer", &Crystal::profile.hitboxes);
+	CrystalClient::ImExtendedToggleable("Hitbox Viewer", setVar<bool>("hitboxes"));
 	if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Show Hitboxes on Death", &Crystal::profile.onDeath);
-		CrystalClient::ImToggleable("Show Hitbox Trail", &Crystal::profile.drawTrail);
-		CrystalClient::ImToggleable("Show Hitboxes in Editor", &Crystal::profile.inEditor);
-		//CrystalClient::ImToggleable("Fill Hitboxes", &Crystal::profile.fillHitbox);
-		//ImGui::InputFloat("Hitbox Fill Opacity", &Crystal::profile.fillOpacity);
-		CrystalClient::ImToggleable("Coin Tracker", &Crystal::profile.coinFind);
-		CrystalClient::ImToggleable("Show Trajectory [BETA]", &Crystal::profile.trajectory);
+		CrystalClient::ImToggleable("Show Hitboxes on Death", setVar<bool>("hitbox_on_death"));
+		CrystalClient::ImToggleable("Show Hitbox Trail", setVar<bool>("hitbox_trail"));
+		CrystalClient::ImToggleable("Show Hitboxes in Editor", setVar<bool>("hitboxes_in_editor"));
+		CrystalClient::ImToggleable("Coin Tracker", setVar<bool>("coin_tracker"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	/* CrystalClient::ImExtendedToggleable("Hitbox Multiplier", &Crystal::profile.hitboxMultiply);
-	if (ImGui::BeginPopupModal("Hitbox Multiplier", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::InputFloat("Solids Multiplier", &Crystal::profile.multiplySolids);
-		ImGui::InputFloat("Hazard Multiplier", &Crystal::profile.multiplyHazards);
-		ImGui::InputFloat("Special Multiplier", &Crystal::profile.multiplySpecial);
+	CrystalClient::ImToggleable("No Progress Bar", setVar<bool>("no_progress_bar"));
+	CrystalClient::ImExtendedToggleable("Accurate Percentage", setVar<bool>("acc_percentage"));
+	if (ImGui::BeginPopupModal("Accurate Percentage", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::InputInt("Percentage Decimal Points", setVar<int>("acc_percentage_decimals"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
-	} */
-	CrystalClient::ImToggleable("No Progress Bar", &Crystal::profile.progressBar);
-	CrystalClient::ImToggleable("Accurate Percentage", &Crystal::profile.accpercentage);
-	CrystalClient::ImExtendedToggleable("Hide Attempts Label", &Crystal::profile.hideatts);
+	}
+	CrystalClient::ImExtendedToggleable("Hide Attempts Label", setVar<bool>("hide_attempts"));
 	if (ImGui::BeginPopupModal("Hide Attempts Label", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Hide in Normal Mode", &Crystal::profile.hidenormalatts);
-		CrystalClient::ImToggleable("Hide in Practice Mode", &Crystal::profile.hidepracticeatts);
+		CrystalClient::ImToggleable("Hide in Normal Mode", setVar<bool>("hide_attempts_normal"));
+		CrystalClient::ImToggleable("Hide in Practice Mode", setVar<bool>("hide_attempts_practice"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Practice Music Hack", &Crystal::profile.pracmusic);
-	CrystalClient::ImToggleable("Hide Pause Menu", &Crystal::profile.hidepause);
-	CrystalClient::ImToggleable("Ignore ESC", &Crystal::profile.ignoreESC);
-	CrystalClient::ImToggleable("Confirm Quit", &Crystal::profile.confirmQuit);
+	CrystalClient::ImToggleable("Practice Music Hack", setVar<bool>("practice_music"));
+	CrystalClient::ImToggleable("Hide Pause Menu", setVar<bool>("hide_pause"));
+	CrystalClient::ImToggleable("Ignore ESC", setVar<bool>("ignore_esc"));
+	CrystalClient::ImToggleable("Confirm Quit", setVar<bool>("confirm_quit"));
 	CrystalClient::ImToggleable("Auto LDM", &Crystal::profile.autoldm);
 	CrystalClient::ImToggleable("Auto Song Downloader", &Crystal::profile.autoSong);
 	CrystalClient::ImToggleable("Flipped Dual Controls", &Crystal::profile.flippedcontrol);
@@ -721,164 +715,7 @@ class $modify(MenuLayer) {
 	}
 };
 
-class $modify(HitboxLevelEditorLayer, LevelEditorLayer) {
-    static inline tulip::HitboxNode* drawer;
-	static inline bool paused = false;
-
-	bool init(GJGameLevel* lvl) {
-		drawer = tulip::HitboxNode::create();
-		auto ret = LevelEditorLayer::init(lvl);
-		drawer->setVisible(false);
-		m_objectLayer->addChild(drawer, 32);
-
-		s_drawer = drawer;
-
-		// i hate bad practices
-		drawer->m_drawTrail = Crystal::profile.drawTrail;
-		s_noLimitTrail = false;
-
-		for (int s = 0; s < profile.regularPath.size(); s++) {
-			drawer->addToPlayer1Queue(profile.regularPath[s]);
-		}
-		this->updateHitboxEditor();
-
-		if (Crystal::profile.inEditor) drawer->setVisible(true);
-		return ret;
-	}
-	bool checkCollisions(PlayerObject* player, float uhh) {
-		auto ret = LevelEditorLayer::checkCollisions(player, uhh);
-		if (player == m_player1) {
-			drawer->addToPlayer1Queue(m_player1->getObjectRect());
-		}
-		if (player == m_player2) {
-			drawer->addToPlayer2Queue(m_player2->getObjectRect());
-		}
-		return ret;
-	}
-	void onPlaytest() {
-		LevelEditorLayer::onPlaytest();
-		drawer->drawForPlayer1(m_player1);
-		this->updateHitboxEditor();
-		if (Crystal::profile.inEditor) {
-			drawer->setVisible(true);
-		}
-	}
-	void onPausePlaytest() {
-		LevelEditorLayer::onPausePlaytest();
-		paused = true;
-		this->updateHitboxEditor();
-	}
-	void updateHitboxEditor() {
-		if (!paused) return;
-		if (s_noLimitTrail) drawer->m_noLimitTrail = true;
-
-		if (m_player1) {
-			drawer->drawForPlayer1(m_player1);
-		}
-		if (m_player2) {
-			drawer->drawForPlayer2(m_player2);
-		}
-
-		float xp = m_player1->getPositionX();
-
-		for (int s = sectionForPos(xp) - 5; s < sectionForPos(xp) + 6; ++s) {
-			if (s < 0) continue;
-			if (s >= m_sectionObjects->count()) break;
-			auto section = static_cast<CCArray*>(m_sectionObjects->objectAtIndex(s));
-			for (size_t i = 0; i < section->count(); ++i) {
-				auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-
-				if (s_onlyHitboxes) obj->setOpacity(0);
-
-				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
-				if (!obj->m_active) continue;
-
-				drawer->drawForObject(obj);
-			}
-		}
-	}
-	void onResumePlaytest() {
-		if (s_noLimitTrail) drawer->m_noLimitTrail = false;
-		paused = false;
-		LevelEditorLayer::onResumePlaytest();
-	}
-	void onStopPlaytest() {
-		if (s_noLimitTrail) drawer->m_noLimitTrail = false;
-		paused = false;
-        drawer->clearQueue();
-        if (Crystal::profile.inEditor) {
-			drawer->setVisible(true);
-		}
-        LevelEditorLayer::onStopPlaytest();
-    }
-
-	void update(float dt) {
-		drawer->clear();
-		LevelEditorLayer::update(dt);
-
-		if (m_player1) {
-			if (Crystal::profile.inEditor) drawer->drawForPlayer1(m_player1);
-			
-		}
-		if (m_player2) {
-			if (Crystal::profile.inEditor) drawer->drawForPlayer2(m_player2);
-		}
-
-		float xp = m_player1->getPositionX();
-
-		for (int s = sectionForPos(xp) - 5; s < sectionForPos(xp) + 6; ++s) {
-			if (s < 0) continue;
-			if (s >= m_sectionObjects->count()) break;
-			auto section = static_cast<CCArray*>(m_sectionObjects->objectAtIndex(s));
-			for (size_t i = 0; i < section->count(); ++i) {
-				auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-
-				if (s_onlyHitboxes) obj->setOpacity(0);
-
-				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
-				if (!obj->m_active) continue;
-
-				if (Crystal::profile.inEditor) drawer->drawForObject(obj);
-			}
-		}
-	}
-};
-
 class $modify(EditorUI) {
-	void keyDown(enumKeyCodes code) {
-		EditorUI::keyDown(code);
-		if (s_drawer) {
-			s_drawer->clear();
-			for (int s = 0; s < profile.regularPath.size(); s++) {
-				s_drawer->addToPlayer1Queue(profile.regularPath[s]);
-			}
-			if (GJBaseGameLayer::get()->m_player1) {
-				s_drawer->drawForPlayer1(GJBaseGameLayer::get()->m_player1);
-			}
-			if (GJBaseGameLayer::get()->m_player2) {
-				s_drawer->drawForPlayer2(GJBaseGameLayer::get()->m_player2);
-			}
-
-			float xp = GJBaseGameLayer::get()->m_player1->getPositionX();
-
-			for (int s = GJBaseGameLayer::get()->sectionForPos(xp) - 5; s < GJBaseGameLayer::get()->sectionForPos(xp) + 6; ++s) {
-				if (s < 0) continue;
-				if (s >= GJBaseGameLayer::get()->m_sectionObjects->count()) break;
-				auto section = static_cast<CCArray*>(GJBaseGameLayer::get()->m_sectionObjects->objectAtIndex(s));
-				for (size_t i = 0; i < section->count(); ++i) {
-					auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-
-					if (s_onlyHitboxes) obj->setOpacity(0);
-
-					if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
-					if (!obj->m_active) continue;
-
-					s_drawer->drawForObject(obj);
-				}
-			}
-		} 
-	}
-
 	void scrollWheel(float y, float x) {
 		auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
 		//if (kb->getShiftKeyPressed() && scrollzoom) {
@@ -900,11 +737,6 @@ class $modify(CCScheduler) {
 			float tScale = dir->getScheduler()->getTimeScale();
 
 			f3 = spf * tScale;
-		}
-	
-		if (shouldQuit && PlayLayer::get()) {
-			PlayLayer::get()->PlayLayer::onQuit();
-			shouldQuit = false;
 		}
 
 		if (PlayLayer::get() && gameStarted && (profile.TPSbypass || profile.FPSbypass || profile.deltaLock || profile.replay || profile.record || profile.renderer)) {
@@ -1047,7 +879,7 @@ class $(MyGameObject, GameObject) {
 		}
 		GameObject::update(time2);
 	}
-
+/*
 	void activatedByPlayer(GameObject* other) {
 		if (profile.trajectory && s_drawer->m_pIsSimulation) {
 			if (this->getType() != GameObjectType::Slope &&
@@ -1070,7 +902,7 @@ class $(MyGameObject, GameObject) {
 			}
 		}
 		GameObject::activatedByPlayer(other);
-	}
+	}*/
 };
 
 class $modify(LevelTools) {
@@ -1154,7 +986,7 @@ class $modify(GJBaseGameLayer) {
 
 class $modify(HardStreak) {
 	void addPoint(cocos2d::CCPoint point) {
-		if (profile.trajectory && s_drawer->m_pIsSimulation) return;
+		//if (profile.trajectory && s_drawer->m_pIsSimulation) return;
 		HardStreak::addPoint(point);
 	}
 };
@@ -1186,7 +1018,6 @@ class $modify(LevelInfoLayer) {
 class $modify(PauseLayer) {
 	static PauseLayer* create(bool isPaused) {
 		auto pause = PauseLayer::create(isPaused);
-		if (profile.hidepause) pause->setVisible(false);
 		if (Crystal::profile.levelEdit) {
 			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
 			auto menu = static_cast<CCMenu*>(pause->getChildByID("center-button-menu"));
@@ -1204,16 +1035,6 @@ class $modify(PauseLayer) {
 		}
 		return pause;
 	}
-
-	void keyDown(cocos2d::enumKeyCodes key) {
-		if (key == KEY_Escape) {
-			if (!Crystal::profile.ignoreESC) {
-				PauseLayer::keyDown(key);
-			}
-		} else {
-			PauseLayer::keyDown(key);
-		}
-	}
 };
 
 class $modify(PlayerObject) {
@@ -1224,12 +1045,8 @@ class $modify(PlayerObject) {
 	}
 	void playerDestroyed(bool idk) {
 		PlayerObject::playerDestroyed(idk);
-		s_drawOnDeath = true;
         if (Crystal::profile.instantdeath) {
 			PlayLayer::get()->resetLevel();
-		}
-		if (Crystal::profile.pracmusic) {
-			GameSoundManager::sharedManager()->stopBackgroundMusic();
 		}
 	}
 };
@@ -1314,7 +1131,6 @@ class $modify(Main, PlayLayer) {
 		if (Crystal::profile.noglow) g->m_isGlowDisabled = true;
 		PlayLayer::addObject(g);
 		SPs.push_back(reinterpret_cast<StartPosObject*>(g));
-		if ((g->m_objectID == 1329 || g->m_objectID == 142) && profile.coinFind) coins.push_back(g);
 		if (Crystal::profile.startpos) {
 			if (g->m_objectID == 31) {
 				g->retain();
@@ -1340,14 +1156,12 @@ class $modify(Main, PlayLayer) {
 	}
 
     void resetLevel() {
-		drawer->m_pDieInSimulation = false;
-		drawer->m_pIsSimulation = false;
+		//drawer->m_pDieInSimulation = false;
+		//drawer->m_pIsSimulation = false;
 		
 		if (profile.bestRun) {
 			bestEnd2 = (m_player1->getPositionX() / m_levelLength) * 100;
 		}
-        if (s_showOnDeath) s_drawOnDeath = false;
-        drawer->clearQueue();
 		
 		PlayLayer::resetLevel();
 
@@ -1436,132 +1250,9 @@ class $modify(Main, PlayLayer) {
 			profile.displayNodes[d]->setVisible(profile.displays[d]);
 			CrystalClient::get()->arrangeText(d, this, false);
 		}
-
-        if (p == m_player1) {
-            drawer->addToPlayer1Queue(m_player1->getObjectRect());
-            if (profile.replay && (int)(m_time * 60) != lastMacroTime) {
-				profile.regularPath.push_back(m_player1->getObjectRect());
-				lastMacroTime = (int)(m_time * 60);
-			}
-        }
-        if (p == m_player2) {
-            drawer->addToPlayer2Queue(m_player2->getObjectRect());
-        }
 	}
 
-    void updateProgressbar() {
-		PlayLayer::updateProgressbar();	
-		if (Crystal::profile.accpercentage) {
-			if (percent > 100.00) {
-				percent = 100.00;
-			}
-			char str[64];
-			sprintf(str, "%.2lf%%", percent);
-			m_percentLabel->setString(str);
-		}
-	}
-
-    CGImageRef CGImageFromCCImage(CCImage* img) {
-		float width = img->getWidth();
-		float height = img->getHeight();
-		int dataLen = width * height * 4;
-
-		CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, img->getData(), dataLen, NULL);
-
-
-		return CGImageCreate(
-			width, height, 
-			8, 8 * 4, width * 4, 
-			CGColorSpaceCreateDeviceRGB(), 
-			kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast, 
-			provider,   // data provider
-			NULL,       // decode
-			true,        // should interpolate
-			kCGRenderingIntentDefault
-		);
-	}
-
-	bool CGImageWriteToFile(CGImageRef image) {
-		std::stringstream newthing;
-		newthing << (std::string)geode::Mod::get()->getConfigDir();
-		newthing << "/Amethyst/Renderer/Frames/";
-  		newthing << "frame_";
-		newthing << std::setw(4) << std::setfill('0') << std::to_string(ss);
-		newthing << ".png";
-		std::string name = newthing.str();
-
-		ss++;
-
-		CFStringRef file = CFStringCreateWithCString(kCFAllocatorDefault,
-		name.c_str(),
-		kCFStringEncodingMacRoman);
-		CFStringRef type = CFSTR("public.png");
-		CFURLRef urlRef = CFURLCreateWithFileSystemPath( kCFAllocatorDefault, file, kCFURLPOSIXPathStyle, false );
-		CGImageDestinationRef destination = CGImageDestinationCreateWithURL( urlRef, kUTTypePNG, 1, NULL );
-		CGImageDestinationAddImage( destination, image, NULL );
-		CGImageDestinationFinalize( destination );
-		if (!destination) {
-			return false;
-		}
-
-		CGImageDestinationAddImage(destination, image, nil);
-
-		if (!CGImageDestinationFinalize(destination)) {
-			CFRelease(destination);
-			return false;
-		}
-
-		CFRelease(destination);
-		return true;
-	}
-
-	void captureScreen() {
-		auto size = CCDirector::sharedDirector()->getWinSize();
-		auto renderer = CCRenderTexture::create(size.width, size.height, cocos2d::kCCTexture2DPixelFormat_RGBA8888);
-
-		renderer->begin();
-		if (static_cast<CCNode*>(PlayLayer::get())->getChildrenCount()) {
-			CCArrayExt<CCNode*> children = this->getChildren();
-			for (auto* child : children) {
-				using namespace std::literals::string_view_literals;
-				if ((typeinfo_cast<CCLabelBMFont*>(child) && typeinfo_cast<CCLabelBMFont*>(child)->getString() == "Testmode"sv) || child->getZOrder() == 1000) {
-					//label->setVisible(false);
-					//break;
-					//do nothing
-				} else {
-					child->visit();
-				}
-			}
-		}
-		//static_cast<cocos2d::CCNode*>(PlayLayer::get())->visit();
-		renderer->end();
-
-		auto img = renderer->newCCImage(true);
-		CGImageWriteToFile(CGImageFromCCImage(img));    
-	}
-
-	void Press(int key) {
-		// Create an HID hardware event source
-		CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-
-		// Create a new keyboard key press event
-		CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) key, true);
-
-		// Post keyboard event and release
-		CGEventPost (kCGHIDEventTap, evt);
-		CFRelease (evt); CFRelease (src);
-	}
-
-	void Release(int key) {
-		// Create an HID hardware event source
-		CGEventSourceRef src = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-
-		// Create a new keyboard key release event
-		CGEventRef evt = CGEventCreateKeyboardEvent(src, (CGKeyCode) key, false);
-
-		// Post keyboard event and release
-		CGEventPost (kCGHIDEventTap, evt);
-		CFRelease (evt); CFRelease (src);
+	void captureScreen() { 
 	}
 
     void update(float f4) {
@@ -1924,18 +1615,6 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 
-		if (Crystal::profile.progressBar) {
-			m_sliderGrooveSprite->setVisible(false);
-			m_percentLabel->setPositionX(cocos2d::CCDirector::sharedDirector()->getWinSize().width / 2 - (m_percentLabel->getContentSize().width / 4));
-		} else {
-			m_sliderGrooveSprite->setVisible(true);
-		}
-		if (Crystal::profile.hideatts) {
-			if (Crystal::profile.hidenormalatts && !m_isPracticeMode) m_attemptLabel->setVisible(false);
-			if (Crystal::profile.hidepracticeatts && m_isPracticeMode) m_attemptLabel->setVisible(false);
-		}
-        drawer->clear();
-
 		for (int i = 0; i < variables.size(); i++) {
 			if (variables[i].activeVar == 0) m_player1->m_gravity = variables[i].activeValue;
 			if (variables[i].activeVar == 1) m_player1->m_xVelocity = variables[i].activeValue;
@@ -1956,7 +1635,7 @@ class $modify(Main, PlayLayer) {
 			if (profile.renderer) record.handle_recording(this, f4);
 		}
 
-		if (profile.trajectory) drawer->processMainTrajectory(f4);
+		//if (profile.trajectory) drawer->processMainTrajectory(f4);
 
 		if (profile.replay && gameStarted) currentMacro.updateReplay(f4);
 
@@ -1965,42 +1644,6 @@ class $modify(Main, PlayLayer) {
 			auto bg = static_cast<CCSprite*>(p);
 			ccColor3B color = { (GLubyte)(40), (GLubyte)(125), (GLubyte)(255) };
 			bg->setColor(color);
-		}
-
-		if (s_showOnDeath) {
-			if (!s_drawOnDeath || !Crystal::profile.hitboxes) return;
-			drawer->setVisible(true);
-		}		
-
-		for (size_t i = 0; i < coins.size(); i++) {
-			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && Crystal::profile.hitboxes && profile.coinFind) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
-		}
-
-		if (m_player1 && Crystal::profile.hitboxes) {
-			drawer->drawForPlayer1(m_player1);
-		}
-		if (m_player2 && Crystal::profile.hitboxes) {
-			drawer->drawForPlayer2(m_player2);
-		}
-
-		s_showOnDeath = Crystal::profile.onDeath;
-
-		float xp = m_player1->getPositionX();
-
-		for (int s = sectionForPos(xp) - 5; s < sectionForPos(xp) + 6; ++s) {
-			if (s < 0) continue;
-			if (s >= m_sectionObjects->count()) break;
-			auto section = static_cast<CCArray*>(m_sectionObjects->objectAtIndex(s));
-			for (size_t i = 0; i < section->count(); ++i) {
-				auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-
-				if (s_onlyHitboxes) obj->setOpacity(0);
-
-				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
-				if (!obj->m_active) continue;
-
-				if (Crystal::profile.hitboxes) drawer->drawForObject(obj);
-			}
 		}
 	}
 
@@ -2011,17 +1654,6 @@ class $modify(Main, PlayLayer) {
 	void removeLastCheckpoint() {
 		PlayLayer::removeLastCheckpoint();
 		if (profile.record) currentMacro.removeCheckpointData();
-	}
-
-    void startMusic() {
-		if (Crystal::profile.pracmusic) {
-			auto p = m_isPracticeMode;
-			m_isPracticeMode = false; // pretend there is no practice mode
-			PlayLayer::startMusic();
-			m_isPracticeMode = p;
-		} else {
-			PlayLayer::startMusic();
-		}
 	}
 
 	std::string getOffsetTime(float time) {
@@ -2055,43 +1687,14 @@ class $modify(Main, PlayLayer) {
 	}
 
     void onQuit() {
-		if (profile.trajectory) drawer->onQuitTrajectory();
+		//if (profile.trajectory) drawer->onQuitTrajectory();
 		std::string renderprocess;
 		//FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
 		std::string basicNAME = (std::string)renderer + "/new.mp4";
 		if (profile.renderer) {
 			record.stop();
 		}
-		coins.clear();
-		if (!shouldQuit && Crystal::profile.confirmQuit && !m_hasLevelCompleteMenu) {
-			geode::createQuickPopup(
-				"Confirm Quit",            // title
-				"Are you sure you would like to Quit?",   // content
-				"Cancel", "Quit",      // buttons
-				[](auto, bool btn2) {
-					if (btn2) {
-						shouldQuit = true;
-					}
-				}
-			);
-		} else {
-			PlayLayer::onQuit();
-		}
-	}
-
-    void togglePracticeMode(bool p) {
-		if (Crystal::profile.pracmusic) {
-			if (!m_isPracticeMode && p) {
-				m_isPracticeMode = p;
-				m_UILayer->toggleCheckpointsMenu(p);
-				PlayLayer::startMusic();
-				this->stopActionByTag(18);
-			} else {
-				PlayLayer::togglePracticeMode(p);
-			}
-		} else {
-			PlayLayer::togglePracticeMode(p);
-		}
+		PlayLayer::onQuit();
 	}
 
     void toggleFlipped(bool one, bool two) {
@@ -2104,8 +1707,6 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::startGame();
 		gameStarted = true;
 	}
-
-    static inline tulip::HitboxNode* drawer;
 
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
@@ -2125,7 +1726,7 @@ class $modify(Main, PlayLayer) {
 			profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
 		}
 
-        drawer = tulip::HitboxNode::create();
+        
 
 		ss = 0;
 		clickscount = 0;
@@ -2168,16 +1769,7 @@ class $modify(Main, PlayLayer) {
 
 		if (profile.clickBot) Clickbot::start = std::chrono::system_clock::now();
 
-        m_objectLayer->addChild(drawer, 32);
-
-		s_drawer = drawer;
-
-		s_showOnDeath = Crystal::profile.onDeath;
-		drawer->m_drawTrail = Crystal::profile.drawTrail;
-		s_onlyHitboxes = false;
-		if (s_showOnDeath) s_drawOnDeath = false;
-
-		if (profile.trajectory) drawer->createPlayersForTrajectory();
+		//if (profile.trajectory) drawer->createPlayersForTrajectory();
 
 		currentFrame = 0;
 		
@@ -2205,9 +1797,6 @@ class $modify(Main, PlayLayer) {
 			addChild(rightButton, 1000);
 			addChild(leftButton, 1000);
 		}
-		if (Crystal::profile.progressBar) {
-			m_percentLabel->setPositionX(CCDirector::sharedDirector()->getWinSize().width / 2);
-		}
 		for (int d = 0; d < 15; d++) {
 			CrystalClient::get()->arrangeText(d, this, true);
 		}
@@ -2231,7 +1820,7 @@ class $(UILayer) {
 				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
 			}
 		} else if (current == 4) {
-			s_showOnDeath = !s_showOnDeath;
+			//s_showOnDeath = !s_showOnDeath;
 		} else if (current == 5) {
 			if (Crystal::profile.autoclick) {
 				Crystal::profile.autoclick = false;
