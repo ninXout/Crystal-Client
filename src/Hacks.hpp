@@ -35,44 +35,11 @@ void fps_shower_init();
     GLuint m_pFBO;
     GLint m_pOldRBO;
 
-    // StartPos Switcher
-    std::vector<std::pair<StartPosObject*, CCPoint>> g_startPoses;
-    int g_startPosIndex;
-    CCLabelBMFont* g_startPosText;
-
     // Customization
     bool sameAsAccent;
     bool RGBAccent;
     bool borders;
     bool rounded;
-
-    // Checkpoint Switcher
-    std::vector<std::pair<CheckpointObject*, CCPoint>> g_checkpoints;
-    int g_checkpointIndex;
-    CCSprite* CPrightButton;
-    CCSprite* CPleftButton;
-
-    // Noclip Accuracy
-    static float frames, noclipped_frames = 0;
-    bool completed = false;
-    static float limitframes = 0;
-    CCLabelBMFont* text;
-    float percent;
-    bool lenient;
-    float killaccuracy;
-    bool finished;
-    bool resetaccuracy;
-    //bool would_die;
-    bool dying = false;
-    bool deaath = false;
-
-    // Noclip Deaths
-    //int noclip_deaths = 0;
-    CCLabelBMFont* font;
-    int deathwait;
-
-    // Overlay
-    CCSprite* spaceBar;
 
     // Amethyst
     AmethystMacro currentMacro;
@@ -180,9 +147,6 @@ void fps_shower_init();
     CCLabelBMFont* g_macro;
     CCLabelBMFont* g_clock;
     CCLabelBMFont* g_fps;
-
-    CCSprite* rightButton;
-    CCSprite* leftButton;
 
     int nextTR = 1;
     int nextTL = 1;

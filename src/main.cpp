@@ -246,13 +246,12 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Hide Pause Menu", setVar<bool>("hide_pause"));
 	CrystalClient::ImToggleable("Ignore ESC", setVar<bool>("ignore_esc"));
 	CrystalClient::ImToggleable("Confirm Quit", setVar<bool>("confirm_quit"));
-	CrystalClient::ImToggleable("Auto LDM", &Crystal::profile.autoldm);
-	CrystalClient::ImToggleable("Auto Song Downloader", &Crystal::profile.autoSong);
-	CrystalClient::ImToggleable("Flipped Dual Controls", &Crystal::profile.flippedcontrol);
-	CrystalClient::ImToggleable("Mirrored Dual Controls", &Crystal::profile.mirrorcontrol);
-	CrystalClient::ImToggleable("StartPos Switcher", &Crystal::profile.startpos);
-	CrystalClient::ImToggleable("Checkpoint Switcher", &Crystal::profile.checkpointswitch);
-	CrystalClient::ImToggleable("Frame Stepper", &Crystal::profile.framestep);
+	CrystalClient::ImToggleable("Auto LDM", setVar<bool>("auto_ldm"));
+	CrystalClient::ImToggleable("Auto Song Downloader", setVar<bool>("auto_song_download"));
+	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"));
+	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"));
+	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"));
+	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"));
 	CrystalClient::ImToggleable("Load from Last Checkpoint", &Crystal::profile.lastCheckpoint);
 	CrystalClient::ImToggleable("No Glow", &Crystal::profile.noglow);
 	CrystalClient::ImToggleable("No Mirror Effect", &Crystal::profile.mirror);
@@ -777,9 +776,6 @@ class $modify(EditLevelLayer) {
 		if (profile.verify) {
 			ok->m_isVerified = true;
 		}	
-		if (Crystal::profile.autoldm) {
-			ok->m_lowDetailModeToggled = true;
-		} 
 		return EditLevelLayer::create(ok);
 	}
 
@@ -939,15 +935,7 @@ class $modify(GJBaseGameLayer) {
             Clickbot::clickChannel->setPaused(false);
             Clickbot::system->update();
         }
-		if (Crystal::profile.flippedcontrol) {
-			if (!b) GJBaseGameLayer::pushButton(i,true);
-			if (b) GJBaseGameLayer::pushButton(i,false);
-		} else if (Crystal::profile.mirrorcontrol) {
-			GJBaseGameLayer::pushButton(i,true);
-			GJBaseGameLayer::pushButton(i,false);
-		} else {
-			GJBaseGameLayer::pushButton(i,b);
-		}
+		GJBaseGameLayer::pushButton(i,b);
 		clickscount++;
 		click_count++;
 		holding = true;
@@ -970,15 +958,7 @@ class $modify(GJBaseGameLayer) {
 			Clickbot::releaseChannel->setPaused(false);
 			Clickbot::system->update();
 		}
-        if (Crystal::profile.flippedcontrol) {
-			if (!b) GJBaseGameLayer::releaseButton(i,true);
-			if (b) GJBaseGameLayer::releaseButton(i,false);
-		} else if (Crystal::profile.mirrorcontrol) {
-			GJBaseGameLayer::releaseButton(i,true);
-			GJBaseGameLayer::releaseButton(i,false);
-		} else {
-			GJBaseGameLayer::releaseButton(i,b);
-		}
+        GJBaseGameLayer::releaseButton(i,b);
 
 		holding = false;
 	}
@@ -996,10 +976,6 @@ class $modify(LevelInfoLayer) {
 		auto layer = LevelInfoLayer::create(g);
 		if (profile.copy) {
 			g->m_password = 1;
-		}
-
-		if (Crystal::profile.autoldm) {
-			g->m_lowDetailModeToggled = true;
 		}
 
 		return layer;
@@ -1037,20 +1013,6 @@ class $modify(PauseLayer) {
 	}
 };
 
-class $modify(PlayerObject) {
-	void addAllParticles() {
-		if (!Crystal::profile.instantdeath) {
-			PlayerObject::addAllParticles();
-		}
-	}
-	void playerDestroyed(bool idk) {
-		PlayerObject::playerDestroyed(idk);
-        if (Crystal::profile.instantdeath) {
-			PlayLayer::get()->resetLevel();
-		}
-	}
-};
-
 class $modify(CheckpointObject) {
 	static CheckpointObject* create() {
 		auto cpo = CheckpointObject::create();
@@ -1067,79 +1029,9 @@ class $modify(CheckpointObject) {
 };
 
 class $modify(Main, PlayLayer) {
-    void updateIndex(bool increment) {
-		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		auto win_size = CCDirector::sharedDirector()->getWinSize();
-
-		if (m_isPracticeMode && profile.checkpointswitch && (!m_isTestMode && !CCDirector::sharedDirector()->getKeyboardDispatcher()->getShiftKeyPressed())) {
-			if (increment) {
-				g_checkpointIndex++;
-			} else {
-				g_checkpointIndex--;
-			}
-
-			if (g_checkpointIndex == g_checkpoints.size()) {
-				g_checkpointIndex = -1;
-			} else if (g_checkpointIndex < -1) {
-				g_checkpointIndex = g_checkpoints.size() - 1;
-			}
-
-			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
-			g_startPosText->setString(label.c_str());
-
-			if (g_checkpointIndex == -1) {
-				m_startPosCheckpoint = nullptr;
-				m_playerStartPosition = ccp(0, 105);
-			} else {
-				m_startPosCheckpoint = g_checkpoints[g_checkpointIndex].first;
-				m_playerStartPosition = g_checkpoints[g_checkpointIndex].second;
-			}
-		}
-
-		if (m_isTestMode && profile.startpos) {
-			if (increment) {
-				g_startPosIndex++;
-			} else {
-				g_startPosIndex--;
-			}
-
-			if (g_startPosIndex == g_startPoses.size()) {
-				g_startPosIndex = -1;
-			} else if (g_startPosIndex < -1) {
-				g_startPosIndex = g_startPoses.size() - 1;
-			}
-
-			auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
-			g_startPosText->setString(label.c_str());
-
-			if (m_isTestMode) {
-				m_startPosCheckpoint = nullptr;
-				if (g_startPosIndex == -1) {
-					m_startPos = nullptr;
-					m_playerStartPosition = ccp(0, 105);
-				} else {
-					m_startPos = g_startPoses[g_startPosIndex].first;
-					m_playerStartPosition = g_startPoses[g_startPosIndex].second;
-				}
-			}
-		}
-
-		resetLevel();
-	}
-
     void addObject(GameObject* g) {
 		if (Crystal::profile.noglow) g->m_isGlowDisabled = true;
 		PlayLayer::addObject(g);
-		SPs.push_back(reinterpret_cast<StartPosObject*>(g));
-		if (Crystal::profile.startpos) {
-			if (g->m_objectID == 31) {
-				g->retain();
-				g_startPoses.push_back({reinterpret_cast<StartPosObject*>(g), g->getPosition()});
-				g_startPosIndex += 1;
-				auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
-				g_startPosText->setString(label.c_str());
-			}
-		}
 	}	
 
 	void loadFromCheckpoint(CheckpointObject* cpo) {
@@ -1630,10 +1522,8 @@ class $modify(Main, PlayLayer) {
 		if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentFrame += f4;
 		if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentTXTFrame++;
 
-		if (!profile.framestep || (Crystal::profile.framestep && shouldUpdate)) {
-			PlayLayer::update(f4);
-			if (profile.renderer) record.handle_recording(this, f4);
-		}
+		PlayLayer::update(f4);
+		if (profile.renderer) record.handle_recording(this, f4);
 
 		//if (profile.trajectory) drawer->processMainTrajectory(f4);
 
@@ -1712,15 +1602,6 @@ class $modify(Main, PlayLayer) {
 		//leftDisplay = 0;
 		timee = 0.0f;
 		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		if (Crystal::profile.startpos || Crystal::profile.checkpointswitch) {
-			rightButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
-			leftButton = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
-			g_startPosText = CCLabelBMFont::create("0/0", "bigFont.fnt");
-			g_startPosIndex = -1;
-			g_startPoses = {};
-			g_checkpointIndex = -1;
-			g_checkpoints = {};
-		}
 
 		for (int d = 0; d < 15; d++) {
 			profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
@@ -1773,30 +1654,6 @@ class $modify(Main, PlayLayer) {
 
 		currentFrame = 0;
 		
-		if (Crystal::profile.startpos || Crystal::profile.checkpointswitch) {
-			g_startPosText->setPosition(win_size.width / 2, corner - 275);
-			g_startPosText->setScale(0.5);
-			g_startPosText->setOpacity(50);
-
-			rightButton->::Main::setPosition(win_size.width / 2 - 30, corner - 275);
-			rightButton->setScale(0.5);
-			rightButton->setOpacity(50);
-			
-			leftButton->::Main::setPosition(win_size.width / 2 + 30, corner - 275);
-			leftButton->setFlipX(true);
-			leftButton->setScale(0.5);
-			leftButton->setOpacity(50);
-
-			if (!m_isTestMode) {
-				g_startPosText->setVisible(false);
-				rightButton->setVisible(false);
-				leftButton->setVisible(false);
-			}
-			
-			addChild(g_startPosText, 1000);
-			addChild(rightButton, 1000);
-			addChild(leftButton, 1000);
-		}
 		for (int d = 0; d < 15; d++) {
 			CrystalClient::get()->arrangeText(d, this, true);
 		}
@@ -2005,24 +1862,6 @@ class $modify(LevelBrowserLayer) {
 
         return true;
     }
-};
-
-class $modify(CustomSongWidget) {
-	bool init(SongInfoObject* so, LevelSettingsObject* ls, bool a, bool b , bool c , bool d, bool hideBackground) {
-		CustomSongWidget::init(so,ls, a, b, c, d, hideBackground);
-	
-		if (Crystal::profile.autoSong) {
-			auto button = findFirstChildRecursive<CCMenuItemSpriteExtra>(this, [](CCNode* n) {
-				return n->getPositionY() == -180.0f;
-		});
-
-        if (button->isVisible()) {
-			button->activate();
-		}
-	}
-
-		return true;
-	}
 };
 
 class $modify(CCLayerColor) {

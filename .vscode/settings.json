@@ -8,6 +8,9 @@
         "set": "cpp",
         "unordered_map": "cpp",
         "unordered_set": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "vector": "cpp",
+        "filesystem": "cpp",
+        "random": "cpp"
     }
 }
