@@ -6,6 +6,9 @@ project(CrystalClient VERSION 1.0.0)
 
 file(GLOB_RECURSE SOURCES
     src/*.cpp
+    src/ImGui/*.cpp
+    src/Player/Noclip.cpp
+    src/Player/NoDeathEffect.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -23,6 +26,7 @@ set(GEODE_LINK_NIGHTLY ON)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
 include(cmake/CPM.cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 CPMAddPackage("gh:ocornut/imgui#c191faf")
 
@@ -46,5 +50,4 @@ elseif(ANDROID)
 endif()
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
-target_link_libraries(${PROJECT_NAME} libfmod.dylib)
 create_geode_file(${PROJECT_NAME})

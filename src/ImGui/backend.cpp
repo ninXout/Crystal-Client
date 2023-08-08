@@ -33,6 +33,7 @@ void ImGuiCocos::toggle() {
     if (m_visible) {
 		//ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		Crystal::saveMods(Crystal::profile);
+		saveConfigToFile();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
 	this->setVisible(!m_visible);

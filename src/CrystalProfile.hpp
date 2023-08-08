@@ -21,6 +21,82 @@ enum LabelPos
 	BL
 };
 
+inline std::map<std::string, bool> modsMapB = {};
+inline std::map<std::string, int> modsMapI = {};
+inline std::map<std::string, float> modsMapF = {};
+
+template <typename T>
+T getVar(std::string const& key);
+
+template <typename T>
+T* setVar(std::string const& key);
+
+template <>
+inline bool getVar<bool>(std::string const& key) {
+	return modsMapB[key];
+}
+template <>
+inline bool* setVar<bool>(std::string const& key) {
+	return &modsMapB[key];
+}
+
+template <>
+inline int getVar<int>(std::string const& key) {
+	return modsMapI[key];
+}
+template <>
+inline int* setVar<int>(std::string const& key) {
+	return &modsMapI[key];
+}
+
+template <>
+inline float getVar<float>(std::string const& key) {
+	return modsMapF[key];
+}
+template <>
+inline float* setVar<float>(std::string const& key) {
+	return &modsMapF[key];
+}
+
+inline void saveConfigToFile() {
+    auto JSONobj01 = json2::object();
+    JSONobj01 = modsMapB;
+    auto JSONobj02 = json2::object();
+    JSONobj02 = modsMapI;
+    auto JSONobj03 = json2::object();
+    JSONobj03 = modsMapF;
+    std::ofstream file((Mod::get()->getConfigDir() / "Config" / "GH_config-01.json").string().c_str());
+    file << JSONobj01;
+    file.close();
+    file.open((Mod::get()->getConfigDir() / "Config" / "GH_config-02.json").string().c_str());
+    file << JSONobj02;
+    file.close();
+    file.open((Mod::get()->getConfigDir() / "Config" / "GH_config-03.json").string().c_str());
+    file << JSONobj03;
+    file.close();
+}
+
+inline void loadConfigFromFile() {
+    std::fstream input((Mod::get()->getConfigDir() / "Config" / "GH_config-01.json").string().c_str());
+    if (input.is_open()) {
+        auto JSONobj1 = json2::parse(input);
+        modsMapB = JSONobj1;
+    }
+    input.close();
+    input.open((Mod::get()->getConfigDir() / "Config" / "GH_config-02.json").string().c_str());
+    if (input.is_open()) {
+        auto JSONobj2 = json2::parse(input);
+        modsMapI = JSONobj2;
+    }
+    input.close();
+    input.open((Mod::get()->getConfigDir() / "Config" / "GH_config-03.json").string().c_str());
+    if (input.is_open()) {
+        auto JSONobj3 = json2::parse(input);
+        modsMapF = JSONobj3;
+    }
+    input.close();
+}
+
 struct CrystalProfile {
     bool noclip = false;
     bool noclipP1 = true;

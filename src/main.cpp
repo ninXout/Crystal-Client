@@ -18,6 +18,7 @@ using namespace Icon;
 
 $on_mod(Loaded) {
     profile = Crystal::loadMods();
+	loadConfigFromFile();
     ImGuiCocos::get().setup([] {
         CrystalClient::get()->addTheme();
     }).draw([] {
@@ -133,48 +134,48 @@ void CrystalClient::drawGUI() {
 	if (profile.titlebar) window_flags |= ImGuiWindowFlags_NoTitleBar;
 
     ImGui::Begin("Player", NULL, window_flags);
-	CrystalClient::ImExtendedToggleable("Noclip", &Crystal::profile.noclip);
+	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"));
 	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Noclip Player 1", &Crystal::profile.noclipP1);
-		CrystalClient::ImToggleable("Noclip Player 2", &Crystal::profile.noclipP2);
-		CrystalClient::ImToggleable("Tint Screen on Death", &Crystal::profile.tintOnDeath);
+		CrystalClient::ImToggleable("Noclip Player 1", setVar<bool>("noclip_P1"));
+		CrystalClient::ImToggleable("Noclip Player 2", setVar<bool>("noclip_P2"));
+		CrystalClient::ImToggleable("Tint Screen on Death", setVar<bool>("noclip_tint"));
 		ImGui::PushItemWidth(100);
-		ImGui::InputFloat("##Noclip Accuracy Limit", &profile.resetAcc);
+		ImGui::InputFloat("##Noclip Accuracy Limit", setVar<float>("accuracy_limit_num"));
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
-		CrystalClient::ImToggleable("Noclip Accuracy Limit", &profile.resetOnAccuracy);
+		CrystalClient::ImToggleable("Noclip Accuracy Limit", setVar<bool>("accuracy_limit"));
 		ImGui::PushItemWidth(100);
-		ImGui::InputInt("##Noclip Deaths Limit", &profile.resetDeath);
+		ImGui::InputInt("##Noclip Deaths Limit", setVar<int>("death_limit_num"));
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
-		CrystalClient::ImToggleable("Noclip Deaths Limit", &profile.resetOnDeath);
+		CrystalClient::ImToggleable("Noclip Deaths Limit", setVar<bool>("death_limit"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("No Death Effect", &Crystal::profile.deathEffect);
-	CrystalClient::ImToggleable("Instant Death Respawn", &Crystal::profile.instantdeath);
-	CrystalClient::ImExtendedToggleable("Auto Reset", &Crystal::profile.autoreset);
+	CrystalClient::ImToggleable("No Death Effect", setVar<bool>("no_death_effect"));
+	//CrystalClient::ImToggleable("Instant Death Respawn", setVar<bool>("instant_death_respawn"));
+	CrystalClient::ImExtendedToggleable("Auto Reset", setVar<bool>("auto_reset"));
 	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::InputFloat("Auto Reset Percentage", &Crystal::profile.autoresetnum);
+		ImGui::InputFloat("Auto Reset Percentage", setVar<float>("auto_reset_num"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Respawn Bug Fix", &Crystal::profile.respawnfix);
-	CrystalClient::ImToggleable("Practice Bug Fix", &Crystal::profile.practiceorbfix);
-	CrystalClient::ImExtendedToggleable("No Wave Pulse", &Crystal::profile.nopulse);
+	CrystalClient::ImToggleable("Respawn Bug Fix", setVar<bool>("respawn_fix"));
+	CrystalClient::ImToggleable("Practice Bug Fix", setVar<bool>("practice_fix"));
+	CrystalClient::ImExtendedToggleable("No Wave Pulse", setVar<bool>("no_wave_pulse"));
 	if (ImGui::BeginPopupModal("No Wave Pulse", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::InputFloat("Wave Trail Size", &Crystal::profile.trailsize);
+		ImGui::InputFloat("Wave Trail Size", setVar<float>("wave_size"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Solid Wave Trail", &Crystal::profile.solidwave);
-	CrystalClient::ImToggleable("Invisible Player", &Crystal::profile.invisibleplayer);
+	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"));
+	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"));
 	ImGui::End();
 
 	ImGui::Begin("Icon", NULL, window_flags);
@@ -509,113 +510,20 @@ void CrystalClient::drawGUI() {
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Delta Lock", &profile.deltaLock);
 	ImGui::InputFloat("ClickBot Volume", &profile.CBvolume);
-    //ImGui::Combo("Macro Type", &currentMacroType, macroTypes, IM_ARRAYSIZE(macroTypes));
+    //ImGui::Combo("Macro Type", (int*)&currentMacro.type, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", profile.macroname, IM_ARRAYSIZE(profile.macroname));
     if (ImGui::Button("Save Macro")) {
 		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
-		std::fstream myfile(filename.c_str(), std::ios::app);
-		myfile << P1pushes.size();
-		myfile << "\n";
-		for (size_t i = 0; i < P1pushes.size(); i++)
-		{
-			myfile << std::setprecision(10) << std::fixed << P1pushes[i];
-			myfile << "\n";
-		}
-		myfile << P1releases.size();
-		myfile << "\n";
-		for (size_t i = 0; i < P1releases.size(); i++)
-		{
-			myfile << std::setprecision(10) << std::fixed << P1releases[i];
-			myfile << "\n";
-		}
-		myfile << P2pushes.size();
-		myfile << "\n";
-		for (size_t i = 0; i < P2pushes.size(); i++)
-		{
-			myfile << std::setprecision(10) << std::fixed << P2pushes[i];
-			myfile << "\n";
-		}
-		myfile << P2releases.size();
-		myfile << "\n";
-		for (size_t i = 0; i < P2releases.size(); i++)
-		{
-			myfile << std::setprecision(10) << std::fixed << P2releases[i];
-			myfile << "\n";
-		}
+		currentMacro.saveToFile(filename.c_str());
 	}
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
-		std::string fileCheck = (std::string)profile.macroname;
-		if (fileCheck.find('.') == std::string::npos) {
-			std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
-			std::string line;
-			std::fstream file;
-			file.open(filename, std::ios::in);
-			if (file.is_open()) {
-				getline(file, line);
-				int len;
-				len = stoi(line);
-				for (int lineno = 1; lineno <= len; lineno++) {
-					getline(file, line);
-					P1pushes.push_back(stof(line));
-				}
-				getline(file, line);
-				len = stoi(line);
-				for (int lineno = 1; lineno <= len; lineno++) {
-					getline(file, line);
-					P1releases.push_back(stof(line));
-				}
-				getline(file, line);
-				len = stoi(line);
-				for (int lineno = 1; lineno <= len; lineno++) {
-					getline(file, line);
-					P2pushes.push_back(stof(line));
-				}
-				getline(file, line);
-				len = stoi(line);
-				for (int lineno = 1; lineno <= len; lineno++) {
-					getline(file, line);
-					P2releases.push_back(stof(line));
-				}
-				file.close();
-			}
-		} else {
-			std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname;
-			std::string line;
-			std::fstream file;
-			file.open(filename, std::ios::in);
-			if (file.is_open()) {
-				getline(file, line);
-				int fps;
-				fps = stoi(line);
-				while (true) {
-					getline(file, line);
-					int frame = std::stoi(line.substr(0, strpos(line.c_str(), " ", 1)));
-					char the = '1';
-					if (line[strpos(line.c_str(), " ", 1) + 1] == the) P1pushesINT.push_back(frame);
-					else P1releasesINT.push_back(frame);
-					if (line[strpos(line.c_str(), " ", 1) + 3] == the) P2pushesINT.push_back(frame);
-					else P2releasesINT.push_back(frame);
-					if( file.eof() ) break;
-					//cerr << x << endl;
-				}
-				file.close();
-			}
-		}
+		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
+		currentMacro = AmethystMacro::createFromFile(filename.c_str(), false);
 	}
     ImGui::SameLine();
     if (ImGui::Button("Clear Macro")) {
-        P1pushes.clear();
-		P1releases.clear();
-		P2pushes.clear();
-		P2releases.clear();
-		P1pushesINT.clear();
-		P1releasesINT.clear();
-		P2pushesINT.clear();
-		P2releasesINT.clear();
-		checkpointFrames.clear();
-		P1checkpoints.clear();
-		P2checkpoints.clear();
+        currentMacro.clearData();
     }
 	//CrystalClient::ImToggleable("Enable Macro Buffer", &macroBuffer);
 	//if (ImGui::Button("Clear Macro Buffer")) {
@@ -1139,16 +1047,6 @@ class $(MyGameObject, GameObject) {
 		}
 		GameObject::update(time2);
 	}
-    
-	virtual void activateObject() {
-		bool a = this->m_hasBeenActivated;
-    	bool b = this->m_hasBeenActivatedP2;
-		GameObject::activateObject();
-		if (PlayLayer::get() && PlayLayer::get()->m_isPracticeMode) {
-    		if (this->m_hasBeenActivated && !a) g_activated_objects.push_back(this);
-        	if (this->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(this);
-    	}
-	}
 
 	void activatedByPlayer(GameObject* other) {
 		if (profile.trajectory && s_drawer->m_pIsSimulation) {
@@ -1184,12 +1082,7 @@ class $modify(LevelTools) {
 
 class $modify(GJBaseGameLayer) {
 	void pushButton(int i, bool b) {
-		if (b) P1pushing = true;
-		if (!b) P2pushing = true;
-		if (profile.record) {
-            if (b) P1pushes.push_back(currentFrame);
-			if (!b) P2pushes.push_back(currentFrame);
-        }
+		currentMacro.setPushingData(true, b);
         if (profile.clickBot) {
             if (!Clickbot::inited) {
                 FMOD::System_Create(&Clickbot::system);
@@ -1229,12 +1122,7 @@ class $modify(GJBaseGameLayer) {
 	}
 
 	void releaseButton(int i, bool b) {
-		if (b) P1pushing = false;
-		if (!b) P2pushing = false;
-		if (profile.record) {
-            if (b) P1releases.push_back(currentFrame);
-			if (!b) P2releases.push_back(currentFrame);
-		}
+		currentMacro.setPushingData(false, b);
 		if (profile.clickBot) {
 			if (Clickbot::cycleTime.count() < 0.5f) {
 				std::string path = Clickbot::pickRandomRelease();
@@ -1262,25 +1150,9 @@ class $modify(GJBaseGameLayer) {
 
 		holding = false;
 	}
-
-	void bumpPlayer(PlayerObject* player, GameObject* object) {
-		bool a = object->m_hasBeenActivated;
-    	bool b = object->m_hasBeenActivatedP2;
-		GJBaseGameLayer::bumpPlayer(player, object);
-		if (PlayLayer::get() && PlayLayer::get()->m_isPracticeMode) {
-        	if (object->m_hasBeenActivated && !a) g_activated_objects.push_back(object);
-        	if (object->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(object);
-    	}
-	}
 };
 
 class $modify(HardStreak) {
-	void updateStroke(float f) {
-		if (Crystal::profile.nopulse) m_pulseSize = profile.trailsize;
-		if (Crystal::profile.solidwave) m_isSolid = true;
-		HardStreak::updateStroke(f);
-	}
-
 	void addPoint(cocos2d::CCPoint point) {
 		if (profile.trajectory && s_drawer->m_pIsSimulation) return;
 		HardStreak::addPoint(point);
@@ -1345,35 +1217,10 @@ class $modify(PauseLayer) {
 };
 
 class $modify(PlayerObject) {
-	void playDeathEffect() {
-		if (!Crystal::profile.deathEffect) {
-			PlayerObject::playDeathEffect();
-		}
-	}
 	void addAllParticles() {
 		if (!Crystal::profile.instantdeath) {
 			PlayerObject::addAllParticles();
 		}
-	}
-	void update(float spe) {		
-		if (m_waveTrail && Crystal::profile.solidwave) {
-			m_waveTrail->setBlendFunc(getBlendFunc()); // removes the blending of it
-		}
-		if (Crystal::profile.invisibleplayer) {
-			PlayerObject::setVisible(false);
-		}
-		PlayerObject::update(spe);
-	}
-	void ringJump(GameObject* ring) {
-		bool a;
-		bool b;
-		a = ring->m_hasBeenActivated;
-    	b = ring->m_hasBeenActivatedP2;
-		PlayerObject::ringJump(ring);
-		if (PlayLayer::get() && PlayLayer::get()->m_isPracticeMode && Crystal::profile.practiceorbfix) {
-        	if (ring->m_hasBeenActivated && !a) g_activated_objects.push_back(ring);
-        	if (ring->m_hasBeenActivatedP2 && !b) g_activated_objects_p2.push_back(ring);
-    	}
 	}
 	void playerDestroyed(bool idk) {
 		PlayerObject::playerDestroyed(idk);
@@ -1397,11 +1244,7 @@ class $modify(CheckpointObject) {
 			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
 			g_startPosText->setString(label.c_str());
 		}
-		if (!PlayLayer::get()->m_isDead) {
-            P1checkpoints.push_back(store(PlayLayer::get()->m_player1));
-			P2checkpoints.push_back(store(PlayLayer::get()->m_player2));
-            checkpointFrames.push_back(currentFrame);
-        }
+		if (profile.record) currentMacro.createCheckpointData();
 		return cpo;
 	}
 };
@@ -1500,11 +1343,6 @@ class $modify(Main, PlayLayer) {
 		drawer->m_pDieInSimulation = false;
 		drawer->m_pIsSimulation = false;
 		
-		if (Crystal::profile.respawnfix) {
-			if (m_isTestMode || m_isPracticeMode) {
-				smoothOut = 2;
-			}
-		}
 		if (profile.bestRun) {
 			bestEnd2 = (m_player1->getPositionX() / m_levelLength) * 100;
 		}
@@ -1513,74 +1351,9 @@ class $modify(Main, PlayLayer) {
 		
 		PlayLayer::resetLevel();
 
-	if (PlayLayer::get()->m_isPracticeMode && profile.record) {
-        if (P1checkpoints.size() > 0) P1checkpoints.back().apply(GJBaseGameLayer::get()->m_player1);
-		if (P2checkpoints.size() > 0) P2checkpoints.back().apply(GJBaseGameLayer::get()->m_player2);
+		if (profile.replay || profile.record) currentMacro.resetActions(profile.record);
 
-        if (checkpointFrames.size() == 0) checkpointFrames.push_back(0);
-        currentFrame = checkpointFrames.back();
-
-        if (P1pushes.size() > 0) {
-            while (P1pushes.back() >= currentFrame && P1pushes.size() != 0) {
-                P1pushes.pop_back();
-            }
-        }
-
-        if (P1releases.size() > 0) {
-            while (P1releases.back() >= currentFrame && P1releases.size() != 0) {
-                P1releases.pop_back();
-            }
-        }
-
-		if (P2pushes.size() > 0) {
-            while (P2pushes.back() >= currentFrame && P2pushes.size() != 0) {
-                P2pushes.pop_back();
-            }
-        }
-
-        if (P2releases.size() > 0) {
-            while (P2releases.back() >= currentFrame && P2releases.size() != 0) {
-                P2releases.pop_back();
-            }
-        }
-
-        if (P1pushing) P1pushes.push_back(currentFrame);
-		if (P2pushing) P2pushes.push_back(currentFrame);
-
-    } else {
-        currentP1index = 0;
-        currentR1index = 0;
-		currentP2index = 0;
-        currentR2index = 0;
-        currentFrame = 0;
-		currentTXTFrame = 0;
-        if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, true);
-		if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, false);
-    }
-
-		if (m_checkpoints->count() == 0) {
-        	g_activated_objects.clear();
-        	g_activated_objects_p2.clear();
-        	g_orbCheckpoints.clear();
-    	} else {
-			if (Crystal::profile.practiceorbfix && m_isPracticeMode) {
-				const auto [p1, p2] = g_orbCheckpoints.back();
-        		g_activated_objects.erase(
-            		g_activated_objects.begin() + p1,
-            		g_activated_objects.end()
-        		);
-        		g_activated_objects_p2.erase(
-            		g_activated_objects_p2.begin() + p2,
-            		g_activated_objects_p2.end()
-        		);
-        		for (const auto& object : g_activated_objects) {
-            		object->m_hasBeenActivated = true;
-        		}
-        		for (const auto& object : g_activated_objects_p2) {
-            		object->m_hasBeenActivatedP2 = true;
-        		}
-			}
-    	}
+		
 		if (profile.cheatIndicate) {
 			bad = "Not Cheating";
 			g_cheating->setColor(ccc3(0,255,0));
@@ -1615,53 +1388,18 @@ class $modify(Main, PlayLayer) {
 			display = "Best Run: " + std::to_string(bestStart) + " to " + std::to_string(bestEnd);
 			profile.displayNodes[8]->setString(display.c_str());
 		}
-		frames = noclipped_frames = noclip_deaths = 0;
-		would_die = false;
+		
 	}
-
+/*
     void destroyPlayer(PlayerObject* p, GameObject* g) {
-		if (g == m_antiCheatObject) {
-			return PlayLayer::destroyPlayer(p,g);
-		}
+		
 		if (profile.trajectory && drawer->shouldInterrumpHooks(p)) {
 			drawer->m_pDieInSimulation = true;
 			return;
 		}
-		would_die = true;
-		if (profile.resetOnAccuracy) {
-			auto accu = (float)(frames-noclipped_frames) / (float)frames;
-			if (accu * 100 <= profile.resetAcc) {
-				frames = noclipped_frames = noclip_deaths = 0;
-				resetLevel();
-				//char str[20];
-				//sprintf(str, "%.2f%%", profile.resetAcc);
-				//if (profile.noclipAcc) reinterpret_cast<CCLabelBMFont*>(getChildByTag(31403))->setString(str);
-			}
-		}
-		if (profile.resetOnDeath) {
-			if (noclip_deaths >= profile.resetDeath) {
-				frames = noclipped_frames = noclip_deaths = 0;
-				resetLevel();
-				//if (profile.noclipDeath) g_death->setString(std::to_string(noclip_deaths).c_str());
-			}
-		}
-		if (profile.anticheat) {
-			m_antiCheatPassed = true;
-			m_shouldTryToKick = false;
-			m_hasCheated = false;
-		}
-		if (Crystal::profile.noclip && !Crystal::profile.noclipP2 && Crystal::profile.noclipP1) {
-			if (p == m_player2) PlayLayer::destroyPlayer(p,g);
-		}
-		if (Crystal::profile.noclip && Crystal::profile.noclipP2 && !Crystal::profile.noclipP1) {
-			if (p == m_player1) PlayLayer::destroyPlayer(p,g);
-
-		} 
-		if (!Crystal::profile.noclip || (Crystal::profile.noclip && !Crystal::profile.noclipP2 && !Crystal::profile.noclipP1)) {
-			PlayLayer::destroyPlayer(p,g);
-		}
+		
 	}
-
+*/
     void fullReset() {
 		if (Crystal::profile.lastCheckpoint && m_isPracticeMode) {
 			loadLastCheckpoint();
@@ -1713,10 +1451,6 @@ class $modify(Main, PlayLayer) {
 
     void updateProgressbar() {
 		PlayLayer::updateProgressbar();	
-		double percent = (m_player1->getPositionX() / m_levelLength) * 100;
-		if (((int)percent == Crystal::profile.autoresetnum) && profile.autoreset) {
-			resetLevel();
-		}
 		if (Crystal::profile.accpercentage) {
 			if (percent > 100.00) {
 				percent = 100.00;
@@ -1953,38 +1687,8 @@ class $modify(Main, PlayLayer) {
 
 		if (!ImGuiCocos::get().isVisible() && Crystal::profile.lockCursor && !m_hasCompletedLevel) CGWarpMouseCursorPosition(point);
 
-		frames += f4;
 		fixa += f4;
 		timee += f4;
-
-		if (would_die && !lastDeath) {
-			if (Crystal::profile.displays[10]) {
-				noclip_deaths++;
-			}
-			deaath = true;
-		} else if (fixa > 0.2f) {
-			deaath = false;
-			fixa = 0.0f;
-		}
-
-		lastDeath = would_die;
-
-		if (would_die && !m_isDead && !m_hasCompletedLevel) {
-			noclipped_frames += f4;
-			dying = true;
-			would_die = false;
-
-			if (opacity < 70) {
-				opacity += 10;
-				if (Crystal::profile.tintOnDeath) noclipRed->setOpacity(opacity);
-			}
-		} else {
-			dying = false;
-			if (opacity > 0) {
-				opacity -= 10;
-				if (Crystal::profile.tintOnDeath) noclipRed->setOpacity(opacity);
-			}
-		}
 
 		if (profile.rainbowIcon) {
 			if (m_player1) {
@@ -2123,7 +1827,7 @@ class $modify(Main, PlayLayer) {
 			}
 		}
 		if (profile.displays[10]) {
-			std::string nd = "Noclip Deaths: " + std::to_string(noclip_deaths);
+			std::string nd = "Noclip Deaths: ";
 			profile.displayNodes[10]->setString(nd.c_str());
 
 			if (Crystal::profile.redDeath && deaath) {
@@ -2248,71 +1952,13 @@ class $modify(Main, PlayLayer) {
 		if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentTXTFrame++;
 
 		if (!profile.framestep || (Crystal::profile.framestep && shouldUpdate)) {
-			if (!profile.respawnfix || (Crystal::profile.respawnfix && !smoothOut)) {
-				PlayLayer::update(f4);
-			} else if (Crystal::profile.respawnfix) {
-				float time = cocos2d::CCDirector::sharedDirector()->getAnimationInterval();
-				if (smoothOut != 0 && f4 - time < 1) {
-					smoothOut --;
-				}
-
-				if (profile.record || profile.replay) time = f4;
-
-				PlayLayer::update(time);
-			}
-			//PlayLayer::update(f4);
+			PlayLayer::update(f4);
 			if (profile.renderer) record.handle_recording(this, f4);
 		}
 
 		if (profile.trajectory) drawer->processMainTrajectory(f4);
 
-		if (profile.replay && (P1pushes.size() > 0 || P2pushes.size() > 0 || P1pushesINT.size())) {
-			if (((std::string)profile.macroname).find(".") == std::string::npos) {
-				if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
-					GJBaseGameLayer::get()->pushButton(1, true);
-					currentP1index++;
-				}
-
-				if (P1releases[currentR1index] <= currentFrame && currentR1index < P1releases.size()) {
-					GJBaseGameLayer::get()->releaseButton(1, true);
-					currentR1index++;
-				}
-
-				if (P2pushes.size() > 0) {
-					if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
-						GJBaseGameLayer::get()->pushButton(1, false);
-						currentP2index++;
-					}
-
-					if (P2releases[currentR2index] <= currentFrame && currentR2index < P2releases.size()) {
-						GJBaseGameLayer::get()->releaseButton(1, false);
-						currentR2index++;
-					}
-				}
-			} else {
-				if (P1pushesINT[currentP1index] <= currentTXTFrame && currentP1index < P1pushesINT.size()) {
-					GJBaseGameLayer::get()->pushButton(1, true);
-					currentP1index++;
-				}
-
-				if (P1releasesINT[currentR1index] <= currentTXTFrame && currentR1index < P1releasesINT.size()) {
-					GJBaseGameLayer::get()->releaseButton(1, true);
-					currentR1index++;
-				}
-
-				if (P2pushesINT.size() > 0) {
-					if (P2pushesINT[currentP2index] <= currentTXTFrame && currentP2index < P2pushesINT.size()) {
-						GJBaseGameLayer::get()->pushButton(1, false);
-						currentP2index++;
-					}
-
-					if (P2releasesINT[currentR2index] <= currentTXTFrame && currentR2index < P2releasesINT.size()) {
-						GJBaseGameLayer::get()->releaseButton(1, false);
-						currentR2index++;
-					}
-				}
-			}
-		}
+		if (profile.replay && gameStarted) currentMacro.updateReplay(f4);
 
 		if (profile.layout) {
 			auto p = PlayLayer::get()->getChildren()->objectAtIndex(0);
@@ -2359,16 +2005,12 @@ class $modify(Main, PlayLayer) {
 	}
 
     void markCheckpoint() {
-		if (Crystal::profile.practiceorbfix) g_orbCheckpoints.push_back({g_activated_objects.size(), g_activated_objects_p2.size()});
 		PlayLayer::markCheckpoint();
 	}
 
 	void removeLastCheckpoint() {
-		if (Crystal::profile.practiceorbfix) g_orbCheckpoints.pop_back();
 		PlayLayer::removeLastCheckpoint();
-		P1checkpoints.pop_back();
-		P2checkpoints.pop_back();
-        checkpointFrames.pop_back();
+		if (profile.record) currentMacro.removeCheckpointData();
 	}
 
     void startMusic() {
@@ -2525,14 +2167,6 @@ class $modify(Main, PlayLayer) {
 		auto win_size = CCDirector::sharedDirector()->getWinSize();
 
 		if (profile.clickBot) Clickbot::start = std::chrono::system_clock::now();
-
-		noclipRed = CCSprite::createWithSpriteFrameName("block005b_05_001.png");
-		noclipRed->setPosition({CCDirector::sharedDirector()->getWinSize().width / 2, CCDirector::sharedDirector()->getWinSize().height / 2});
-		noclipRed->setScale(1000.0f);
-		noclipRed->setColor(ccc3(255,0,0));
-		noclipRed->setOpacity(0);
-		noclipRed->setZOrder(1000);
-		m_UILayer->addChild(noclipRed);
 
         m_objectLayer->addChild(drawer, 32);
 
@@ -3042,9 +2676,9 @@ CrystalProfile Crystal::loadMods() {
 						.ipm = json["ipm"],
 						.ilt = json["ilt"],
 						.igt = json["igt"],
-						.noclip = json["noclip"],
-						.noclipP1 = json["noclipP1"],
-						.noclipP2 = json["noclipP2"],
+						//.noclip = json["noclip"],
+						//.noclipP1 = json["noclipP1"],
+						//.noclipP2 = json["noclipP2"],
 						.tintOnDeath = json["tintOnDeath"],
 						.resetOnAccuracy = json["resetOnAccuracy"],
 						.resetOnDeath = json["resetOnDeath"],

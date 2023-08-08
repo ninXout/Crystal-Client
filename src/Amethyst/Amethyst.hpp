@@ -46,36 +46,52 @@ struct CheckpointData {
 CheckpointData store(PlayerObject* player);
 
 enum ButtonState {
-    NONE,
-    PUSH,
-    RELEASE
+    NONE = 0,
+    PUSH = 1,
+    RELEASE = 2
+};
+
+enum ReplayType {
+    NORMAL = 0,
+    CLICK = 1,
+    FRAME = 2
 };
 
 class AmethystMacro {
     public:
         struct AmethystFrame {
-            float xpos;
-            float ypos;
-            float rot;
-            double accel;
-            ButtonState state;
-            void apply(PlayerObject* player) {
-                player->m_yVelocity = accel;
-                player->m_position.x = xpos;
-                player->m_position.y = ypos;
-                player->getRotation() = rot;
-            }
+            float time;
+
+            float xpos_P1;
+            float ypos_P1;
+            float rot_P1;
+            double accel_P1;
+            ButtonState state_P1;
+
+            float xpos_P2;
+            float ypos_P2;
+            float rot_P2;
+            double accel_P2;
+            ButtonState state_P2;
         };
 
         static AmethystMacro createFromFile(const char* filename, bool legacy);
         void updateReplay(float dt);
-        void resetActions();
-        void addAction(bool player);
+        void resetActions(bool recording);
         void saveToFile(const char* filename);
+        void createCheckpointData();
+        void removeCheckpointData();
+        void setPushingData(bool push, bool player);
+        void clearData();
+
+        ReplayType type = ReplayType::NORMAL;
 
     protected:
-        std::vector<AmethystFrame> P1frames;
-        std::vector<AmethystFrame> P2frames;
+        std::vector<float> P1pushes;
+        std::vector<float> P1releases;
+        std::vector<float> P2pushes;
+        std::vector<float> P2releases;
+        std::vector<float> checkpointFrames;
         std::vector<CheckpointData> P1checkpoints;
         std::vector<CheckpointData> P2checkpoints;
 
@@ -123,7 +139,7 @@ namespace AmethystReplay {
     static inline bool P1pushing = false;
     static inline bool P2pushing = false;
 
-    void resetActions();
+    void resetActions(bool recording);
     void updateAmethyst();
     void addAction(bool push);
     AmethystFrame create();

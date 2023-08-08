@@ -7,8 +7,8 @@
 
 void fps_shower_init();
 
-    CCSprite* noclipRed;
-    int opacity = 100;
+    //CCSprite* noclipRed;
+    //int opacity = 100;
 
     ImFont* m_defaultFont  = nullptr;
 
@@ -62,25 +62,21 @@ void fps_shower_init();
     float killaccuracy;
     bool finished;
     bool resetaccuracy;
-    bool would_die;
+    //bool would_die;
     bool dying = false;
     bool deaath = false;
 
     // Noclip Deaths
-    int noclip_deaths = 0;
+    //int noclip_deaths = 0;
     CCLabelBMFont* font;
     int deathwait;
-
-    // Respawn
-    int smoothOut = 0;
 
     // Overlay
     CCSprite* spaceBar;
 
-    // Practice Orb Bugfix
-    std::vector<GameObject*> g_activated_objects;
-    std::vector<GameObject*> g_activated_objects_p2;
-    std::vector<std::pair<size_t, size_t>> g_orbCheckpoints;
+    // Amethyst
+    AmethystMacro currentMacro;
+
 
     // Smart Start Pos
     std::vector<GameObject*> gravityPortals;
@@ -238,4 +234,4 @@ void fps_shower_init();
     float speedhack = 1;
     bool shouldUpdate = false;
     float newDT;
-    bool lastDeath;
+    //bool lastDeath;
