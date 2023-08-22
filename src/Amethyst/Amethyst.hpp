@@ -76,7 +76,7 @@ class AmethystMacro {
         };
 
         static AmethystMacro createFromFile(const char* filename, bool legacy);
-        void updateReplay(float dt);
+        void updateReplay(float dt, bool replay);
         void resetActions(bool recording);
         void saveToFile(const char* filename);
         void createCheckpointData();

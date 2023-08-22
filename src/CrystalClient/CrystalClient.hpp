@@ -44,16 +44,16 @@ public:
     void initPatches();
     void refreshPatches();
 
-    Result<geode::Patch *> scaleHack1;
-    Result<geode::Patch *> scaleHack2;
+    geode::Patch *scaleHack1;
+    geode::Patch *scaleHack2;
 
-    Result<geode::Patch *> objLimit1;
-    Result<geode::Patch *> objLimit2;
-    Result<geode::Patch *> objLimit3;
+    geode::Patch *objLimit1;
+    geode::Patch *objLimit2;
+    geode::Patch *objLimit3;
 
-    Result<geode::Patch *> customObjLimit1;
-    Result<geode::Patch *> customObjLimit2;
-    Result<geode::Patch *> customObjLimit3;
+    geode::Patch *customObjLimit1;
+    geode::Patch *customObjLimit2;
+    geode::Patch *customObjLimit3;
 
     std::vector<const char*> plugins;
     std::vector<bool*> pluginBools;

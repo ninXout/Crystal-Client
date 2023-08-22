@@ -12,8 +12,8 @@
 
 using namespace geode::prelude;
 
-using namespace Shortcuts;
-using namespace Variables;
+//using namespace Shortcuts;
+//using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
 using namespace Icon;
@@ -75,25 +75,6 @@ ImGuiKey cocosToImGuiKey(cocos2d::enumKeyCodes key) {
 class $modify(CCKeyboardDispatcher) {
 	bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
         cocos2d::enumKeyCodes dispatchedkey = KEY_Tab;
-		for (int m = 0; m < keybinds.size(); m++) {
-			if (GJBaseGameLayer::get()) {
-				if (keybinds[m].activeMod == 8 && down && !P1pushing && key == CrystalClient::shortcutKey(keybinds[m].activeKey)) {
-					GJBaseGameLayer::get()->pushButton(1, true);
-				} 
-				if (keybinds[m].activeMod == 8 && !down && P1pushing && key == CrystalClient::shortcutKey(keybinds[m].activeKey)) {
-					GJBaseGameLayer::get()->releaseButton(1, true);
-				}
-				if (keybinds[m].activeMod == 9 && down && !P2pushing && key == CrystalClient::shortcutKey(keybinds[m].activeKey)) {
-					GJBaseGameLayer::get()->pushButton(1, false);
-				} 
-				if (keybinds[m].activeMod == 9 && !down && P2pushing && key == CrystalClient::shortcutKey(keybinds[m].activeKey)) {
-					GJBaseGameLayer::get()->releaseButton(1, false);
-				}
-			}
-			if (keybinds[m].activeMod == 12) {
-				dispatchedkey = CrystalClient::shortcutKey(keybinds[m].activeKey);
-			}
-		}
         if (down && key == dispatchedkey) {
             ImGuiCocos::get().toggle();
             return true;

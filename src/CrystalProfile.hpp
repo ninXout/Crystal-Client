@@ -25,6 +25,10 @@ inline std::map<std::string, bool> modsMapB = {};
 inline std::map<std::string, int> modsMapI = {};
 inline std::map<std::string, float> modsMapF = {};
 
+inline std::map<std::string, bool> TEMPmodsMapB = {};
+inline std::map<std::string, int> TEMPmodsMapI = {};
+inline std::map<std::string, float> TEMPmodsMapF = {};
+
 template <typename T>
 T getVar(std::string const& key);
 
@@ -56,6 +60,41 @@ inline float getVar<float>(std::string const& key) {
 template <>
 inline float* setVar<float>(std::string const& key) {
 	return &modsMapF[key];
+}
+
+// TEMP SHIT
+
+template <typename T>
+T getTempVar(std::string const& key);
+
+template <typename T>
+T* setTempVar(std::string const& key);
+
+template <>
+inline bool getTempVar<bool>(std::string const& key) {
+	return TEMPmodsMapB[key];
+}
+template <>
+inline bool* setTempVar<bool>(std::string const& key) {
+	return &TEMPmodsMapB[key];
+}
+
+template <>
+inline int getTempVar<int>(std::string const& key) {
+	return TEMPmodsMapI[key];
+}
+template <>
+inline int* setTempVar<int>(std::string const& key) {
+	return &TEMPmodsMapI[key];
+}
+
+template <>
+inline float getTempVar<float>(std::string const& key) {
+	return TEMPmodsMapF[key];
+}
+template <>
+inline float* setTempVar<float>(std::string const& key) {
+	return &TEMPmodsMapF[key];
 }
 
 inline void saveConfigToFile() {
@@ -96,6 +135,18 @@ inline void loadConfigFromFile() {
     }
     input.close();
 }
+
+inline CCLabelBMFont* labels[14];
+
+// should move to a utils file
+
+inline double getPercentage() {
+    if (!PlayLayer::get()) return 0;
+
+    return ((PlayLayer::get()->m_player1->getPositionX() - 50) / PlayLayer::get()->m_levelLength) * 100;
+}
+
+// Legacy shit just incase
 
 struct CrystalProfile {
     bool noclip = false;

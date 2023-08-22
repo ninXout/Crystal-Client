@@ -111,6 +111,7 @@ void AmethystMacro::resetActions(bool recording) {
         if (P1pushing) P1pushes.push_back(currentFrame);
 		if (P2pushing) P2pushes.push_back(currentFrame);
 
+        log::info("[reset] currentFrame: {}", currentFrame);
     } else {
         currentP1index = 0;
         currentR1index = 0;
@@ -122,30 +123,32 @@ void AmethystMacro::resetActions(bool recording) {
     }
 }
 
-void AmethystMacro::updateReplay(float dt) {
+void AmethystMacro::updateReplay(float dt, bool replay) {
     currentFrame += dt;
 
-    if (P1pushes.size() > 0) {
-        if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
-            GJBaseGameLayer::get()->pushButton(1, true);
-            currentP1index++;
+    if (replay) {
+        if (P1pushes.size() > 0) {
+            if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
+                GJBaseGameLayer::get()->pushButton(1, true);
+                currentP1index++;
+            }
+
+            if (P1releases[currentR1index] <= currentFrame && currentR1index < P1releases.size()) {
+                GJBaseGameLayer::get()->releaseButton(1, true);
+                currentR1index++;
+            }
         }
 
-        if (P1releases[currentR1index] <= currentFrame && currentR1index < P1releases.size()) {
-            GJBaseGameLayer::get()->releaseButton(1, true);
-            currentR1index++;
-        }
-    }
+        if (P2pushes.size() > 0) {
+            if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
+                GJBaseGameLayer::get()->pushButton(1, false);
+                currentP2index++;
+            }
 
-    if (P2pushes.size() > 0) {
-        if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
-            GJBaseGameLayer::get()->pushButton(1, false);
-            currentP2index++;
-        }
-
-        if (P2releases[currentR2index] <= currentFrame && currentR2index < P2releases.size()) {
-            GJBaseGameLayer::get()->releaseButton(1, false);
-            currentR2index++;
+            if (P2releases[currentR2index] <= currentFrame && currentR2index < P2releases.size()) {
+                GJBaseGameLayer::get()->releaseButton(1, false);
+                currentR2index++;
+            }
         }
     }
 }
@@ -178,11 +181,13 @@ void AmethystMacro::setPushingData(bool pushing, bool b) {
     if (pushing) {
         if (b) P1pushing = true;
 		if (!b) P2pushing = true;
+        log::info("[pushing] currentFrame: {}", currentFrame);
         if (b) P1pushes.push_back(currentFrame);
 		if (!b) P2pushes.push_back(currentFrame);
     } else  {
         if (b) P1pushing = false;
 		if (!b) P2pushing = false;
+        log::info("[releasing] currentFrame: {}", currentFrame);
         if (b) P1releases.push_back(currentFrame);
 		if (!b) P2releases.push_back(currentFrame);
     }

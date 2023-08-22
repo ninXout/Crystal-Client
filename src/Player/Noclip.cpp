@@ -5,7 +5,6 @@ float frames;
 float noclipped_frames;
 int noclip_deaths;
 
-bool would_die;
 bool lastDeath;
 
 float opacity;
@@ -46,7 +45,7 @@ class $modify(PlayLayer) {
 				//if (profile.noclipDeath) g_death->setString(std::to_string(noclip_deaths).c_str());
 			}
 		}
-        would_die = true;
+        *setTempVar<bool>("would_die") = true;
         if (getVar<bool>("noclip") && !getVar<bool>("noclip_P2") && getVar<bool>("noclip_P1")) {
 			if (p == m_player2) PlayLayer::destroyPlayer(p,g);
 		}
@@ -63,22 +62,26 @@ class $modify(PlayLayer) {
         PlayLayer::resetLevel();
 
         frames = noclipped_frames = noclip_deaths = 0;
-		would_die = false;
+		*setTempVar<bool>("would_die") = false;
     }
 
     void update(float dt)  {
         if (!m_hasCompletedLevel) frames += dt;
 
-        if (would_die && !lastDeath) {
+		*setTempVar<float>("frames") = frames;
+
+        if (getTempVar<bool>("would_die") && !lastDeath) {
 			noclip_deaths++;
+			*setTempVar<int>("noclip_deaths") = noclip_deaths;
 		}
 
-		lastDeath = would_die;
+		lastDeath = getTempVar<bool>("would_die");
 
-		if (would_die && !m_isDead && !m_hasCompletedLevel) {
+		if (getTempVar<bool>("would_die") && !m_isDead && !m_hasCompletedLevel) {
 			noclipped_frames += dt;
+			*setTempVar<float>("noclipped_frames") = noclipped_frames;
 			//dying = true;
-			would_die = false;
+			*setTempVar<bool>("would_die") = false;
 
 			if (opacity < 70) {
 				opacity += 10;

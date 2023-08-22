@@ -10,8 +10,8 @@
 #include "./ImGui/ImGui.hpp"
 
 using namespace geode::prelude;
-using namespace Shortcuts;
-using namespace Variables;
+//using namespace Shortcuts;
+//using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
 using namespace Icon;
@@ -44,34 +44,45 @@ void CrystalClient::arrangeText(int arrayLength, PlayLayer* menulay, bool first)
 	auto director = CCDirector::sharedDirector();
 	auto size = director->getWinSize();
 
-	auto ptr = static_cast<CCLabelBMFont*>(profile.displayNodes[arrayLength]);
+	std::vector<LabelPos> displayPositions;
+
+	if (first) {
+		for (int d = 0; d < 13; d++) {
+			menulay->addChild(labels[d], 1000);
+		}
+	}
+
+	for (int i = 0; i < 13; i++) {
+		std::string theKey = "label_pos-" + std::to_string(i);
+		displayPositions.push_back((LabelPos)getVar<int>(theKey));
+	}
+
+	auto ptr = static_cast<CCLabelBMFont*>(labels[arrayLength]);
 
 	float tr = 0, tl = 0, br = 0, bl = 0, thisLabel;
 
-	for (int i = 0; i < 15; i++) {
-		if (profile.displays[i]) {
-			switch (profile.displayPositions[i]) {
-				case TR:
-					if (arrayLength == i)
-						thisLabel = tr;
-					tr += 1.0f * profile.displayScaleF;
-					break;
-				case TL:
-					if (arrayLength == i)
-						thisLabel = tl;
-					tl += 1.0f * profile.displayScaleF;
-					break;
-				case BR:
-					if (arrayLength == i)
-						thisLabel = br;
-					br += 1.0f * profile.displayScaleF;
-					break;
-				case BL:
-					if (arrayLength == i)
-						thisLabel = bl;
-					bl += 1.0f * profile.displayScaleF;
-					break;
-			}
+	for (int i = 0; i < 13; i++) {
+		switch (profile.displayPositions[i]) {
+			case TR:
+				if (arrayLength == i)
+					thisLabel = tr;
+				tr += 1.0f * getVar<float>("display_scale");
+				break;
+			case TL:
+				if (arrayLength == i)
+					thisLabel = tl;
+				tl += 1.0f * getVar<float>("display_scale");
+				break;
+			case BR:
+				if (arrayLength == i)
+					thisLabel = br;
+				br += 1.0f * getVar<float>("display_scale");
+				break;
+			case BL:
+				if (arrayLength == i)
+					thisLabel = bl;
+				bl += 1.0f * getVar<float>("display_scale");
+				break;
 		}
 	}
 
@@ -79,53 +90,47 @@ void CrystalClient::arrangeText(int arrayLength, PlayLayer* menulay, bool first)
 
 	switch (profile.displayPositions[arrayLength]) {
 		case TR:
-			height = size.height - 10 - (thisLabel * profile.displaySpaceF);
+			height = size.height - 10 - (thisLabel * getVar<float>("display_space"));
 			x = size.width - 5;
 			break;
 		case TL:
-			height = size.height - 10 - (thisLabel * profile.displaySpaceF);
+			height = size.height - 10 - (thisLabel * getVar<float>("display_space"));
 			x = 5.0f;
 			break;
 		case BR:
-			height = 10.0f + (thisLabel * profile.displaySpaceF);
+			height = 10.0f + (thisLabel * getVar<float>("display_space"));
 			x = size.width - 5;
 			break;
 		case BL:
-			height = 10.0f + (thisLabel * profile.displaySpaceF);
+			height = 10.0f + (thisLabel * getVar<float>("display_space"));
 			x = 5.0f;
 			break;
 	}
 
-	profile.displayNodes[arrayLength]->setPosition(x, height);
+	labels[arrayLength]->setPosition(x, height);
 
 	if (arrayLength != 0) {
-		profile.displayNodes[arrayLength]->setOpacity(50);
+		labels[arrayLength]->setOpacity(50);
 	}
-	if (profile.displayScaleF < 0.1f || profile.displayScaleF > 1.5f)
-		profile.displayScaleF = 1.0f;
+	if (getVar<float>("display_scale") < 0.1f || getVar<float>("display_scale") > 1.5f)
+		*setVar<float>("display_scale") = 1.0f;
 
-	float sc = profile.displayScaleF * 0.45f;
+	float sc = getVar<float>("display_scale") * 0.45f;
 	if (arrayLength == 0)
 	{
 		sc *= 1.8f;
-		profile.displayNodes[arrayLength]->setPosition(x, height + 10);
+		labels[arrayLength]->setPosition(x, height + 10);
 	}
 
-	profile.displayNodes[arrayLength]->setScale(sc);
-	if (profile.displayOpacityF < 1)
-		profile.displayOpacityF = 255;
-	else if (profile.displayOpacityF > 255)
-		profile.displayOpacityF = 255;
-	profile.displayNodes[arrayLength]->setOpacity(profile.displayOpacityF);
-	profile.displayNodes[arrayLength]->setAnchorPoint(profile.displayNodes[arrayLength]->getPositionX() > 284.5f
-										? ccp(1.0f, profile.displayNodes[arrayLength]->getAnchorPoint().y)
-										: ccp(0.0f, profile.displayNodes[arrayLength]->getAnchorPoint().y));
-
-	if (first) {
-		for (int d = 0; d < 15; d++) {
-			menulay->addChild(profile.displayNodes[d], 1000);
-		}
-	}
+	labels[arrayLength]->setScale(sc);
+	if (getVar<float>("display_opacity") < 1)
+		*setVar<float>("display_opacity") = 255;
+	else if (getVar<float>("display_opacity") > 255)
+		*setVar<float>("display_opacity") = 255;
+	labels[arrayLength]->setOpacity(getVar<float>("display_opacity"));
+	labels[arrayLength]->setAnchorPoint(labels[arrayLength]->getPositionX() > 284.5f
+										? ccp(1.0f, labels[arrayLength]->getAnchorPoint().y)
+										: ccp(0.0f, labels[arrayLength]->getAnchorPoint().y));
 }
 
 void CrystalClient::drawGUI() {
@@ -269,48 +274,42 @@ void CrystalClient::drawGUI() {
 	}
     ImGui::End();
     ImGui::Begin("Display", NULL, window_flags);
-	CrystalClient::ImToggleable("Testmode Label", &profile.testmode);
-	ImGui::InputFloat("Display Scale", &profile.displayScaleF);
-	ImGui::InputFloat("Display Opacity", &profile.displayOpacityF);
-	ImGui::InputFloat("Display Spacing", &profile.displaySpaceF);
-	CrystalClient::ImExtendedToggleable("Cheat Indicator", &Crystal::profile.displays[0]);
+	CrystalClient::ImToggleable("Testmode Label", setVar<bool>("testmode_label"));
+	ImGui::InputFloat("Display Scale", setVar<float>("display_scale"));
+	ImGui::InputFloat("Display Opacity", setVar<float>("display_opacity"));
+	ImGui::InputFloat("Display Spacing", setVar<float>("display_space"));
+	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"));
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[0], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[0]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[0]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Custom Message", &Crystal::profile.displays[1]);
+	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"));
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		strcpy(profile.messageBuffer, profile.message.c_str());
 		ImGui::InputTextWithHint("Message", "Custom Message", profile.messageBuffer, IM_ARRAYSIZE(profile.messageBuffer));
 		profile.message = profile.messageBuffer;
 		ImGui::Combo("Position", (int *)&profile.displayPositions[1], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[1]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[1]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("CPS display", &Crystal::profile.displays[2]);
+	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"));
 	if (ImGui::BeginPopupModal("CPS display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
-		CrystalClient::ImToggleable("Show Clicks", &Crystal::profile.sclicks);
-		CrystalClient::ImToggleable("Only Clicks", &Crystal::profile.oclicks);
-		CrystalClient::ImToggleable("Reset Clicks Every Attempt", &Crystal::profile.rclicks);
+		//CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
+		//CrystalClient::ImToggleable("Show Clicks", &Crystal::profile.sclicks);
+		//CrystalClient::ImToggleable("Only Clicks", &Crystal::profile.oclicks);
+		//CrystalClient::ImToggleable("Reset Clicks Every Attempt", &Crystal::profile.rclicks);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[2], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[2]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[2]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("FPS Display", &Crystal::profile.displays[3]);
+	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"));
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[3], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[3]);
@@ -320,7 +319,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Last Death", &Crystal::profile.displays[4]);
+	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"));
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[4], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[4]);
@@ -330,9 +329,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Attempts", &Crystal::profile.displays[5]);
+	CrystalClient::ImExtendedToggleable("Attempts", setVar<bool>("attempts"));
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Total Attempts", &Crystal::profile.tattoo);
+		CrystalClient::ImToggleable("Total Attempts", setVar<bool>("total_attempts"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[5], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[5]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[5]);
@@ -341,10 +340,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Jumps", &Crystal::profile.displays[6]);
+	CrystalClient::ImExtendedToggleable("Jumps", setVar<bool>("jumps"));
 	if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Total Jumps", &Crystal::profile.tjumps);
-		CrystalClient::ImToggleable("Attempt Jumps", &Crystal::profile.ajumps);
+		CrystalClient::ImToggleable("Total Jumps", setVar<bool>("total_jumps"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[6], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[6]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[6]);
@@ -353,7 +351,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Run From", &Crystal::profile.displays[7]);
+	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"));
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[7], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[7]);
@@ -363,7 +361,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Best Run", &Crystal::profile.displays[8]);
+	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"));
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[8], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[8]);
@@ -373,9 +371,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Noclip Accuracy", &Crystal::profile.displays[9]);
+	CrystalClient::ImExtendedToggleable("Noclip Accuracy", setVar<bool>("noclip_accuracy"));
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Red Pulse on Death", &Crystal::profile.redDying);
+		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_accuracy"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[9], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[9]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[9]);
@@ -384,9 +382,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Noclip Deaths", &Crystal::profile.displays[10]);
+	CrystalClient::ImExtendedToggleable("Noclip Deaths", setVar<bool>("noclip_deaths"));
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Red Pulse on Death", &Crystal::profile.redDeath);
+		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_death"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[10], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[10]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[10]);
@@ -395,10 +393,10 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Level Name and ID", &Crystal::profile.displays[11]);
+	CrystalClient::ImExtendedToggleable("Level Name and ID", setVar<bool>("level_info"));
 	if (ImGui::BeginPopupModal("Level Name and ID", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Hide ID", &Crystal::profile.hideID);
-		CrystalClient::ImToggleable("Show Author", &Crystal::profile.author);
+		CrystalClient::ImToggleable("Hide ID", setVar<bool>("hide_ID"));
+		CrystalClient::ImToggleable("Show Author", setVar<bool>("level_info_author"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[11], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[11]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[11]);
@@ -407,7 +405,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Macro Status", &Crystal::profile.displays[12]);
+	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"));
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[12], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[12]);
@@ -417,12 +415,12 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Clock", &Crystal::profile.displays[13]);
+	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"));
 	if (ImGui::BeginPopupModal("Clock", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("12-hour format", &Crystal::profile.ipm);
-		CrystalClient::ImToggleable("In-Attempt Time", &Crystal::profile.iat);
-		CrystalClient::ImToggleable("In-Level Time", &Crystal::profile.ilt);
-		CrystalClient::ImToggleable("In-Game Time", &Crystal::profile.igt);
+		//CrystalClient::ImToggleable("12-hour format", &Crystal::profile.ipm);
+		//CrystalClient::ImToggleable("In-Attempt Time", &Crystal::profile.iat);
+		//CrystalClient::ImToggleable("In-Level Time", &Crystal::profile.ilt);
+		//CrystalClient::ImToggleable("In-Game Time", &Crystal::profile.igt);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[13], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		//ImGui::InputFloat("Opacity", &profile.displayOpacity[13]);
 		//ImGui::InputFloat("Scale", &profile.displayScale[13]);
@@ -453,16 +451,16 @@ void CrystalClient::drawGUI() {
 	ImGui::InputFloat("Scrollbar Rounding", &profile.scrollbarRounding);
     ImGui::End();
     ImGui::Begin("Bypasses", NULL, window_flags);
-	CrystalClient::ImToggleable("Anticheat Bypass", &profile.anticheat);
-	CrystalClient::ImToggleable("Unlock All", &profile.unlockAll);
-	CrystalClient::ImToggleable("Scale Hack", &profile.scalehack);
-	CrystalClient::ImToggleable("Object Limit Bypass", &profile.objlimit);
-	CrystalClient::ImToggleable("Custom Object Object Limit Bypass", &profile.customobjlimit);
-	CrystalClient::ImToggleable("Verify Bypass", &profile.verify);
-	CrystalClient::ImToggleable("Copy Bypass", &profile.copy);
-	CrystalClient::ImToggleable("Editor Zoom Bypass", &profile.editorZoom);
-	CrystalClient::ImToggleable("Level Edit Bypass", &profile.levelEdit);
-	CrystalClient::ImToggleable("Load Failed Bypass", &profile.loadfail);
+	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"));
+	CrystalClient::ImToggleable("Unlock All", setVar<bool>("unlock_all"));
+	CrystalClient::ImToggleable("Scale Hack", setVar<bool>("scalehack"));
+	CrystalClient::ImToggleable("Object Limit Bypass", setVar<bool>("obj_limit"));
+	CrystalClient::ImToggleable("Custom Object Object Limit Bypass", setVar<bool>("custom_obj_limit"));
+	CrystalClient::ImToggleable("Verify Bypass", setVar<bool>("verify"));
+	CrystalClient::ImToggleable("Copy Bypass", setVar<bool>("copy_hack"));
+	CrystalClient::ImToggleable("Editor Zoom Bypass", setVar<bool>("editor_zoom"));
+	CrystalClient::ImToggleable("Level Edit Bypass", setVar<bool>("level_edit"));
+	CrystalClient::ImToggleable("Load Failed Bypass", setVar<bool>("load_failed"));
     ImGui::End();
     ImGui::Begin("Global", NULL, window_flags);
 	ImGui::PushItemWidth(100);
@@ -539,24 +537,25 @@ void CrystalClient::drawGUI() {
         OptionsLayer::addToCurrentScene(false);
     }
     ImGui::Separator();
-    ImGui::Combo("Keybind", &currentKey, keybindings, IM_ARRAYSIZE(keybindings));
-    ImGui::Combo("Mod to Switch", &currentMod, modbindings, IM_ARRAYSIZE(modbindings));
+    ImGui::Combo("Keybind", &Shortcuts::get()->currentKey, Shortcuts::get()->keybindings, IM_ARRAYSIZE(Shortcuts::get()->keybindings));
+    ImGui::Combo("Mod to Switch", &Shortcuts::get()->currentMod, Shortcuts::get()->modbindings, IM_ARRAYSIZE(Shortcuts::get()->modbindings));
     if (ImGui::Button("Add Keybind")) {
-        keybinds.push_back({currentKey, currentMod});
+        Shortcuts::get()->keybinds.push_back({Shortcuts::get()->currentKey, Shortcuts::get()->currentMod});
     }
-	for (size_t i = 0; i < keybinds.size(); i++) {
+	for (size_t i = 0; i < Shortcuts::get()->keybinds.size(); i++) {
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text("%s", modbindings[keybinds[i].activeMod]);
+		ImGui::Text("%s", Shortcuts::get()->modbindings[Shortcuts::get()->keybinds[i].activeMod]);
 		ImGui::SameLine();
-		ImGui::Text("%s", keybindings[keybinds[i].activeKey]);
+		ImGui::Text("%s", Shortcuts::get()->keybindings[Shortcuts::get()->keybinds[i].activeKey]);
 		ImGui::SameLine();
 		if (ImGui::Button(("x##" + std::to_string(i)).c_str())) {
-			keybinds.erase(keybinds.begin() + i);
+			Shortcuts::get()->keybinds.erase(Shortcuts::get()->keybinds.begin() + i);
 		}
 		ImGui::Separator();
 	}
     ImGui::End();
 	ImGui::Begin("Variable Changer", NULL, window_flags);
+	/*
     ImGui::Combo("Variable", &currentVar, playerVars, IM_ARRAYSIZE(playerVars));
 	ImGui::InputFloat("Value", &currentValue);
     if (ImGui::Button("Add Change")) {
@@ -572,7 +571,7 @@ void CrystalClient::drawGUI() {
 			variables.erase(variables.begin() + i);
 		}
 		ImGui::Separator();
-	}
+	}*/
     ImGui::End();
 	ImGui::Begin("Internal Renderer", NULL, window_flags);
 	CrystalClient::ImToggleable("Render Recording", &profile.renderer);
@@ -743,6 +742,8 @@ class $modify(CCScheduler) {
 		if (PlayLayer::get() && gameStarted && (profile.TPSbypass || profile.FPSbypass || profile.deltaLock || profile.replay || profile.record || profile.renderer)) {
 			auto dir = CCDirector::sharedDirector();
 
+			//CGSSetDebugOptions(327680);
+
 			float spf = (float)dir->getAnimationInterval() * (60 / profile.TPS);
 			auto nspeedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
 
@@ -774,13 +775,6 @@ class $modify(CCScheduler) {
 };
 
 class $modify(EditLevelLayer) {
-	static EditLevelLayer* create(GJGameLevel* ok) {
-		if (profile.verify) {
-			ok->m_isVerified = true;
-		}	
-		return EditLevelLayer::create(ok);
-	}
-
 	bool init(GJGameLevel* ed) {
         EditLevelLayer::init(ed);
 
@@ -796,67 +790,6 @@ class $modify(GJGameLevel) {
 		if (profile.safeMode && profile.autoSafeMode && profile.displayNodes[0]->getColor() == ccc3(255,0,0)) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, false);
 		if (profile.anticheat) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, true);
 		else return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
-	}
-};
-
-class $modify(GameManager) {
-    bool isIconUnlocked(int a, IconType b) {
-        auto icon = GameManager::isIconUnlocked(a,b);
-        if (profile.unlockAll) {
-            return true;
-        } else {
-            return icon;
-        }
-    } 
-
-    bool isColorUnlocked(int a, bool b) {
-        auto color = GameManager::isColorUnlocked(a,b);
-        if (profile.unlockAll) {
-            return true;
-        } else {
-            return color;
-        }
-    }
-};
-
-class $(MyGameObject, GameObject) {
-    virtual void update(float time2) {
-		if (Crystal::profile.instantdeath) {
-			m_particleAdded = true;
-   			m_hasParticles = false;
-		}
-		GameObject::update(time2);
-	}
-/*
-	void activatedByPlayer(GameObject* other) {
-		if (profile.trajectory && s_drawer->m_pIsSimulation) {
-			if (this->getType() != GameObjectType::Slope &&
-				this->getType() != GameObjectType::Solid &&
-				this->getType() != GameObjectType::GravityPad &&
-				this->getType() != GameObjectType::PinkJumpPad && this->getType() != GameObjectType::RedJumpPad &&
-				this->getType() != GameObjectType::YellowJumpPad && this->getType() != GameObjectType::DashRing &&
-				this->getType() != GameObjectType::DropRing && this->getType() != GameObjectType::GravityDashRing &&
-				this->getType() != GameObjectType::GravityRing && this->getType() != GameObjectType::GreenRing &&
-				this->getType() != GameObjectType::PinkJumpRing && this->getType() != GameObjectType::RedJumpRing &&
-				this->getType() != GameObjectType::YellowJumpRing && this->getType() != GameObjectType::Special &&
-				this->getType() != GameObjectType::CollisionObject && this->getType() != GameObjectType::Hazard &&
-				this->getType() != GameObjectType::InverseGravityPortal &&
-				this->getType() != GameObjectType::NormalGravityPortal &&
-				this->getType() != GameObjectType::TeleportPortal &&
-				this->getType() != GameObjectType::MiniSizePortal &&
-				this->getType() != GameObjectType::RegularSizePortal) 
-			{
-				return;
-			}
-		}
-		GameObject::activatedByPlayer(other);
-	}*/
-};
-
-class $modify(LevelTools) {
-	static bool verifyLevelIntegrity(gd::string mg, int de) {
-		if (profile.loadfail || profile.levelEdit) return true;
-		return LevelTools::verifyLevelIntegrity(mg, de);
 	}
 };
 
@@ -916,23 +849,7 @@ class $modify(GJBaseGameLayer) {
 	}
 };
 
-class $modify(HardStreak) {
-	void addPoint(cocos2d::CCPoint point) {
-		//if (profile.trajectory && s_drawer->m_pIsSimulation) return;
-		HardStreak::addPoint(point);
-	}
-};
-
 class $modify(LevelInfoLayer) {
-	static LevelInfoLayer* create(GJGameLevel* g) {
-		auto layer = LevelInfoLayer::create(g);
-		if (profile.copy) {
-			g->m_password = 1;
-		}
-
-		return layer;
-	}
-
 	bool init(GJGameLevel* level) {
         LevelInfoLayer::init(level);
         
@@ -941,28 +858,6 @@ class $modify(LevelInfoLayer) {
         return true;
  
     }
-};
-
-class $modify(PauseLayer) {
-	static PauseLayer* create(bool isPaused) {
-		auto pause = PauseLayer::create(isPaused);
-		if (Crystal::profile.levelEdit) {
-			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
-			auto menu = static_cast<CCMenu*>(pause->getChildByID("center-button-menu"));
-			auto editorButton = CCMenuItemSpriteExtra::create(editorSprite, pause, menu_selector(PauseLayer::goEdit));
-
-			if (menu->getChildrenCount() != 5) {
-				editorButton->setPosition({-212.25f, 0.0f});
-				editorButton->setScale(0.8f);
-				editorButton->setAnchorPoint({0.5f, 0.5f});
-
-				menu->setPosition({325.0f, 130.0f});
-				menu->addChild(editorButton);
-				menu->updateLayout();
-			}
-		}
-		return pause;
-	}
 };
 
 class $modify(CheckpointObject) {
@@ -997,82 +892,15 @@ class $modify(Main, PlayLayer) {
     void resetLevel() {
 		//drawer->m_pDieInSimulation = false;
 		//drawer->m_pIsSimulation = false;
-		
-		if (profile.bestRun) {
-			bestEnd2 = (m_player1->getPositionX() / m_levelLength) * 100;
-		}
-		
+	
 		PlayLayer::resetLevel();
 
 		if (profile.replay || profile.record) currentMacro.resetActions(profile.record);
 
-		
-		if (profile.cheatIndicate) {
-			bad = "Not Cheating";
-			g_cheating->setColor(ccc3(0,255,0));
-		}
-
 		if (Crystal::profile.rclicks) {
 			clickscount = 0;
 		}
-
-		if (profile.displays[2]) {
-			click_count = 0;
-			click_time_sum = 0.f;
-		}
-
-		if (profile.displays[6]) {
-			m_attemptJumpCount = 0;
-		}
 		
-		if (profile.displays[7]) {
-			double start = (m_player1->getPositionX() / m_levelLength) * 100;
-			char str[64];
-			sprintf(str, "Run from %.0lf%%", start);
-			profile.displayNodes[7]->setString(str);
-		}
-		
-		if (profile.displays[8]) {
-			bestStart2 = (m_player1->getPositionX() / m_levelLength) * 100;
-			if ((bestEnd2 - bestStart2) > (bestEnd - bestStart)) {
-				bestStart = bestStart2;
-				bestEnd = bestEnd2;
-			}
-			display = "Best Run: " + std::to_string(bestStart) + " to " + std::to_string(bestEnd);
-			profile.displayNodes[8]->setString(display.c_str());
-		}
-		
-	}
-/*
-    void destroyPlayer(PlayerObject* p, GameObject* g) {
-		
-		if (profile.trajectory && drawer->shouldInterrumpHooks(p)) {
-			drawer->m_pDieInSimulation = true;
-			return;
-		}
-		
-	}
-*/
-
-    void checkCollisions(PlayerObject* p, float g) {
-		if (profile.anticheat) {
-			m_antiCheatPassed = true;
-			m_shouldTryToKick = false;
-			m_hasCheated = false;
-			m_inlineCalculatedKickTime = 0.0;
-			m_accumulatedKickCounter = 0;
-			m_kickCheckDeltaSnapshot = (float)std::time(nullptr);
-		}
-
-        PlayLayer::checkCollisions(p, g);
-
-		for (int d = 0; d < 15; d++) {
-			profile.displayNodes[d]->setVisible(profile.displays[d]);
-			CrystalClient::get()->arrangeText(d, this, false);
-		}
-	}
-
-	void captureScreen() { 
 	}
 
     void update(float f4) {
@@ -1229,222 +1057,6 @@ class $modify(Main, PlayLayer) {
 
 		percent = (m_player1->getPositionX() / m_levelLength) * 100;
 
-		if (profile.displays[0]) {
-			bad = ".";
-			if (profile.noclip || profile.speed < 1 || Crystal::profile.mirror || Crystal::profile.framestep || Crystal::profile.autoclick || Crystal::profile.layout || Crystal::profile.record || Crystal::profile.replay || Crystal::profile.FPS > 360.0 || Crystal::profile.TPS > 360.0) {
-				profile.displayNodes[0]->setColor(ccc3(255,0,0));
-			} else {
-				profile.displayNodes[0]->setColor(ccc3(0,255,0));
-			}
-
-			profile.displayNodes[0]->setString(bad.c_str());
-		}
-		if (profile.displays[1]) {
-			profile.displayNodes[1]->setString(profile.messageBuffer);
-		}
-		if (profile.displays[2]) {
-			const auto know = std::chrono::high_resolution_clock::now();
-
-			const std::chrono::duration<float> dif = know - previous;
-			click_time_sum += dif.count();
-
-			std::string fixy = "/" + std::to_string(clickscount);
-			std::string displayC = std::to_string(clickscount);
-			std::string disply = cipy + fixy;
-			std::string dasply = cipy + " CPS";
-
-			//if (std::chrono::duration<float>(know - last).count() > 1.0f) {
-				last = know;
-				const auto cps = static_cast<int>(std::roundf(static_cast<float>(click_count) / m_time));
-				click_time_sum = 0.f;
-				//click_count = 0;
-			
-				cipy = std::to_string(cps);
-			//}
-
-			if (holding && Crystal::profile.tclicks) {
-				profile.displayNodes[2]->setColor(ccc3(0, 255, 0));
-			} else {
-				profile.displayNodes[2]->setColor(ccc3(255, 255, 255));
-			}
-
-			if (Crystal::profile.sclicks) {
-				profile.displayNodes[2]->setString(disply.c_str());
-			} else if (Crystal::profile.oclicks) {
-				profile.displayNodes[2]->setString(displayC.c_str());
-			} else {
-				profile.displayNodes[2]->setString(dasply.c_str());
-			}
-
-			previous = know;
-		}
-		if (profile.displays[3]) {
-			const auto now = std::chrono::high_resolution_clock::now();
-
-			const std::chrono::duration<float> diff = now - previous_frame;
-			frame_time_sum += diff.count();
-			frame_count++;
-
-			if (std::chrono::duration<float>(now - last_update).count() > 1.0f) {
-				last_update = now;
-				const auto fps = static_cast<int>(std::roundf(static_cast<float>(frame_count) / frame_time_sum));
-				frame_time_sum = 0.f;
-				frame_count = 0;
-				profile.displayNodes[3]->setString((std::to_string(fps) + " FPS").c_str());
-			}
-
-			previous_frame = now;
-		}
-		if (profile.displays[4]) {
-			double start = m_lastDeathPercent;
-			char str[64];
-			sprintf(str, "Last Death: %.0lf%%", start);
-			profile.displayNodes[4]->setString(str);
-		}
-		if (profile.displays[5]) {
-			if (Crystal::profile.tattoo) {
-				std::string at = "Global Atts: " + std::to_string(m_level->m_attempts);
-				profile.displayNodes[5]->setString(at.c_str());
-			} else {
-				auto work = m_currentAttempt;
-				char str[64];
-				sprintf(str, "Attempts: %0d", work);
-				profile.displayNodes[5]->setString(str);
-			}
-		}
-		if (profile.displays[6]) {
-			std::string nd = "Jumps: " + std::to_string(m_jumpCount);
-			std::string ed = "Total Jumps: " + std::to_string(m_level->m_jumps);
-			std::string ad = "Jumps: " + std::to_string(m_attemptJumpCount);
-
-			if (Crystal::profile.ajumps) {
-				profile.displayNodes[6]->setString(ad.c_str());
-			} else if (Crystal::profile.tjumps) {
-				profile.displayNodes[6]->setString(ed.c_str());
-			} else {
-				profile.displayNodes[6]->setString(nd.c_str());
-			}
-		}
-		if (profile.displays[9]) {
-			char ok[20];
-            auto accu = (float)(frames - noclipped_frames) / (float)frames;
-            sprintf(ok, "%.2f%%", accu * 100);
-            profile.displayNodes[9]->setString(ok);
-
-			if (Crystal::profile.redDying && dying) {
-				profile.displayNodes[9]->setColor(ccc3(255, 0, 0));
-			} else {
-				profile.displayNodes[9]->setColor(ccc3(255, 255, 255));
-			}
-		}
-		if (profile.displays[10]) {
-			std::string nd = "Noclip Deaths: ";
-			profile.displayNodes[10]->setString(nd.c_str());
-
-			if (Crystal::profile.redDeath && deaath) {
-				profile.displayNodes[10]->setColor(ccc3(255, 0, 0));
-			} else {
-				profile.displayNodes[10]->setColor(ccc3(255, 255, 255));
-			}
-		}
-		if (profile.displays[11]) {
-			std::string displayL;
-			std::string levelName = PlayLayer::get()->m_level->m_levelName;
-			std::string levelAuthor = PlayLayer::get()->m_level->m_creatorName;
-			std::string levelID = std::to_string(PlayLayer::get()->m_level->m_levelID);			
-			if (PlayLayer::get()->m_level->m_levelID == 0) {
-				levelID = "Copy";
-			}
-			if (PlayLayer::get()->m_level->m_levelID < 22 && PlayLayer::get()->m_level->m_levelID > 0) {
-				levelAuthor = "RobTop"; 
-			}
-
-			if (Crystal::profile.hideID && !Crystal::profile.author) {
-				displayL = levelName;
-			} else if (Crystal::profile.hideID && Crystal::profile.author) {
-				displayL = levelName + " by " + levelAuthor;
-			} else {
-				displayL = levelName + " (" + levelID + ")";
-			}
-			profile.displayNodes[11]->setString(displayL.c_str());
-		}
-		if (profile.displays[12]) {
-            if (profile.replay && !profile.renderer) {
-                std::string status = "Playing: " + std::to_string(currentP1index) + "/" + std::to_string(P1pushes.size()) + " (Frame " + std::to_string((int)(m_time * profile.TPS)) + ")";
-                profile.displayNodes[12]->setString(status.c_str());
-            } else if (profile.record) {
-                std::string status = "Recording: Macro Frame " + std::to_string((int)(m_time * profile.TPS));
-                profile.displayNodes[12]->setString(status.c_str());
-            } else if (profile.replay && profile.renderer) {
-                std::string status = "Rendering: Video Frame " + std::to_string((int)(m_time * 60));
-                profile.displayNodes[12]->setString(status.c_str());
-            } else {
-				profile.displayNodes[12]->setString("Not using Amethyst");
-			}
-        }
-		if (profile.displays[13]) {
-			auto t = std::time(nullptr);
-			std::tm tm = *std::localtime(&t);
-
-			std::ostringstream oss;
-			if (Crystal::profile.ipm) {
-				oss << std::put_time(&tm, "%I:%M:%S %p");
-			} else {
-				oss << std::put_time(&tm, "%H:%M:%S");
-			}
-			auto clstr = oss.str();
-
-			if (Crystal::profile.iat) {
-				int minutes = static_cast<int>(m_time / 60);
-    			int seconds = static_cast<int>(m_time) % 60;
-
-				std::ostringstream timeStream;
-    			timeStream << std::setfill('0') << std::setw(2) << minutes << ":" << std::setw(2) << seconds;
-				std::string time = timeStream.str();
-
-				profile.displayNodes[13]->setString(time.c_str());
-			} else if (Crystal::profile.ilt) {
-				int hours = static_cast<int>(timee / 3600);
-				int minutes = static_cast<int>(timee / 60);
-    			int seconds = static_cast<int>(timee) % 60;
-
-				std::ostringstream timeStr;
-    			timeStr << std::setfill('0') << std::setw(2) << hours << ":"
-               	<< std::setw(2) << minutes << ":"
-               	<< std::setw(2) << seconds;
-				std::string tie = timeStr.str();
-
-				profile.displayNodes[13]->setString(tie.c_str());
-			} else if (Crystal::profile.igt) {
-				auto nov = std::chrono::high_resolution_clock::now();
-            	auto teim = std::chrono::duration_cast<std::chrono::seconds>(nov - tiem);
-
-            	int hours = static_cast<int>(teim.count() / 3600);
-    			int minutes = static_cast<int>(teim.count() / 60);
-    			int secs = static_cast<int>(teim.count()) % 60;
-
-				std::ostringstream tStr;
-    			tStr << std::setfill('0') << std::setw(2) << hours << ":"
-               	<< std::setw(2) << minutes << ":"
-               	<< std::setw(2) << secs;
-				std::string tei = tStr.str();
-
-				profile.displayNodes[13]->setString(tei.c_str());
-			} else {
-				profile.displayNodes[13]->setString(clstr.c_str());
-			}
-		}
-
-		for (int i = 0; i < variables.size(); i++) {
-			if (variables[i].activeVar == 0) m_player1->m_gravity = variables[i].activeValue;
-			if (variables[i].activeVar == 1) m_player1->m_xVelocity = variables[i].activeValue;
-			if (variables[i].activeVar == 2) m_player1->m_yVelocity = variables[i].activeValue;
-			if (variables[i].activeVar == 3) m_player1->m_position.x = variables[i].activeValue;
-			if (variables[i].activeVar == 4) m_player1->m_position.y = variables[i].activeValue;
-			if (variables[i].activeVar == 5) m_player1->m_jumpAccel = variables[i].activeValue;
-			if (variables[i].activeVar == 6) m_player1->m_vehicleSize = variables[i].activeValue;
-		}
-
 		if (profile.record || profile.replay) f4 = 1.f / (profile.FPS * (profile.TPS / 60)) / speedhack;
 
 		//if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentFrame += f4;
@@ -1455,7 +1067,7 @@ class $modify(Main, PlayLayer) {
 
 		//if (profile.trajectory) drawer->processMainTrajectory(f4);
 
-		if (profile.replay && gameStarted) currentMacro.updateReplay(f4);
+		if ((profile.replay || profile.record) && gameStarted) currentMacro.updateReplay(f4, profile.replay);
 	}
 
 	void removeLastCheckpoint() {
@@ -1504,6 +1116,8 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::onQuit();
 	}
 
+	typedef uint16_t CGKeyCode;
+
 	void startGame() {
 		PlayLayer::startGame();
 		gameStarted = true;
@@ -1512,11 +1126,6 @@ class $modify(Main, PlayLayer) {
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		timee = 0.0f;
-
-		for (int d = 0; d < 15; d++) {
-			profile.displayNodes[d] = CCLabelBMFont::create("Loading...", "bigFont.fnt");
-		}
-
         
 
 		ss = 0;
@@ -1540,83 +1149,18 @@ class $modify(Main, PlayLayer) {
 			record.start(filePATH, tempPATH);
 		}
 
-		for (int d = 0; d < 15; d++) {
-			profile.displayNodes[d]->setVisible(profile.displays[d]);
-		}
-
-		if (!profile.testmode) {
-			if (this->getChildrenCount()) {
-				CCArrayExt<CCNode*> children = this->getChildren();
-				for (auto* child : children) {
-					using namespace std::literals::string_view_literals;
-					if (auto* label = typeinfo_cast<CCLabelBMFont*>(child); label && label->getString() == "Testmode"sv) {
-						label->setVisible(false);
-						break;
-					}
-				}
-			}
-		}
-
 		if (profile.clickBot) Clickbot::start = std::chrono::system_clock::now();
 
 		//if (profile.trajectory) drawer->createPlayersForTrajectory();
 
 		currentFrame = 0;
-		
-		for (int d = 0; d < 15; d++) {
-			CrystalClient::get()->arrangeText(d, this, true);
-		}
 		return true;
 	}
 };
 
 class $(UILayer) {
-	void customMod(int current) {
-		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
-		if (current == 0) {
-			Crystal::profile.noclip = !Crystal::profile.noclip;
-		} else if (current == 1) {
-			PlayLayer::get()->destroyPlayer(PlayLayer::get()->m_player1, nullptr);
-		} else if (current == 2) {
-			PlayLayer::get()->resetLevel();
-		} else if (current == 3) {
-			if (speedhack != 1) {
-				CCDirector::sharedDirector()->getScheduler()->setTimeScale(1);
-			} else {
-				CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhack);
-			}
-		} else if (current == 4) {
-			//s_showOnDeath = !s_showOnDeath;
-		} else if (current == 5) {
-			if (Crystal::profile.autoclick) {
-				Crystal::profile.autoclick = false;
-				GJBaseGameLayer::get()->releaseButton(1,true);
-			} else {
-				Crystal::profile.autoclick = true;
-			}
-		} else if (current == 6) {
-			//mpl->updateIndex(false);
-		} else if (current == 7) {
-			//mpl->updateIndex(true);
-		} else if (current == 10) {
-			if (PlayLayer::get()->m_isPracticeMode) PlayLayer::get()->markCheckpoint();
-		} else if (current == 11) {
-			if (PlayLayer::get()->m_isPracticeMode) PlayLayer::get()->removeLastCheckpoint();
-		} else if (current == 13 && profile.framestep) {
-			//shouldUpdate = true;
-			//mpl->update(1.f / (profile.FPS * (profile.TPS / 60)) / profile.speedhack);
-			//shouldUpdate = false;
-		}
-	}
-
 	void keyDown(cocos2d::enumKeyCodes kc) {
 		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
-
-		for (int m = 0; m < keybinds.size(); m++) {
-			if (kc == CrystalClient::shortcutKey(keybinds[m].activeKey)) {
-				customMod(keybinds[m].activeMod);
-			}
-		}
 
 		UILayer::keyDown(kc);
 	}
@@ -1943,11 +1487,11 @@ struct json::Serialize<CrystalProfile> {
     		scalesArray.push_back(skale);
 		}
 		ret["scales"] = std::move(scalesArray);
-		ret["keybindsSize"] = keybinds.size();
-		for (int i = 0; i < keybinds.size(); i++) {
-			ret[std::to_string(i).c_str()]["key"] = keybinds[i].activeKey;
-			ret[std::to_string(i).c_str()]["mod"] = keybinds[i].activeMod;
-		}
+		//ret["keybindsSize"] = keybinds.size();
+		//for (int i = 0; i < keybinds.size(); i++) {
+			//ret[std::to_string(i).c_str()]["key"] = keybinds[i].activeKey;
+			//ret[std::to_string(i).c_str()]["mod"] = keybinds[i].activeMod;
+		//}
         return ret;
     }
 };
@@ -1966,10 +1510,10 @@ CrystalProfile Crystal::loadMods() {
 		auto json = json2::parse(input);
 		std::string ver = std::to_string(Mod::get()->getVersion().getMajor()) + "." + std::to_string(Mod::get()->getVersion().getMinor()) + "." + std::to_string(Mod::get()->getVersion().getPatch());
 		if (ver == json["CrystalVer"]) {
-			keybinds.clear();
-			for (int i = 0; i < json["keybindsSize"]; i++) {
-				keybinds.push_back({json[std::to_string(i).c_str()]["key"], json[std::to_string(i).c_str()]["mod"]});
-			}
+			//keybinds.clear();
+			//for (int i = 0; i < json["keybindsSize"]; i++) {
+				//keybinds.push_back({json[std::to_string(i).c_str()]["key"], json[std::to_string(i).c_str()]["mod"]});
+			//}
 			const auto& displaysJson = json["displays"];
             auto& displaysArray = profile.displays;
             for (std::size_t i = 0; i < std::min(displaysJson.size(), displaysArray.size()); ++i) {

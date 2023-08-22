@@ -41,6 +41,14 @@ void fps_shower_init();
     bool borders;
     bool rounded;
 
+    struct A : cocos2d::CCObject {
+        void restart() {
+            auto pl = (PlayLayer*)this;
+
+            pl->resetLevel();
+        }
+    };
+
     // Checkpoint Switcher
     std::vector<std::pair<CheckpointObject*, CCPoint>> g_checkpoints;
     int g_checkpointIndex;
@@ -123,11 +131,6 @@ void fps_shower_init();
 
     Recorder record;
 
-    double m_resetInterval;
-	std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
-    float frame_time_sum = 0.f;
-    int frame_count = 0;
-
     // CPS Display
     bool holding;
     float click_time_sum = 0.f;
@@ -145,13 +148,6 @@ void fps_shower_init();
     float fixa = 0.0f;
     float timee = 0.0f;
 
-    bool currentRun;
-    bool bestRun;
-    int bestEnd;
-    int bestStart;
-    int bestEnd2;
-    int bestStart2;
-    std::string display = "Best Run: " + std::to_string(bestStart) + " to " + std::to_string(bestEnd);
     std::chrono::time_point<std::chrono::high_resolution_clock> tiem;
     bool isTiemOn = false;
 

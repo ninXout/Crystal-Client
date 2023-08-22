@@ -10,8 +10,8 @@
 
 using namespace geode::prelude;
 
-using namespace Shortcuts;
-using namespace Variables;
+//using namespace Shortcuts;
+//using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
 using namespace Icon;
@@ -206,7 +206,7 @@ float CrystalClient::getTimeForXPos(PlayLayer* play) {
     float xPos = play->m_player1->getPositionX();
     __asm movss xmm1, xPos;
     reinterpret_cast<void(__thiscall*)>(geode::base::get() + 0x293eb0); // PlayLayer::timeForXPos2
-    __asm movss ret, xmm0; // return value
+    __asm movss ret, xmm0; // return unwrap
 
     return ret;
 }
@@ -237,45 +237,45 @@ void CrystalClient::addTransparentBG(CCNode* layer) {
 
 void CrystalClient::initPatches() {
 	// scale hack
-	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
-	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
-	//auto respawn = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x072419), {'\x00'});
+	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'}).unwrap();
+	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'}).unwrap();
+	//auto respawn = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x072419), {'\x00'}).unwrap();
 
 	// object limit
-	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
-	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
-	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'}).unwrap();
+	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'}).unwrap();
+	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'}).unwrap();
 
 	// custom object
-	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
-	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
-	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}).unwrap();
+	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}).unwrap();
+	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}).unwrap();
 }
 
 void CrystalClient::refreshPatches() {
 	/*
-	if (Crystal::profile.scalehack) {
-		scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'});
-		scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'});
+	if (getVar<bool>("scalehack")) {
+		scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'}).unwrap();
+		scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'}).unwrap();
 	} else {
 		Mod::get()->unpatch(scaleHack1);
 		Mod::get()->unpatch(scaleHack2);
 	}
 
-	if (Crystal::profile.objlimit) {
-		objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'});
-		objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'});
-		objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'});
+	if (getVar<bool>("obj_limit")) {
+		objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'}).unwrap();
+		objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'}).unwrap();
+		objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'}).unwrap();
 	} else {
 		Mod::get()->unpatch(objLimit1);
 		Mod::get()->unpatch(objLimit2);
 		Mod::get()->unpatch(objLimit3);
 	}
 
-	if (Crystal::profile.customobjlimit) {
-		customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'});
-		customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'});
-		customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'});
+	if (getVar<bool>("custom_obj_limit")) {
+		customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}).unwrap();
+		customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}).unwrap();
+		customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}).unwrap();
 	} else {
 		Mod::get()->unpatch(customObjLimit1);
 		Mod::get()->unpatch(customObjLimit2);
@@ -290,8 +290,8 @@ void GameTime() {
 }
 
 void CrystalClient::firstLoad(CCNode* layer) {
-	keybinds.push_back({39, 6});
-	keybinds.push_back({40, 7});
+	//keybinds.push_back({39, 6});
+	//keybinds.push_back({40, 7});
 	if (layer) {
 		auto alert = geode::createQuickPopup(
 			"Hi!",            // title

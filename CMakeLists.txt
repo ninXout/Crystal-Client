@@ -6,9 +6,6 @@ project(CrystalClient VERSION 1.0.0)
 
 file(GLOB_RECURSE SOURCES
     src/*.cpp
-    src/ImGui/*.cpp
-    src/Player/Noclip.cpp
-    src/Player/NoDeathEffect.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -31,6 +28,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 CPMAddPackage("gh:ocornut/imgui#c191faf")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR})
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-inline)
 
 target_sources(${PROJECT_NAME} PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
