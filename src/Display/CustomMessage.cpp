@@ -1,13 +1,21 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
-/*
+#include "Display.hpp"
+
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        labels[1] = CCLabelBMFont::create("very custom message", "bigFont.fnt");
+        Display::get()->setDefaultDisplay(1, "N/A");
 
         if (!PlayLayer::init(gj)) return false;
 
-        CrystalClient::get()->arrangeText(1, this, true);
+        Display::get()->arrangeDisplay(1);
+        Display::get()->addDisplayChildren(1, this);
         return true;
     }
-};*/
+
+    void update(float dt) {
+        PlayLayer::update(dt);
+
+        Display::get()->updateDisplay(1);
+    }
+};

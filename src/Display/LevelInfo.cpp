@@ -1,20 +1,22 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
-/*
+#include "Display.hpp"
+
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        labels[11] = CCLabelBMFont::create("N/A", "bigFont.fnt");
+        Display::get()->setDefaultDisplay(11, "N/A");
 
         if (!PlayLayer::init(gj)) return false;
 
-        CrystalClient::get()->arrangeText(11, this, true);
+        Display::get()->arrangeDisplay(11);
+        Display::get()->addDisplayChildren(11, this);
         return true;
     }
 
     void update(float dt) {
         PlayLayer::update(dt);
 
-        labels[11]->setVisible(getVar<bool>("level_info"));
+        Display::get()->updateDisplay(11);
 
         std::string levelInfo;
         std::string levelName = m_level->m_levelName;
@@ -35,8 +37,6 @@ class $modify(PlayLayer) {
             levelInfo = levelName + " (" + levelID + ")";
         }
         
-        if (getVar<bool>("level_info")) {
-            labels[11]->setString(levelInfo.c_str());
-        }
+        if (getVar<bool>("level_info")) Display::get()->getDisplay(11)->setString(levelInfo.c_str());
     }
-};*/
+};

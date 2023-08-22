@@ -1,5 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
+#include "Display.hpp"
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {

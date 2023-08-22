@@ -1,5 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
+#include "Display.hpp"
 
 // Copied from mateus44/Matcool's FPS Bypass mod
 
@@ -7,19 +8,22 @@ double m_resetInterval;
 std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
 float frame_time_sum = 0.f;
 int frame_count = 0;
-/*
+
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        labels[3] = CCLabelBMFont::create("60", "bigFont.fnt");
+        Display::get()->setDefaultDisplay(3, "60");
 
         if (!PlayLayer::init(gj)) return false;
 
-        CrystalClient::get()->arrangeText(3, this, true);
+        Display::get()->arrangeDisplay(3);
+        Display::get()->addDisplayChildren(3, this);
         return true;
     }
 
     void update(float dt) {
         PlayLayer::update(dt);
+
+        Display::get()->updateDisplay(3);
 
         const auto now = std::chrono::high_resolution_clock::now();
 
@@ -38,10 +42,6 @@ class $modify(PlayLayer) {
 
         previous_frame = now;
 
-        labels[3]->setVisible(getVar<bool>("fps_display"));
-
-        if (getVar<bool>("fps_display")) {
-            labels[3]->setString((std::to_string(fps)).c_str());
-        }
+        if (getVar<bool>("fps_display")) Display::get()->getDisplay(3)->setString((std::to_string(fps)).c_str());
     }
-};*/
+};

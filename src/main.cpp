@@ -40,99 +40,6 @@ int strpos(const char *haystack, const char *needle, int nth) {
     return res - haystack;
 }
 
-void CrystalClient::arrangeText(int arrayLength, PlayLayer* menulay, bool first) {
-	auto director = CCDirector::sharedDirector();
-	auto size = director->getWinSize();
-
-	std::vector<LabelPos> displayPositions;
-
-	if (first) {
-		for (int d = 0; d < 13; d++) {
-			menulay->addChild(labels[d], 1000);
-		}
-	}
-
-	for (int i = 0; i < 13; i++) {
-		std::string theKey = "label_pos-" + std::to_string(i);
-		displayPositions.push_back((LabelPos)getVar<int>(theKey));
-	}
-
-	auto ptr = static_cast<CCLabelBMFont*>(labels[arrayLength]);
-
-	float tr = 0, tl = 0, br = 0, bl = 0, thisLabel;
-
-	for (int i = 0; i < 13; i++) {
-		switch (profile.displayPositions[i]) {
-			case TR:
-				if (arrayLength == i)
-					thisLabel = tr;
-				tr += 1.0f * getVar<float>("display_scale");
-				break;
-			case TL:
-				if (arrayLength == i)
-					thisLabel = tl;
-				tl += 1.0f * getVar<float>("display_scale");
-				break;
-			case BR:
-				if (arrayLength == i)
-					thisLabel = br;
-				br += 1.0f * getVar<float>("display_scale");
-				break;
-			case BL:
-				if (arrayLength == i)
-					thisLabel = bl;
-				bl += 1.0f * getVar<float>("display_scale");
-				break;
-		}
-	}
-
-	float height = 0, x = 0;
-
-	switch (profile.displayPositions[arrayLength]) {
-		case TR:
-			height = size.height - 10 - (thisLabel * getVar<float>("display_space"));
-			x = size.width - 5;
-			break;
-		case TL:
-			height = size.height - 10 - (thisLabel * getVar<float>("display_space"));
-			x = 5.0f;
-			break;
-		case BR:
-			height = 10.0f + (thisLabel * getVar<float>("display_space"));
-			x = size.width - 5;
-			break;
-		case BL:
-			height = 10.0f + (thisLabel * getVar<float>("display_space"));
-			x = 5.0f;
-			break;
-	}
-
-	labels[arrayLength]->setPosition(x, height);
-
-	if (arrayLength != 0) {
-		labels[arrayLength]->setOpacity(50);
-	}
-	if (getVar<float>("display_scale") < 0.1f || getVar<float>("display_scale") > 1.5f)
-		*setVar<float>("display_scale") = 1.0f;
-
-	float sc = getVar<float>("display_scale") * 0.45f;
-	if (arrayLength == 0)
-	{
-		sc *= 1.8f;
-		labels[arrayLength]->setPosition(x, height + 10);
-	}
-
-	labels[arrayLength]->setScale(sc);
-	if (getVar<float>("display_opacity") < 1)
-		*setVar<float>("display_opacity") = 255;
-	else if (getVar<float>("display_opacity") > 255)
-		*setVar<float>("display_opacity") = 255;
-	labels[arrayLength]->setOpacity(getVar<float>("display_opacity"));
-	labels[arrayLength]->setAnchorPoint(labels[arrayLength]->getPositionX() > 284.5f
-										? ccp(1.0f, labels[arrayLength]->getAnchorPoint().y)
-										: ccp(0.0f, labels[arrayLength]->getAnchorPoint().y));
-}
-
 void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
 	if (profile.invisBG) window_flags |= ImGuiWindowFlags_NoBackground;
@@ -288,9 +195,6 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"));
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		strcpy(profile.messageBuffer, profile.message.c_str());
-		ImGui::InputTextWithHint("Message", "Custom Message", profile.messageBuffer, IM_ARRAYSIZE(profile.messageBuffer));
-		profile.message = profile.messageBuffer;
 		ImGui::Combo("Position", (int *)&profile.displayPositions[1], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
@@ -300,9 +204,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"));
 	if (ImGui::BeginPopupModal("CPS display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		//CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
-		//CrystalClient::ImToggleable("Show Clicks", &Crystal::profile.sclicks);
-		//CrystalClient::ImToggleable("Only Clicks", &Crystal::profile.oclicks);
-		//CrystalClient::ImToggleable("Reset Clicks Every Attempt", &Crystal::profile.rclicks);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[2], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
@@ -312,8 +213,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"));
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[3], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[3]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[3]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -322,8 +221,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"));
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[4], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[4]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[4]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -333,8 +230,6 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Attempts", setVar<bool>("total_attempts"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[5], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[5]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[5]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -344,8 +239,6 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Jumps", setVar<bool>("total_jumps"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[6], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[6]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[6]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -354,8 +247,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"));
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[7], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[7]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[7]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -364,8 +255,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"));
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[8], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[8]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[8]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -375,8 +264,6 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_accuracy"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[9], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[9]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[9]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -386,8 +273,6 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_death"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[10], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[10]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[10]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -398,8 +283,6 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImToggleable("Hide ID", setVar<bool>("hide_ID"));
 		CrystalClient::ImToggleable("Show Author", setVar<bool>("level_info_author"));
 		ImGui::Combo("Position", (int *)&profile.displayPositions[11], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[11]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[11]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -408,8 +291,6 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"));
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", (int *)&profile.displayPositions[12], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[12]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[12]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -422,8 +303,6 @@ void CrystalClient::drawGUI() {
 		//CrystalClient::ImToggleable("In-Level Time", &Crystal::profile.ilt);
 		//CrystalClient::ImToggleable("In-Game Time", &Crystal::profile.igt);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[13], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
-		//ImGui::InputFloat("Opacity", &profile.displayOpacity[13]);
-		//ImGui::InputFloat("Scale", &profile.displayScale[13]);
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}

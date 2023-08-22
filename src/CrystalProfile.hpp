@@ -136,8 +136,6 @@ inline void loadConfigFromFile() {
     input.close();
 }
 
-inline CCLabelBMFont* labels[14];
-
 // should move to a utils file
 
 inline double getPercentage() {

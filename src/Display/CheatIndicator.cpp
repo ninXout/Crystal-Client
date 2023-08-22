@@ -1,27 +1,25 @@
 #include "../CrystalProfile.hpp"
-#include <Geode/modify/PlayLayer.hpp>
+#include "Display.hpp"
 
 bool isCheating() {
-    return (getVar<bool>("noclip") || getVar<float>("speed") < 1 || getVar<bool>("no_mirror") || getVar<bool>("framestep") || getVar<bool>("autoclicker") || getVar<bool>("layout_mode") || getVar<bool>("AT_record") || getVar<bool>("AT_replay") || getVar<float>("FPS") > 360.0 || getVar<float>("TPS") > 360.0);
+    return (getVar<bool>("noclip") || getVar<float>("speed") != 1 || getVar<bool>("no_mirror") || getVar<bool>("framestep") || getVar<bool>("autoclicker") || getVar<bool>("layout_mode") || getVar<bool>("AT_record") || getVar<bool>("AT_replay") || getVar<float>("FPS") > 360.0 || getVar<float>("TPS") > 360.0);
 }
-/*
+
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        labels[0] = CCLabelBMFont::create(".", "bigFont.fnt");
+        Display::get()->setDefaultDisplay(0, ".");
 
         if (!PlayLayer::init(gj)) return false;
 
-        CrystalClient::get()->arrangeText(0, this, true);
+        Display::get()->arrangeDisplay(0);
+        Display::get()->addDisplayChildren(0, this);
         return true;
     }
 
     void update(float dt) {
         PlayLayer::update(dt);
 
-        labels[0]->setVisible(getVar<bool>("cheat_indicator"));
-
-        if (getVar<bool>("cheat_indicator")) {
-            labels[0]->setColor(isCheating() ? ccc3(255, 0, 0) : ccc3(0, 255, 0));
-        }
+        Display::get()->updateDisplay(0);
+        if (getVar<bool>("cheat_indicator")) Display::get()->getDisplay(0)->setColor(isCheating() ? ccc3(255, 0, 0) : ccc3(0, 255, 0));
     }
-};*/
+};

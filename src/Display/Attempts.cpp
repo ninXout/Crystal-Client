@@ -1,20 +1,22 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
+#include "Display.hpp"
 
-/*class $modify(PlayLayer) {
+class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        labels[5] = CCLabelBMFont::create("0 Attempts", "bigFont.fnt");
+        Display::get()->setDefaultDisplay(5, "Attempt 1");
 
         if (!PlayLayer::init(gj)) return false;
 
-        CrystalClient::get()->arrangeText(5, this, true);
+        Display::get()->arrangeDisplay(5);
+        Display::get()->addDisplayChildren(5, this);
         return true;
     }
 
     void update(float dt) {
         PlayLayer::update(dt);
 
-        labels[5]->setVisible(getVar<bool>("attempts"));
+        Display::get()->updateDisplay(5);
     }
 
     void resetLevel() {
@@ -25,9 +27,7 @@
         if (getVar<bool>("total_attempts")) attempt = m_level->m_attempts;
         else attempt = m_currentAttempt;
 
-        std::string attempts = std::to_string(attempt) + " Attempts";
-        if (getVar<bool>("attempts")) {
-            labels[5]->setString(attempts.c_str());
-        }
+        std::string attempts = "Attempt " + std::to_string(attempt);
+        if (getVar<bool>("attempts")) Display::get()->getDisplay(5)->setString(attempts.c_str());
     }
-};*/
+};
