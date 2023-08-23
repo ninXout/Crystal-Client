@@ -70,7 +70,7 @@ void fps_shower_init();
     bool deaath = false;
 
     // Amethyst
-    AmethystMacro currentMacro;
+    //AmethystMacro currentMacro;
 
 
     // Smart Start Pos
@@ -86,7 +86,7 @@ void fps_shower_init();
     // Hitbox Visualizer
 
     // Amethyst
-    bool gameStarted;
+    //bool gameStarted;
     bool rendering;
     bool withAudio;
     int lastTime;

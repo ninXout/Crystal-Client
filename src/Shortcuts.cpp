@@ -1,6 +1,7 @@
 #include "Shortcuts.hpp"
 #include "CrystalProfile.hpp"
 #include "Hitbox/HitboxNode.hpp"
+#include <Geode/modify/PlayLayer.hpp>
 
 Shortcuts* Shortcuts::get() {
     static auto inst = new Shortcuts;
@@ -107,5 +108,13 @@ class $modify(CCKeyboardDispatcher) {
         Shortcuts::get()->updateKeybinds(key, down);
 
         return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
+    }
+};
+
+class $modify(PlayLayer) {
+    void update(float dt) {
+        PlayLayer::update(dt);
+
+        Shortcuts::get()->updateVariables();
     }
 };

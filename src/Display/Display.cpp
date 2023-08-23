@@ -115,7 +115,6 @@ void Display::addDisplayChildren(int index, PlayLayer* pl) {
 }
 
 void Display::updateDisplay(int index) {
-    /*
     switch (index) {
         case 0:
             labels[0]->setVisible(getVar<bool>("cheat_indicator"));
@@ -160,5 +159,4 @@ void Display::updateDisplay(int index) {
             labels[13]->setVisible(getVar<bool>("clock"));
             break;
     }
-    */
 }

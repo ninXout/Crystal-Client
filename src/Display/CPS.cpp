@@ -22,7 +22,7 @@ class $modify(PlayLayer) {
         Display::get()->updateDisplay(2);
         
         int cps = 0;
-        if (m_time > 0 && clicks > 0) cps = clicks / ((int)m_time * 60);
+        if (m_time > 0 && clicks > 0) cps = clicks / m_time;
         std::string cpsDisplay = std::to_string(cps) + "/" + std::to_string(clicks);
 
         if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(cpsDisplay.c_str());

@@ -10,8 +10,6 @@
 #include "./ImGui/ImGui.hpp"
 
 using namespace geode::prelude;
-//using namespace Shortcuts;
-//using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
 using namespace Icon;
@@ -298,10 +296,6 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"));
 	if (ImGui::BeginPopupModal("Clock", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		//CrystalClient::ImToggleable("12-hour format", &Crystal::profile.ipm);
-		//CrystalClient::ImToggleable("In-Attempt Time", &Crystal::profile.iat);
-		//CrystalClient::ImToggleable("In-Level Time", &Crystal::profile.ilt);
-		//CrystalClient::ImToggleable("In-Game Time", &Crystal::profile.igt);
 		ImGui::Combo("Position", (int *)&profile.displayPositions[13], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
@@ -352,36 +346,31 @@ void CrystalClient::drawGUI() {
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("TPS Bypass", &profile.TPSbypass);
-	//ImGui::PushItemWidth(100);
-	//ImGui::InputInt("##Draw Divide", &target_fps, 0, 1000);
-	//ImGui::PopItemWidth();
-	//ImGui::SameLine();
-	//CrystalClient::ImToggleable("Draw Divide", &drawDivide);
-    ImGui::InputFloat("Speedhack", &profile.speed);
-    CCDirector::sharedDirector()->getScheduler()->setTimeScale(profile.speed);
-	CrystalClient::ImExtendedToggleable("Safe Mode", &profile.safeMode);
+    ImGui::InputFloat("Speedhack", setVar<float>("speed"));
+    if (getVar<bool>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
+	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Auto Safe Mode", &profile.autoSafeMode);
+		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Lock Cursor", &profile.lockCursor);
-	CrystalClient::ImToggleable("Transparent BG", &profile.transparentBG);
-	CrystalClient::ImToggleable("Transparent Lists", &profile.translists);
-	CrystalClient::ImToggleable("Better BG", &profile.betterbg);
-	CrystalClient::ImToggleable("Demon List Button", &profile.buttonDL);
-	CrystalClient::ImToggleable("Challenge List Button", &profile.buttonCL);
+	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"));
+	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"));
+	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"));
+	//CrystalClient::ImToggleable("Better BG", &profile.betterbg);
+	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"));
+	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"));
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
-    CrystalClient::ImToggleable("Record", &profile.record);
+    CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"));
 	ImGui::SameLine();
-    CrystalClient::ImToggleable("Replay", &profile.replay);
-	CrystalClient::ImToggleable("ClickBot", &profile.clickBot);
+    CrystalClient::ImToggleable("Replay", setVar<bool>("AT_replay"));
+	CrystalClient::ImToggleable("ClickBot", setVar<bool>("clickbot"));
 	ImGui::SameLine();
-	CrystalClient::ImToggleable("Delta Lock", &profile.deltaLock);
-	ImGui::InputFloat("ClickBot Volume", &profile.CBvolume);
+	CrystalClient::ImToggleable("Delta Lock", setVar<bool>("delta_lock"));
+	ImGui::InputFloat("ClickBot Volume", setVar<float>("clickbot_volume"));
     //ImGui::Combo("Macro Type", (int*)&currentMacro.type, macroTypes, IM_ARRAYSIZE(macroTypes));
     ImGui::InputTextWithHint("Macro Name", "Macro Name", profile.macroname, IM_ARRAYSIZE(profile.macroname));
     if (ImGui::Button("Save Macro")) {
@@ -397,10 +386,6 @@ void CrystalClient::drawGUI() {
     if (ImGui::Button("Clear Macro")) {
         currentMacro.clearData();
     }
-	//CrystalClient::ImToggleable("Enable Macro Buffer", &macroBuffer);
-	//if (ImGui::Button("Clear Macro Buffer")) {
-		//newQueue.clear();
-	//}
     ImGui::End();
     ImGui::Begin("Shortcuts", NULL, window_flags);
     if (ImGui::Button("Open Songs Folder")) {
@@ -434,23 +419,22 @@ void CrystalClient::drawGUI() {
 	}
     ImGui::End();
 	ImGui::Begin("Variable Changer", NULL, window_flags);
-	/*
-    ImGui::Combo("Variable", &currentVar, playerVars, IM_ARRAYSIZE(playerVars));
-	ImGui::InputFloat("Value", &currentValue);
+    ImGui::Combo("Variable", &Shortcuts::get()->currentVar, Shortcuts::get()->playerVars, IM_ARRAYSIZE(Shortcuts::get()->playerVars));
+	ImGui::InputFloat("Value", &Shortcuts::get()->currentValue);
     if (ImGui::Button("Add Change")) {
-        variables.push_back({currentVar, currentValue});
+        Shortcuts::get()->variables.push_back({Shortcuts::get()->currentVar, Shortcuts::get()->currentValue});
     }
-	for (size_t i = 0; i < variables.size(); i++) {
+	for (size_t i = 0; i < Shortcuts::get()->variables.size(); i++) {
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text("%s", playerVars[variables[i].activeVar]);
+		ImGui::Text("%s", Shortcuts::get()->playerVars[Shortcuts::get()->variables[i].activeVar]);
 		ImGui::SameLine();
-		ImGui::Text("%s", std::to_string(variables[i].activeValue).c_str());
+		ImGui::Text("%s", std::to_string(Shortcuts::get()->variables[i].activeValue).c_str());
 		ImGui::SameLine();
 		if (ImGui::Button(("x##" + std::to_string(i)).c_str())) {
-			variables.erase(variables.begin() + i);
+			Shortcuts::get()->variables.erase(Shortcuts::get()->variables.begin() + i);
 		}
 		ImGui::Separator();
-	}*/
+	}
     ImGui::End();
 	ImGui::Begin("Internal Renderer", NULL, window_flags);
 	CrystalClient::ImToggleable("Render Recording", &profile.renderer);
@@ -594,19 +578,6 @@ class $modify(MenuLayer) {
 	}
 };
 
-class $modify(EditorUI) {
-	void scrollWheel(float y, float x) {
-		auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
-		//if (kb->getShiftKeyPressed() && scrollzoom) {
-			//auto zoom = this->m_editorLayer->m_objectLayer->getScale();
-			//zoom = std::pow(std::numbers::e, std::log(std::max(zoom, 0.001f)) - y * 0.025f);
-			//this->updateZoom(zoom);
-		//} else {
-			EditorUI::scrollWheel(y, x);
-		//}
-	}
-};
-
 class $modify(CCScheduler) {
 	void update(float f3) {
 		if (PlayLayer::get() && (rendering)) {
@@ -618,7 +589,7 @@ class $modify(CCScheduler) {
 			f3 = spf * tScale;
 		}
 
-		if (PlayLayer::get() && gameStarted && (profile.TPSbypass || profile.FPSbypass || profile.deltaLock || profile.replay || profile.record || profile.renderer)) {
+		if (PlayLayer::get() && (profile.TPSbypass || profile.FPSbypass || profile.deltaLock || profile.replay || profile.record || profile.renderer)) {
 			auto dir = CCDirector::sharedDirector();
 
 			//CGSSetDebugOptions(327680);
@@ -653,92 +624,6 @@ class $modify(CCScheduler) {
 	}
 };
 
-class $modify(EditLevelLayer) {
-	bool init(GJGameLevel* ed) {
-        EditLevelLayer::init(ed);
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
-class $modify(GJGameLevel) {
-	void savePercentage(int percentage, bool practice, int clicks, int attemptTime, bool vfDChk) {
-		if (profile.safeMode && !profile.autoSafeMode) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, false);
-		if (profile.safeMode && profile.autoSafeMode && profile.displayNodes[0]->getColor() == ccc3(255,0,0)) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, false);
-		if (profile.anticheat) return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, true);
-		else return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
-	}
-};
-
-class $modify(GJBaseGameLayer) {
-	void pushButton(int i, bool b) {
-		currentMacro.setPushingData(true, b);
-        if (profile.clickBot) {
-            if (!Clickbot::inited) {
-                FMOD::System_Create(&Clickbot::system);
-                Clickbot::system->init(1024 * 2, FMOD_INIT_NORMAL, nullptr);
-                Clickbot::inited = true;
-            }
-
-            Clickbot::now = std::chrono::system_clock::now();
-            Clickbot::cycleTime = Clickbot::now - Clickbot::start;
-            if (Clickbot::cycleTime.count() < 0.5f) {
-                std::string path = Clickbot::pickRandomSoftClick();
-                Clickbot::start = std::chrono::system_clock::now();
-                std::cout << Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
-            } else {
-                std::string path = Clickbot::pickRandomClick();
-                Clickbot::start = std::chrono::system_clock::now();
-                Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
-            }
-            
-            Clickbot::system->playSound(Clickbot::clickSound, nullptr, true, &Clickbot::clickChannel);
-            Clickbot::clickChannel->setVolume((float)(profile.CBvolume / 100));
-            Clickbot::clickChannel->setPaused(false);
-            Clickbot::system->update();
-        }
-		GJBaseGameLayer::pushButton(i,b);
-		clickscount++;
-		click_count++;
-		holding = true;
-	}
-
-	void releaseButton(int i, bool b) {
-		currentMacro.setPushingData(false, b);
-		if (profile.clickBot) {
-			if (Clickbot::cycleTime.count() < 0.5f) {
-				std::string path = Clickbot::pickRandomRelease();
-				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
-			} else {
-				std::string path = Clickbot::pickRandomRelease();
-				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
-			}
-			
-			
-			Clickbot::system->playSound(Clickbot::releaseSound, nullptr, true, &Clickbot::releaseChannel);
-			Clickbot::releaseChannel->setVolume((float)(profile.CBvolume / 100));
-			Clickbot::releaseChannel->setPaused(false);
-			Clickbot::system->update();
-		}
-        GJBaseGameLayer::releaseButton(i,b);
-
-		holding = false;
-	}
-};
-
-class $modify(LevelInfoLayer) {
-	bool init(GJGameLevel* level) {
-        LevelInfoLayer::init(level);
-        
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
- 
-    }
-};
-
 class $modify(CheckpointObject) {
 	static CheckpointObject* create() {
 		auto cpo = CheckpointObject::create();
@@ -749,7 +634,7 @@ class $modify(CheckpointObject) {
 			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
 			//g_startPosText->setString(label.c_str());
 		}
-		if (profile.record) currentMacro.createCheckpointData();
+
 		return cpo;
 	}
 };
@@ -766,20 +651,6 @@ class $modify(Main, PlayLayer) {
 
     void updateVisibility() {
 		if (!g_disable_render) PlayLayer::updateVisibility();
-	}
-
-    void resetLevel() {
-		//drawer->m_pDieInSimulation = false;
-		//drawer->m_pIsSimulation = false;
-	
-		PlayLayer::resetLevel();
-
-		if (profile.replay || profile.record) currentMacro.resetActions(profile.record);
-
-		if (Crystal::profile.rclicks) {
-			clickscount = 0;
-		}
-		
 	}
 
     void update(float f4) {
@@ -899,11 +770,6 @@ class $modify(Main, PlayLayer) {
         }
     }
 
-		CGEventRef ourEvent = CGEventCreate(NULL);
-		auto point = CGEventGetLocation(ourEvent);
-		CFRelease(ourEvent);
-
-		if (!ImGuiCocos::get().isVisible() && Crystal::profile.lockCursor && !m_hasCompletedLevel) CGWarpMouseCursorPosition(point);
 
 		fixa += f4;
 		timee += f4;
@@ -936,52 +802,8 @@ class $modify(Main, PlayLayer) {
 
 		percent = (m_player1->getPositionX() / m_levelLength) * 100;
 
-		if (profile.record || profile.replay) f4 = 1.f / (profile.FPS * (profile.TPS / 60)) / speedhack;
-
-		//if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentFrame += f4;
-		//if (gameStarted && (!profile.framestep || (Crystal::profile.framestep && shouldUpdate))) currentTXTFrame++;
-
 		PlayLayer::update(f4);
 		if (profile.renderer) record.handle_recording(this, f4);
-
-		//if (profile.trajectory) drawer->processMainTrajectory(f4);
-
-		if ((profile.replay || profile.record) && gameStarted) currentMacro.updateReplay(f4, profile.replay);
-	}
-
-	void removeLastCheckpoint() {
-		PlayLayer::removeLastCheckpoint();
-		if (profile.record) currentMacro.removeCheckpointData();
-	}
-
-	std::string getOffsetTime(float time) {
-		std::stringstream ret;
-		ret << "00:";
-		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time / 60)) << ":";
-		ret << std::setw(2) << std::setfill('0') << std::to_string((int)(time) % 60);
-		return ret.str();
-	}
-
-	std::string exec(std::string command) {
-		char buffer[128];
-		std::string result = "";
-
-		// Open pipe to file
-		FILE* pipe = popen(command.c_str(), "r");
-		if (!pipe) {
-			return "Render Failed";
-		}
-
-		// read till end of process:
-		while (!feof(pipe)) {
-
-			// use buffer to read and add to result
-			if (fgets(buffer, 128, pipe) != NULL)
-				result += buffer;
-		}
-
-		pclose(pipe);
-		return result;
 	}
 
     void onQuit() {
@@ -995,13 +817,6 @@ class $modify(Main, PlayLayer) {
 		PlayLayer::onQuit();
 	}
 
-	typedef uint16_t CGKeyCode;
-
-	void startGame() {
-		PlayLayer::startGame();
-		gameStarted = true;
-	}
-
 	bool init(GJGameLevel* gl) {
 		//leftDisplay = 0;
 		timee = 0.0f;
@@ -1010,7 +825,6 @@ class $modify(Main, PlayLayer) {
 		ss = 0;
 		clickscount = 0;
 		click_count = 0;
-		gameStarted = false;
 		renderTime = 0;
 
 		if (!ghc::filesystem::exists(framesFol)) {
@@ -1028,181 +842,10 @@ class $modify(Main, PlayLayer) {
 			record.start(filePATH, tempPATH);
 		}
 
-		if (profile.clickBot) Clickbot::start = std::chrono::system_clock::now();
-
 		//if (profile.trajectory) drawer->createPlayersForTrajectory();
 
 		currentFrame = 0;
 		return true;
-	}
-};
-
-class $(UILayer) {
-	void keyDown(cocos2d::enumKeyCodes kc) {
-		auto mpl = reinterpret_cast<Main*>(PlayLayer::get());
-
-		UILayer::keyDown(kc);
-	}
-};
-
-class $modify(CreatorLayer) {
-	virtual bool init() {
-        CreatorLayer::init();
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
-class $modify(LeaderboardsLayer) {
-    bool init(LeaderboardState state) {
-        LeaderboardsLayer::init(state);
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
-class $modify(LocalLevelManager) {
-	bool init() {
-		LocalLevelManager::init();
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
-class $modify(ModifiedSearchLayer, LevelSearchLayer) {
-	virtual bool init() {
-		LevelSearchLayer::init();
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-		if (Crystal::profile.buttonDL || Crystal::profile.buttonCL) {
-			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-				return strncmp(thing->getString(), "Filters", 7) == 0;
-			})->removeFromParentAndCleanup(true);
-
-			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-				return strncmp(thing->getString(), "Quick Search", 12) == 0;
-			})->removeFromParentAndCleanup(true);
-
-			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
-				return strncmp(lbl->getString(), "Trending", 8) == 0;
-			})->getParent()->getParent()->getParent();
-
-			auto mpos = menu->getPosition();
-			menu->setPositionY(mpos.y - 17.5);
-		}
-
-		if (Crystal::profile.buttonDL) {
-			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
-				return strncmp(lbl->getString(), "Trending", 8) == 0;
-			})->getParent()->getParent()->getParent();
-
-			auto button_sprite = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
-
-			auto demon_button = CCMenuItemSpriteExtra::create(button_sprite, this, menu_selector(ModifiedSearchLayer::onDemonList));
-			auto demon_label = CCLabelBMFont::create("Demon List", "bigFont.fnt");
-			auto demon_icon = CCSprite::createWithSpriteFrameName("rankIcon_all_001.png");
-
-			demon_button->addChild(demon_label);
-			demon_button->addChild(demon_icon);
-
-			demon_label->setScale(0.55);
-			demon_label->setPosition(ccp(70, 17));
-			demon_icon->setPosition(ccp(140, 16));
-			demon_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(0))->getPosition() + ccp(0, 35));
-
-			menu->addChild(demon_button);
-		} 
-		
-		if (Crystal::profile.buttonCL) {
-			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
-				return strncmp(lbl->getString(), "Trending", 8) == 0;
-			})->getParent()->getParent()->getParent();
-
-			auto button_sprite2 = CCSprite::createWithSpriteFrameName("GJ_longBtn03_001.png");
-			
-			auto challenge_button = CCMenuItemSpriteExtra::create(button_sprite2, this, menu_selector(ModifiedSearchLayer::onChallengeList));
-			auto challenge_label = CCLabelBMFont::create("Challenge List", "bigFont.fnt");
-			auto challenge_icon = CCSprite::createWithSpriteFrameName("rankIcon_top100_001.png");
-
-			challenge_button->addChild(challenge_label);
-			challenge_button->addChild(challenge_icon);
-
-			challenge_label->setScale(0.45);
-			challenge_label->setPosition(ccp(70, 17));
-			challenge_icon->setPosition(ccp(145, 16));
-			challenge_icon->setScale(0.8);
-			challenge_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(1))->getPosition() + ccp(0, 35));
-
-			menu->addChild(challenge_button);
-		}
-		return true;
-	}
-
-	void onDemonList(CCObject*) {
-		if (Crystal::profile.buttonDL) {
-			m_searchInput->onClickTrackNode(false);
-			auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3141), ""));
-
-			auto s = CCScene::create();
-			s->addChild(p);
-			CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
-		}
-	}
-
-	void onChallengeList(CCObject*) {
-		if (Crystal::profile.buttonCL) {
-			m_searchInput->onClickTrackNode(false);
-			auto p = LevelBrowserLayer::create(this->getSearchObject(static_cast<SearchType>(3142), ""));
-
-			auto s = CCScene::create();
-			s->addChild(p);
-			CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5, s));
-		}
-	}
-};
-
-class $(GameLevelManager) {
-	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, int type) {
-		std::string url(gdurl);
-		std::string query(gdquery);
-
-		if (url == "http://www.boomlings.com/database/getGJLevels21.php") {
-			auto thing = atoi(query.substr(query.find("page=") + 5).c_str());
-			if (query.find("type=3141") != std::string::npos && Crystal::profile.buttonDL) {
-				url = std::string("http://absolllute.com/api/mega_hack/demonlist/page") + std::to_string(thing) + ".txt";
-			} else if (query.find("type=3142") != std::string::npos && Crystal::profile.buttonCL) {
-				url = std::string("http://absolllute.com/api/mega_hack/challengelist/page") + std::to_string(thing) + ".txt";
-			}
-		}
-
-		GameLevelManager::ProcessHttpRequest(url, query, idk, type);
-	}
-};
-
-class $modify(LevelBrowserLayer) {
-	bool init(GJSearchObject* search) {
-		LevelBrowserLayer::init(search);
-
-        if (Crystal::profile.transparentBG) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
-class $modify(CCLayerColor) {
-	bool initWithColor(cocos2d::_ccColor4B const& yk, float f1, float f2) {
-		if (Crystal::profile.translists) {
-			return CCLayerColor::initWithColor(ccc4(0, 0, 0, 0), 0, 0);
-		} else {
-			return CCLayerColor::initWithColor(yk, f1, f2);
-		} 
 	}
 };
 

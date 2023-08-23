@@ -1,0 +1,102 @@
+#include "Amethyst.hpp"
+#include "../CrystalProfile.hpp"
+#include <Geode/Geode.hpp>
+#include <Geode/modify/CheckpointObject.hpp>
+
+bool gameStarted = false;
+
+class $modify(CheckpointObject) {
+	static CheckpointObject* create() {
+		auto cpo = CheckpointObject::create();
+
+		if (getVar<bool>("AC_record")) currentMacro.createCheckpointData();
+
+		return cpo;
+	}
+};
+
+class $modify(PlayLayer) {
+    bool init(GJGameLevel* gl) {
+        gameStarted = true;
+
+        if (!PlayLayer::init(gl)) return false;
+
+        if (getVar<bool>("clickbot")) Clickbot::start = std::chrono::system_clock::now();
+        return true;
+    }
+
+    void update(float dt) {
+        if (getVar<bool>("AC_record") || getVar<bool>("AC_replay")) dt = 1.f / (Crystal::profile.FPS * (Crystal::profile.TPS / 60)) / getVar<float>("speed");
+
+		PlayLayer::update(dt);
+
+		if ((getVar<bool>("AC_replay") || getVar<bool>("AC_record")) && gameStarted) currentMacro.updateReplay(dt, getVar<bool>("AC_replay"));
+    }
+
+    void startGame() {
+		PlayLayer::startGame();
+		gameStarted = true;
+	}
+
+    void resetLevel() {
+		PlayLayer::resetLevel();
+
+		if (getVar<bool>("AC_replay") || getVar<bool>("AC_record")) currentMacro.resetActions(getVar<bool>("AC_record"));
+	}
+
+    void removeLastCheckpoint() {
+		PlayLayer::removeLastCheckpoint();
+		if (getVar<bool>("AC_record")) currentMacro.removeCheckpointData();
+	}
+};
+
+class $modify(GJBaseGameLayer) {
+	void pushButton(int i, bool b) {
+		currentMacro.setPushingData(true, b);
+        if (getVar<bool>("clickbot")) {
+            if (!Clickbot::inited) {
+                FMOD::System_Create(&Clickbot::system);
+                Clickbot::system->init(1024 * 2, FMOD_INIT_NORMAL, nullptr);
+                Clickbot::inited = true;
+            }
+
+            Clickbot::now = std::chrono::system_clock::now();
+            Clickbot::cycleTime = Clickbot::now - Clickbot::start;
+            if (Clickbot::cycleTime.count() < 0.5f) {
+                std::string path = Clickbot::pickRandomSoftClick();
+                Clickbot::start = std::chrono::system_clock::now();
+                std::cout << Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
+            } else {
+                std::string path = Clickbot::pickRandomClick();
+                Clickbot::start = std::chrono::system_clock::now();
+                Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::clickSound);
+            }
+            
+            Clickbot::system->playSound(Clickbot::clickSound, nullptr, true, &Clickbot::clickChannel);
+            Clickbot::clickChannel->setVolume((float)(getVar<float>("clickbot_volume") / 100));
+            Clickbot::clickChannel->setPaused(false);
+            Clickbot::system->update();
+        }
+		GJBaseGameLayer::pushButton(i,b);
+	}
+
+	void releaseButton(int i, bool b) {
+		currentMacro.setPushingData(false, b);
+		if (getVar<bool>("clickbot")) {
+			if (Clickbot::cycleTime.count() < 0.5f) {
+				std::string path = Clickbot::pickRandomRelease();
+				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
+			} else {
+				std::string path = Clickbot::pickRandomRelease();
+				Clickbot::system->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &Clickbot::releaseSound);
+			}
+			
+			
+			Clickbot::system->playSound(Clickbot::releaseSound, nullptr, true, &Clickbot::releaseChannel);
+			Clickbot::releaseChannel->setVolume((float)(getVar<float>("clickbot_volume") / 100));
+			Clickbot::releaseChannel->setPaused(false);
+			Clickbot::system->update();
+		}
+        GJBaseGameLayer::releaseButton(i,b);
+	}
+};

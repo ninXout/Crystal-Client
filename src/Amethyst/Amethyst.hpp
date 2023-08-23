@@ -145,6 +145,8 @@ namespace AmethystReplay {
     AmethystFrame create();
 }
 
+inline AmethystMacro currentMacro;
+
 namespace Clickbot {
     std::string pickRandomClick();
     std::string pickRandomSoftClick();
