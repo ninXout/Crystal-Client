@@ -16,5 +16,5 @@ class Display {
         float getDisplayScale(int index);
         CCPoint getDisplayAnchor(int index, CCLabelBMFont* label);
 
-        CCLabelBMFont* labels[13];
+        CCLabelBMFont* labels[14];
 };

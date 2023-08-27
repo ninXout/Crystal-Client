@@ -89,7 +89,6 @@ void fps_shower_init();
     //bool gameStarted;
     bool rendering;
     bool withAudio;
-    int lastTime;
     float DTime;
     std::vector<AmethystReplay::AmethystFrame> stepData;
 
@@ -118,7 +117,6 @@ void fps_shower_init();
     float tps = 60;
     bool tpsBypass;
     bool g_disable_render = false;
-    float g_left_over = 0.f;
     float fps_left_over = 0.f;
     float t_left_over = 0.f;
 

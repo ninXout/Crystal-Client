@@ -14,23 +14,21 @@ class $modify(PlayLayer) {
 		}
 	}
 
+	void destroyPlayer(PlayerObject* player, GameObject* obj) {
+		if (m_isPracticeMode && obj != m_antiCheatObject && getVar<bool>("practice_music")) {
+			GameSoundManager::sharedManager()->stopBackgroundMusic();
+		}
+		PlayLayer::destroyPlayer(player, obj);
+	}
+
     void togglePracticeMode(bool p) {
 		if (!m_isPracticeMode && p && getVar<bool>("practice_music")) {
 			m_isPracticeMode = p;
-			m_UILayer->toggleCheckpointsMenu(p);
+			if (!GameManager::get()->getGameVariable("0071")) m_UILayer->toggleCheckpointsMenu(p);
 			PlayLayer::startMusic();
 			this->stopActionByTag(18);
 		} else {
 			PlayLayer::togglePracticeMode(p);
 		}
 	} 
-};
-
-class $modify(PlayerObject) {
-    void playerDestroyed(bool idk) {
-		PlayerObject::playerDestroyed(idk);
-		if (getVar<bool>("practice_music")) {
-			GameSoundManager::sharedManager()->stopBackgroundMusic();
-		}
-	}
 };

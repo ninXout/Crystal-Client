@@ -22,9 +22,10 @@ class Shortcuts {
         void pushVariable(VarChange);
 
         void updateVariables();
-        void updateKeybinds(enumKeyCodes key, bool down);
+        void updateKeybinds(enumKeyCodes key, bool down, bool global);
 
-        void executeBinds(int current, bool down);
+        void executeBinds(int current, bool down, bool global);
+        void refreshKeybinds(bool save);
         
         std::vector<Keybind> keybinds = {{39,6}, {40,7}};
         std::vector<VarChange> variables;

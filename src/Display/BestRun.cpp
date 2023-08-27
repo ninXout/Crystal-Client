@@ -13,6 +13,8 @@ class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
         Display::get()->setDefaultDisplay(8, "Best Run: 0%");
 
+        bestStart = bestEnd = currentStart = currentEnd = repeats = 0;
+
         if (!PlayLayer::init(gj)) return false;
 
         Display::get()->arrangeDisplay(8);
@@ -44,7 +46,7 @@ class $modify(PlayLayer) {
         }
 
         std::string repeat;
-        if (repeats == 0) repeat = "";
+        if (repeats <= 1) repeat = "";
         else repeat = " x" + std::to_string(repeats);
 
         std::string bestRun;

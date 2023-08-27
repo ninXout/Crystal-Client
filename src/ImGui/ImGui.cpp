@@ -16,7 +16,6 @@ using namespace geode::prelude;
 //using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
-using namespace Icon;
 
 $on_mod(Unloaded) {
 	ImGuiCocos::get().destroy();

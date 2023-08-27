@@ -17,38 +17,57 @@ CCPoint Display::getDisplayPosition(int index) {
     auto director = CCDirector::sharedDirector();
 	auto size = director->getWinSize();
 
+    std::vector<bool> displays = {
+        getVar<bool>("cheat_indicator"),
+        getVar<bool>("custom_message"),
+        getVar<bool>("cps_display"),
+        getVar<bool>("fps_display"),
+        getVar<bool>("last_death"),
+        getVar<bool>("attempts"),
+        getVar<bool>("jumps"),
+        getVar<bool>("run_from"),
+        getVar<bool>("best_run"),
+        getVar<bool>("noclip_accuracy"),
+        getVar<bool>("noclip_deaths"),
+        getVar<bool>("level_info"),
+        getVar<bool>("macro_status"),
+        getVar<bool>("clock")
+    };
+
     std::vector<LabelPos> displayPositions;
 
-	for (int i = 0; i < 13; i++) {
-        std::string theKey = "label_pos-" + std::to_string(index);
+	for (int i = 0; i < 14; i++) {
+        std::string theKey = "label_pos-" + std::to_string(i);
 	    displayPositions.push_back((LabelPos)getVar<int>(theKey));
     }
 
     float tr = 0, tl = 0, br = 0, bl = 0, thisLabel;
 
-	for (int i = 0; i < 13; i++) {
-		switch (displayPositions[i]) {
-			case TR:
-				if (index == i)
-					thisLabel = tr;
-				tr += 1.0f * getVar<float>("display_scale");
-				break;
-			case TL:
-				if (index == i)
-					thisLabel = tl;
-				tl += 1.0f * getVar<float>("display_scale");
-				break;
-			case BR:
-				if (index == i)
-					thisLabel = br;
-				br += 1.0f * getVar<float>("display_scale");
-				break;
-			case BL:
-				if (index == i)
-					thisLabel = bl;
-				bl += 1.0f * getVar<float>("display_scale");
-				break;
-		}
+	for (int i = 0; i < 14; i++) {
+		if (displays[i]) {
+            switch (displayPositions[i]) {
+                case TR:
+                    if (index == i)
+                        thisLabel = tr;
+                    tr += 1.0f * getVar<float>("display_scale");
+                    break;
+                case TL:
+                    if (index == i)
+                        thisLabel = tl;
+                    tl += 1.0f * getVar<float>("display_scale");
+                    break;
+                case BR:
+                    if (index == i)
+                        thisLabel = br;
+                    br += 1.0f * getVar<float>("display_scale");
+                    break;
+                case BL:
+                    if (index == i)
+                        thisLabel = bl;
+                    bl += 1.0f * getVar<float>("display_scale");
+                    break;
+            }
+        }
 	}
 
     float height = 0, x = 0;
@@ -159,4 +178,5 @@ void Display::updateDisplay(int index) {
             labels[13]->setVisible(getVar<bool>("clock"));
             break;
     }
+    Display::get()->arrangeDisplay(index);
 }

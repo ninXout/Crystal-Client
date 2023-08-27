@@ -1,7 +1,8 @@
 #include "Amethyst.hpp"
 #include "../CrystalProfile.hpp"
-#include <Geode/Geode.hpp>
 #include <Geode/modify/CheckpointObject.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
 
 bool gameStarted = false;
 
@@ -9,7 +10,7 @@ class $modify(CheckpointObject) {
 	static CheckpointObject* create() {
 		auto cpo = CheckpointObject::create();
 
-		if (getVar<bool>("AC_record")) currentMacro.createCheckpointData();
+		if (getVar<bool>("AT_record")) currentMacro.createCheckpointData();
 
 		return cpo;
 	}
@@ -17,7 +18,7 @@ class $modify(CheckpointObject) {
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gl) {
-        gameStarted = true;
+        *setTempVar<bool>("gameStarted") = false;
 
         if (!PlayLayer::init(gl)) return false;
 
@@ -26,27 +27,27 @@ class $modify(PlayLayer) {
     }
 
     void update(float dt) {
-        if (getVar<bool>("AC_record") || getVar<bool>("AC_replay")) dt = 1.f / (Crystal::profile.FPS * (Crystal::profile.TPS / 60)) / getVar<float>("speed");
+        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) dt = 1.f / (getVar<float>("FPS")) / getVar<float>("speed");
 
 		PlayLayer::update(dt);
 
-		if ((getVar<bool>("AC_replay") || getVar<bool>("AC_record")) && gameStarted) currentMacro.updateReplay(dt, getVar<bool>("AC_replay"));
+		if ((getVar<bool>("AT_replay") || getVar<bool>("AT_record")) && getTempVar<bool>("gameStarted")) currentMacro.updateReplay(dt, getVar<bool>("AT_replay"));
     }
 
     void startGame() {
 		PlayLayer::startGame();
-		gameStarted = true;
+		*setTempVar<bool>("gameStarted") = true;
 	}
 
     void resetLevel() {
 		PlayLayer::resetLevel();
 
-		if (getVar<bool>("AC_replay") || getVar<bool>("AC_record")) currentMacro.resetActions(getVar<bool>("AC_record"));
+		if (getVar<bool>("AT_replay") || getVar<bool>("AT_record")) currentMacro.resetActions(getVar<bool>("AT_record"));
 	}
 
     void removeLastCheckpoint() {
 		PlayLayer::removeLastCheckpoint();
-		if (getVar<bool>("AC_record")) currentMacro.removeCheckpointData();
+		if (getVar<bool>("AT_record")) currentMacro.removeCheckpointData();
 	}
 };
 

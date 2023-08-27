@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include "ImGui.hpp"
 #include "../CrystalProfile.hpp"
+#include "../Shortcuts.hpp"
 
 using namespace geode::prelude;
 
@@ -33,7 +34,8 @@ void ImGuiCocos::toggle() {
     if (m_visible) {
 		//ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		CrystalClient::get()->refreshPatches();
-		Crystal::saveMods(Crystal::profile);
+		//Crystal::saveMods(Crystal::profile);
+		Shortcuts::get()->refreshKeybinds(true);
 		saveConfigToFile();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }

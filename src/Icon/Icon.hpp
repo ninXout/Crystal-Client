@@ -14,33 +14,36 @@
             b = (color1[2] * cyc) + (color2[2] * (1.0-cyc));\
            }
 
-namespace Icon {
-    enum EffectType {
-        None,
-        Static,
-        Rainbow,
-        Fade
-    };
+enum EffectType {
+    None,
+    Static,
+    Rainbow,
+    Fade
+};
 
-    enum AffectedType {
-        P1Color1,
-        P1Color2,
-        P1Glow,
-        P1WaveTrail,
-        P1RegularTrail,
-        P2Color1,
-        P2Color2,
-        P2Glow,
-        P2WaveTrail,
-        P2RegularTrail
-    };
+enum AffectedType {
+    P1Color1,
+    P1Color2,
+    P1Glow,
+    P1WaveTrail,
+    P1RegularTrail,
+    P2Color1,
+    P2Color2,
+    P2Glow,
+    P2WaveTrail,
+    P2RegularTrail
+};
 
-    static inline float cycle = 0;
-    static inline float R, G, B;
-
-    void update();
-    cocos2d::_ccColor3B getEffectColor(EffectType effect, AffectedType affect);
-    void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
-
-    void fade(float rgb1[4], float rgb2[4]);
-}
+class Icon {
+    public:
+        static Icon* get();
+        void update();
+        cocos2d::_ccColor3B getEffectColor(EffectType effect, AffectedType affect);
+        void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
+        void fade(float first[4], float second[4]);
+        void stat(float color[4]);
+    
+    protected:
+        float cycle = 0;
+        float R, G, B;
+};

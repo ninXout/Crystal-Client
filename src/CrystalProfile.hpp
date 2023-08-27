@@ -21,9 +21,22 @@ enum LabelPos
 	BL
 };
 
-inline std::map<std::string, bool> modsMapB = {};
-inline std::map<std::string, int> modsMapI = {};
-inline std::map<std::string, float> modsMapF = {};
+inline std::map<std::string, bool> modsMapB = {
+    {"noclip_P1", true},
+    {"noclip_P2", true}
+};
+inline std::map<std::string, int> modsMapI = {
+    {"AC_pushFrame", 1},
+    {"AC_releaseFrame", 1}
+};
+inline std::map<std::string, float> modsMapF = {
+    {"wave_size", 2.1},
+    {"FPS", 60.0},
+    {"display_scale", 1.0},
+    {"display_opacity", 200.0},
+    {"display_space", 20.0},
+    {"speed", 1.0}
+};
 
 inline std::map<std::string, bool> TEMPmodsMapB = {};
 inline std::map<std::string, int> TEMPmodsMapI = {};
@@ -141,7 +154,11 @@ inline void loadConfigFromFile() {
 inline double getPercentage() {
     if (!PlayLayer::get()) return 0;
 
-    return ((PlayLayer::get()->m_player1->getPositionX() - 50) / PlayLayer::get()->m_levelLength) * 100;
+    double ret = ((PlayLayer::get()->m_player1->getPositionX()) / PlayLayer::get()->m_levelLength) * 100;
+    if (ret < 0) ret = 0;
+    if (ret > 100) ret = 100;
+
+    return ret;
 }
 
 // Legacy shit just incase

@@ -2,7 +2,6 @@
 #include "CrystalClient.hpp"
 #include <Geode/loader/Log.hpp>
 #include <Geode/loader/Mod.hpp>
-#include "../Includes.hpp"
 #include "../json.hpp"
 #include "../CrystalProfile.hpp"
 #include "../Shortcuts.hpp"
@@ -14,7 +13,6 @@ using namespace geode::prelude;
 //using namespace Variables;
 using namespace Crystal;
 using namespace AmethystReplay;
-using namespace Icon;
 
 CrystalClient* CrystalClient::get() {
     static auto inst = new CrystalClient;
@@ -290,6 +288,11 @@ void GameTime() {
 }
 
 void CrystalClient::firstLoad(CCNode* layer) {
+	*setVar<int>("keybindsSize") = 2;
+	*setVar<int>("keybind_key-1") = 39;
+	*setVar<int>("keybind_mod-1") = 6;
+	*setVar<int>("keybind_key-2") = 40;
+	*setVar<int>("keybind_mod-2") = 7;
 	//keybinds.push_back({39, 6});
 	//keybinds.push_back({40, 7});
 	if (layer) {
@@ -304,7 +307,7 @@ void CrystalClient::firstLoad(CCNode* layer) {
 			},
 			false
 		);
-		alert->m_scene = layer;
+		//alert->m_scene = layer;
 		alert->show();
 	}
 }

@@ -9,24 +9,16 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 		LevelSearchLayer::init();
 
 		if (getVar<bool>("demonlist_button") || getVar<bool>("challengelist_button")) {
-			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-				return strncmp(thing->getString(), "Filters", 7) == 0;
-			})->removeFromParentAndCleanup(true);
+			this->getChildByID("filters-title")->removeFromParentAndCleanup(true);
 
-			findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* thing) {
-				return strncmp(thing->getString(), "Quick Search", 12) == 0;
-			})->removeFromParentAndCleanup(true);
+			this->getChildByID("quick-search-title")->removeFromParentAndCleanup(true);
 
-			auto menu = findFirstChildRecursive<CCLabelBMFont>(this, [](CCLabelBMFont* lbl) {
-				return strncmp(lbl->getString(), "Trending", 8) == 0;
-			})->getParent()->getParent()->getParent();
+			auto menu = this->getChildByID("quick-search-menu");
 
 			auto mpos = menu->getPosition();
 			menu->setPositionY(mpos.y - 17.5);
 
-            auto bg = findFirstChildRecursive<CCNode>(this, [](CCNode* n) {
-                return n->getContentSize().height == 115.0f;
-            });
+            auto bg = this->getChildByID("quick-search-bg");
 
             auto bsize = bg->getContentSize();
 		    bg->setContentSize(CCSize(bsize.width, bsize.height + 35.0));

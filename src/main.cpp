@@ -8,15 +8,16 @@
 #include "./Icon/Icon.hpp"
 #include <random>
 #include "./ImGui/ImGui.hpp"
+#include "Shortcuts.hpp"
 
 using namespace geode::prelude;
 using namespace Crystal;
 using namespace AmethystReplay;
-using namespace Icon;
 
 $on_mod(Loaded) {
-    profile = Crystal::loadMods();
+    //profile = Crystal::loadMods();
 	loadConfigFromFile();
+	Shortcuts::get()->refreshKeybinds(false);
     ImGuiCocos::get().setup([] {
         CrystalClient::get()->addTheme();
     }).draw([] {
@@ -40,8 +41,6 @@ int strpos(const char *haystack, const char *needle, int nth) {
 
 void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
-	if (profile.invisBG) window_flags |= ImGuiWindowFlags_NoBackground;
-	if (profile.titlebar) window_flags |= ImGuiWindowFlags_NoTitleBar;
 
     ImGui::Begin("Player", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"));
@@ -185,7 +184,7 @@ void CrystalClient::drawGUI() {
 	ImGui::InputFloat("Display Spacing", setVar<float>("display_space"));
 	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"));
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[0], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-0"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -193,7 +192,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"));
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[1], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-1"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -202,7 +201,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"));
 	if (ImGui::BeginPopupModal("CPS display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		//CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
-		ImGui::Combo("Position", (int *)&profile.displayPositions[2], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-2"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -210,7 +209,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"));
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[3], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-3"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -218,7 +217,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"));
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[4], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-4"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -227,7 +226,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Attempts", setVar<bool>("attempts"));
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Attempts", setVar<bool>("total_attempts"));
-		ImGui::Combo("Position", (int *)&profile.displayPositions[5], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-5"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -236,7 +235,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Jumps", setVar<bool>("jumps"));
 	if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Jumps", setVar<bool>("total_jumps"));
-		ImGui::Combo("Position", (int *)&profile.displayPositions[6], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-6"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -244,7 +243,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"));
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[7], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-7"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -252,7 +251,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"));
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[8], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-8"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -261,7 +260,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Noclip Accuracy", setVar<bool>("noclip_accuracy"));
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_accuracy"));
-		ImGui::Combo("Position", (int *)&profile.displayPositions[9], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-9"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -270,7 +269,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Noclip Deaths", setVar<bool>("noclip_deaths"));
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_death"));
-		ImGui::Combo("Position", (int *)&profile.displayPositions[10], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-10"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -280,7 +279,7 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Level Name and ID", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Hide ID", setVar<bool>("hide_ID"));
 		CrystalClient::ImToggleable("Show Author", setVar<bool>("level_info_author"));
-		ImGui::Combo("Position", (int *)&profile.displayPositions[11], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-11"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -288,7 +287,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"));
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[12], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-12"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -296,7 +295,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"));
 	if (ImGui::BeginPopupModal("Clock", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", (int *)&profile.displayPositions[13], profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-13"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -306,11 +305,6 @@ void CrystalClient::drawGUI() {
     ImGui::Begin("Customization", NULL, window_flags);
     ImGui::ColorEdit4("Accent Color", profile.LightColour, ImGuiColorEditFlags_NoInputs);
     ImGui::ColorEdit4("Base Color", profile.BGColour, ImGuiColorEditFlags_NoInputs);
-    CrystalClient::ImToggleable("RGB Accent Color", &profile.RGBAccent);
-    CrystalClient::ImToggleable("Borders", &profile.borders);
-    CrystalClient::ImToggleable("Rounded Windows", &profile.rounded);
-	CrystalClient::ImToggleable("No Title Bar", &profile.titlebar);
-	CrystalClient::ImToggleable("Invisible BG", &profile.invisBG);
 	CrystalClient::ImExtendedToggleable("Different Titlebar Color", &profile.diffTitleBar);
 	if (ImGui::BeginPopupModal("Different Titlebar Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::ColorEdit4("Titlebar Color", profile.TitleColour, ImGuiColorEditFlags_NoInputs);
@@ -319,9 +313,6 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	ImGui::InputFloat("Border Rounding", &profile.borderRounding);
-	ImGui::InputFloat("Scrollbar Size", &profile.scrollbarSize);
-	ImGui::InputFloat("Scrollbar Rounding", &profile.scrollbarRounding);
     ImGui::End();
     ImGui::Begin("Bypasses", NULL, window_flags);
 	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"));
@@ -337,17 +328,12 @@ void CrystalClient::drawGUI() {
     ImGui::End();
     ImGui::Begin("Global", NULL, window_flags);
 	ImGui::PushItemWidth(100);
-    ImGui::InputFloat("##FPS Bypass", &profile.FPS);
+    ImGui::InputFloat("##FPS Bypass", setVar<float>("FPS"));
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
-	CrystalClient::ImToggleable("FPS Bypass", &profile.FPSbypass);
-	ImGui::PushItemWidth(100);
-	ImGui::InputFloat("##TPS Bypass", &profile.TPS);
-	ImGui::PopItemWidth();
-	ImGui::SameLine();
-	CrystalClient::ImToggleable("TPS Bypass", &profile.TPSbypass);
+	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
     ImGui::InputFloat("Speedhack", setVar<float>("speed"));
-    if (getVar<bool>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
+    if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
@@ -578,202 +564,8 @@ class $modify(MenuLayer) {
 	}
 };
 
-class $modify(CCScheduler) {
-	void update(float f3) {
-		if (PlayLayer::get() && (rendering)) {
-			auto dir = CCDirector::sharedDirector();
-
-			float spf = (float)dir->getAnimationInterval();
-			float tScale = dir->getScheduler()->getTimeScale();
-
-			f3 = spf * tScale;
-		}
-
-		if (PlayLayer::get() && (profile.TPSbypass || profile.FPSbypass || profile.deltaLock || profile.replay || profile.record || profile.renderer)) {
-			auto dir = CCDirector::sharedDirector();
-
-			//CGSSetDebugOptions(327680);
-
-			float spf = (float)dir->getAnimationInterval() * (60 / profile.TPS);
-			auto nspeedhack = CCDirector::sharedDirector()->getScheduler()->getTimeScale();
-
-			const float newdt = 1.f / profile.TPS / nspeedhack;
-			const float otherdt = 1.f / profile.FPS / nspeedhack;
-			float totaldt = 1.f / (profile.FPS * (profile.TPS / 60)) / nspeedhack;
-
-			if (profile.renderer) renderTime += totaldt;
-			if (profile.deltaLock || profile.renderer) return CCScheduler::update(totaldt);
-
-			g_disable_render = true;
-
-			if (profile.FPSbypass) cocos2d::CCApplication::sharedApplication()->setAnimationInterval(otherdt);
-			else cocos2d::CCApplication::sharedApplication()->setAnimationInterval(1.f / 60.f);
-
-			const int totaltimes = std::min(static_cast<int>((f3 + t_left_over) / totaldt), 100); // limit it to 100x just in case
-			for (int i = 0; i < totaltimes; ++i) {
-				if (i == totaltimes - 1)
-					g_disable_render = false;
-				CCScheduler::update(totaldt);
-				auto io = ImGui::GetIO();
-				if (io.DeltaTime <= 0.0f) io.DeltaTime = 0.00001f;
-			}
-			t_left_over += f3 - totaldt * totaltimes;
-		} else {
-			CCScheduler::update(f3);
-		}
-	}
-};
-
-class $modify(CheckpointObject) {
-	static CheckpointObject* create() {
-		auto cpo = CheckpointObject::create();
-
-		if (Crystal::profile.checkpointswitch) { // bro ninx how you forgot to add the if (it crashed without it lmao)
-			g_checkpoints.push_back({cpo, static_cast<CCNode*>(cpo)->getPosition()});
-			g_checkpointIndex += 1;
-			auto label = std::to_string(g_checkpointIndex + 1) + "/" + std::to_string(g_checkpoints.size());
-			//g_startPosText->setString(label.c_str());
-		}
-
-		return cpo;
-	}
-};
-
 class $modify(Main, PlayLayer) {
-	void loadFromCheckpoint(CheckpointObject* cpo) {
-		if (Crystal::profile.checkpointswitch) {
-			if (cpo && g_checkpointIndex != -1) {
-				cpo = g_checkpoints[g_checkpointIndex].first; 
-			} 
-		}
-		PlayLayer::loadFromCheckpoint(cpo);
-	}
-
-    void updateVisibility() {
-		if (!g_disable_render) PlayLayer::updateVisibility();
-	}
-
     void update(float f4) {
-		Icon::update();
-
-	if (cycle >= 1.0) cycle = 0;
-    Icon::cycle += 0.1;
-    auto pl = PlayLayer::get();
-    if (profile.P1Color1) {
-        if (Crystal::profile.iconEffects[0]) {
-            pl->m_player1->setColor(getEffectColor(Static, P1Color1));
-        }
-        if (Crystal::profile.iconEffects[1]) {
-            pl->m_player1->setColor(getEffectColor(Fade, P1Color1));
-        }
-        if (Crystal::profile.iconEffects[2]) {
-            pl->m_player1->setColor(getEffectColor(Rainbow, P1Color1));
-        }
-    }
-    if (profile.P1Color2) {
-        if (Crystal::profile.iconEffects[3]) {
-            pl->m_player1->setSecondColor(getEffectColor(Static, P1Color2));
-        }
-        if (Crystal::profile.iconEffects[4]) {
-            pl->m_player1->setSecondColor(getEffectColor(Fade, P1Color2));
-        }
-        if (Crystal::profile.iconEffects[5]) {
-            pl->m_player1->setSecondColor(getEffectColor(Rainbow, P1Color2));
-        }
-    }
-    if (profile.P1Glow) {
-        if (Crystal::profile.iconEffects[6]) {
-            pl->m_player1->setGlowColor(getEffectColor(Static, P1Glow));
-        }
-        if (Crystal::profile.iconEffects[7]) {
-            pl->m_player1->setGlowColor(getEffectColor(Fade, P1Glow));
-        }
-        if (Crystal::profile.iconEffects[8]) {
-            pl->m_player1->setGlowColor(getEffectColor(Rainbow, P1Glow));
-        }
-    }
-    if (profile.P1Regular) {
-        if (Crystal::profile.iconEffects[9]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Static, P1RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[10]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Fade, P1RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[11]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Rainbow, P1RegularTrail));
-        }
-    }
-    if (profile.P1Wave) {
-        if (Crystal::profile.iconEffects[12]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Static, P1WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[13]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Fade, P1WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[14]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Rainbow, P1WaveTrail));
-        }
-    }
-    if (profile.P2Color1) {
-        if (Crystal::profile.iconEffects[15]) {
-            pl->m_player2->setColor(getEffectColor(Static, P2Color1));
-        }
-        if (Crystal::profile.iconEffects[16]) {
-            pl->m_player2->setColor(getEffectColor(Fade, P2Color1));
-        }
-        if (Crystal::profile.iconEffects[17]) {
-            pl->m_player2->setColor(getEffectColor(Rainbow, P2Color1));
-        }
-    }
-    if (profile.P2Color2) {
-        if (Crystal::profile.iconEffects[18]) {
-            pl->m_player2->setSecondColor(getEffectColor(Static, P2Color2));
-        }
-        if (Crystal::profile.iconEffects[19]) {
-            pl->m_player2->setSecondColor(getEffectColor(Fade, P2Color2));
-        }
-        if (Crystal::profile.iconEffects[20]) {
-            pl->m_player2->setSecondColor(getEffectColor(Rainbow, P2Color2));
-        }
-    }
-    if (profile.P2Glow) {
-        if (Crystal::profile.iconEffects[21]) {
-            pl->m_player2->setGlowColor(getEffectColor(Static, P2Glow));
-        }
-        if (Crystal::profile.iconEffects[22]) {
-            pl->m_player2->setGlowColor(getEffectColor(Fade, P2Glow));
-        }
-        if (Crystal::profile.iconEffects[23]) {
-            pl->m_player2->setGlowColor(getEffectColor(Rainbow, P2Glow));
-        }
-    }
-    if (profile.P2Regular) {
-        if (Crystal::profile.iconEffects[24]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Static, P2RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[25]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Fade, P2RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[26]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Rainbow, P2RegularTrail));
-        }
-    }
-    if (profile.P2Wave) {
-        if (Crystal::profile.iconEffects[27]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Static, P2WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[28]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Fade, P2WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[29]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Rainbow, P2WaveTrail));
-        }
-    }
-
-
-		fixa += f4;
-		timee += f4;
-
 		if (profile.rainbowIcon) {
 			if (m_player1) {
 				if (Crystal::profile.rainbowP1) m_player1->setColor(col);
@@ -842,351 +634,7 @@ class $modify(Main, PlayLayer) {
 			record.start(filePATH, tempPATH);
 		}
 
-		//if (profile.trajectory) drawer->createPlayersForTrajectory();
-
 		currentFrame = 0;
 		return true;
 	}
 };
-
-template<>
-struct json::Serialize<CrystalProfile> {
-    static json::Value to_json(CrystalProfile const& value) {
-        auto ret = json::Object();
-		std::string ver = std::to_string(Mod::get()->getVersion().getMajor()) + "." + std::to_string(Mod::get()->getVersion().getMinor()) + "." + std::to_string(Mod::get()->getVersion().getPatch());
-		ret["CrystalVer"] = ver;
-        ret["noclip"] = Crystal::profile.noclip;
-        ret["noclipP1"] = Crystal::profile.noclipP1;
-        ret["noclipP2"] = Crystal::profile.noclipP2;
-		ret["resetOnAccuracy"] = Crystal::profile.resetOnAccuracy;
-		ret["resetOnDeath"] = Crystal::profile.resetOnDeath;
-		ret["resetAcc"] = Crystal::profile.resetAcc;
-		ret["resetDeath"] = Crystal::profile.resetDeath;
-        ret["tintOnDeath"] = Crystal::profile.tintOnDeath;
-        ret["deathEffect"] = Crystal::profile.deathEffect;
-        ret["instantdeath"] = Crystal::profile.instantdeath;
-        ret["autoreset"] = Crystal::profile.autoreset;
-        ret["autoresetnum"] = Crystal::profile.autoresetnum;
-        ret["respawnfix"] = Crystal::profile.respawnfix;
-        ret["practiceorbfix"] = Crystal::profile.practiceorbfix;
-        ret["nopulse"] = Crystal::profile.nopulse;
-        ret["trailsize"] = Crystal::profile.trailsize;
-        ret["solidwave"] = Crystal::profile.solidwave;
-        ret["invisibleplayer"] = Crystal::profile.invisibleplayer;
-        ret["customPlayerColor"] = Crystal::profile.customPlayerColor;
-        ret["customWaveColor"] = Crystal::profile.customWaveColor;
-        ret["rainbowIcon"] = Crystal::profile.rainbowIcon;
-        ret["rainbowP1"] = Crystal::profile.rainbowP1;
-        ret["rainbowP2"] = Crystal::profile.rainbowP2;
-        ret["rainbowP1wave"] = Crystal::profile.rainbowP1wave;
-        ret["rainbowP2wave"] = Crystal::profile.rainbowP2wave;
-        ret["rainbowspeed"] = Crystal::profile.rainbowspeed;
-        ret["samedual"] = Crystal::profile.samedual;
-        ret["hitboxes"] = Crystal::profile.hitboxes;
-        ret["onDeath"] = Crystal::profile.onDeath;
-        ret["drawTrail"] = Crystal::profile.drawTrail;
-        ret["inEditor"] = Crystal::profile.inEditor;
-        ret["particles"] = Crystal::profile.particles;
-        ret["progressBar"] = Crystal::profile.progressBar;
-        ret["accpercentage"] = Crystal::profile.accpercentage;
-        ret["hideatts"] = Crystal::profile.hideatts;
-        ret["hidenormalatts"] = Crystal::profile.hidenormalatts;
-        ret["hidepracticeatts"] = Crystal::profile.hidepracticeatts;
-        ret["pracmusic"] = Crystal::profile.pracmusic;
-        ret["ignoreESC"] = Crystal::profile.ignoreESC;
-        ret["confirmQuit"] = Crystal::profile.confirmQuit;
-		ret["hidepause"] = Crystal::profile.hidepause;
-        ret["autoldm"] = Crystal::profile.autoldm;
-		ret["autoSong"] = Crystal::profile.autoSong;
-        ret["flippedcontrol"] = Crystal::profile.flippedcontrol;
-        ret["mirrorcontrol"] = Crystal::profile.mirrorcontrol;
-        ret["startpos"] = Crystal::profile.startpos;
-        ret["checkpointswitch"] = Crystal::profile.checkpointswitch;
-        ret["framestep"] = Crystal::profile.framestep;
-        ret["lastCheckpoint"] = Crystal::profile.lastCheckpoint;
-        ret["noglow"] = Crystal::profile.noglow;
-        ret["nospike"] = Crystal::profile.nospike;
-        ret["mirror"] = Crystal::profile.mirror;
-        ret["layout"] = Crystal::profile.layout;
-        ret["autoclick"] = Crystal::profile.autoclick;
-        ret["ACpushframe"] = Crystal::profile.ACpushframe;
-        ret["ACrelframe"] = Crystal::profile.ACrelframe;
-		ret["testmode"] = Crystal::profile.testmode;
-		ret["customMessage"] = Crystal::profile.customMessage;
-		ret["fps"] = Crystal::profile.fps;
-		ret["cps"] = Crystal::profile.cps;
-		ret["jumps"] = Crystal::profile.jumps;
-		ret["cheatIndicate"] = Crystal::profile.cheatIndicate;
-		ret["attempts"] = Crystal::profile.attempts;
-		ret["bestRun"] = Crystal::profile.bestRun;
-		ret["runFrom"] = Crystal::profile.runFrom;
-		ret["noclipAcc"] = Crystal::profile.noclipAcc;
-		ret["noclipDeath"] = Crystal::profile.noclipDeath;
-		ret["totalAtt"] = Crystal::profile.totalAtt;
-		ret["lvlData"] = Crystal::profile.lvlData;
-		ret["macroStatus"] = Crystal::profile.macroStatus;
-		ret["clock"] = Crystal::profile.clock;
-		ret["message"] = Crystal::profile.message;
-		ret["tclicks"] = Crystal::profile.tclicks;
-		ret["sclicks"] = Crystal::profile.sclicks;
-		ret["oclicks"] = Crystal::profile.oclicks;
-		ret["rclicks"] = Crystal::profile.rclicks;
-		ret["ajumps"] = Crystal::profile.ajumps;
-		ret["tjumps"] = Crystal::profile.tjumps;
-		ret["tattoo"] = Crystal::profile.tattoo;
-		ret["redDying"] = Crystal::profile.redDying;
-		ret["redDeath"] = Crystal::profile.redDeath;
-		ret["hideID"] = Crystal::profile.hideID;
-		ret["author"] = Crystal::profile.author;
-		ret["iat"] = Crystal::profile.iat;
-		ret["ilt"] = Crystal::profile.ilt;
-		ret["igt"] = Crystal::profile.igt;
-		ret["ipm"] = Crystal::profile.ipm;
-		ret["safeMode"] = Crystal::profile.safeMode;
-		ret["autoSafeMode"] = Crystal::profile.autoSafeMode;
-		ret["BGColour-Red"] = Crystal::profile.BGColour[0];
-        ret["BGColour-Green"] = Crystal::profile.BGColour[1];
-        ret["BGColour-Blue"] = Crystal::profile.BGColour[2];
-        ret["BGColour-Alpha"] = Crystal::profile.BGColour[3];
-        ret["LightColour-Red"] = Crystal::profile.LightColour[0];
-        ret["LightColour-Green"] = Crystal::profile.LightColour[1];
-        ret["LightColour-Blue"] = Crystal::profile.LightColour[2];
-        ret["LightColour-Alpha"] = Crystal::profile.LightColour[3];
-        ret["TitleColour-Red"] = Crystal::profile.TitleColour[0];
-        ret["TitleColour-Green"] = Crystal::profile.TitleColour[1];
-        ret["TitleColour-Blue"] = Crystal::profile.TitleColour[2];
-        ret["TitleColour-Alpha"] = Crystal::profile.TitleColour[3];
-        ret["borderRounding"] = Crystal::profile.borderRounding;
-        ret["scrollbarSize"] = Crystal::profile.scrollbarSize;
-        ret["scrollbarRounding"] = Crystal::profile.scrollbarRounding;
-        ret["RGBAccent"] = Crystal::profile.RGBAccent;
-        ret["borders"] = Crystal::profile.borders;
-        ret["rounded"] = Crystal::profile.rounded;
-        ret["titlebar"] = Crystal::profile.titlebar;
-        ret["invisBG"] = Crystal::profile.invisBG;
-        ret["diffTitleBar"] = Crystal::profile.diffTitleBar;
-		ret["anticheat"] = Crystal::profile.anticheat;
-		ret["unlockAll"] = Crystal::profile.unlockAll;
-		ret["scalehack"] = Crystal::profile.scalehack;
-		ret["objlimit"] = Crystal::profile.objlimit;
-		ret["customobjlimit"] = Crystal::profile.customobjlimit;
-		ret["verify"] = Crystal::profile.verify;
-		ret["copy"] = Crystal::profile.copy;
-		ret["editorZoom"] = Crystal::profile.editorZoom;
-		ret["levelEdit"] = Crystal::profile.levelEdit;
-		ret["loadfail"] = Crystal::profile.loadfail;
-		ret["FPS"] = Crystal::profile.FPS;
-		ret["FPSbypass"] = Crystal::profile.FPSbypass;
-		ret["TPS"] = Crystal::profile.TPS;
-		ret["TPSbypass"] = Crystal::profile.TPSbypass;
-		ret["lockCursor"] = Crystal::profile.lockCursor;
-		ret["transparentBG"] = Crystal::profile.transparentBG;
-		ret["translists"] = Crystal::profile.translists;
-		ret["betterbg"] = Crystal::profile.betterbg;
-		ret["buttonDL"] = Crystal::profile.buttonDL;
-		ret["buttonCL"] = Crystal::profile.buttonCL;
-		std::vector<bool> displaysVec(value.displays.begin(), value.displays.end());
-		json::Array displaysArray;
- 		for(const auto& display : displaysVec) {
-    		displaysArray.push_back(json::Value(display));
-		}
-		ret["displays"] = std::move(displaysArray);
-        std::vector<int> positionsVec(value.displayPositions.begin(), value.displayPositions.end());
-		json::Array positionsArray;
- 		for(const auto& position : positionsVec) {
-    		positionsArray.push_back(position);
-		}
-		ret["positions"] = std::move(positionsArray);
-		std::vector<float> opacitiesVec(value.displayOpacity.begin(), value.displayOpacity.end());
-		json::Array opacitiesArray;
- 		for(const auto& opaciti : opacitiesVec) {
-    		opacitiesArray.push_back(json::Value(opaciti));
-		}
-		ret["opacities"] = std::move(opacitiesArray);
-        std::vector<float> scalesVec(value.displayScale.begin(), value.displayScale.end());
-		json::Array scalesArray;
- 		for(const auto& skale : scalesVec) {
-    		scalesArray.push_back(skale);
-		}
-		ret["scales"] = std::move(scalesArray);
-		//ret["keybindsSize"] = keybinds.size();
-		//for (int i = 0; i < keybinds.size(); i++) {
-			//ret[std::to_string(i).c_str()]["key"] = keybinds[i].activeKey;
-			//ret[std::to_string(i).c_str()]["mod"] = keybinds[i].activeMod;
-		//}
-        return ret;
-    }
-};
-
-void Crystal::saveMods(CrystalProfile const& data) {
-    std::fstream jsonOutFile;
-	jsonOutFile.open(geode::Mod::get()->getConfigDir().append("Config").append("GH_config.json"), std::ios::out);
-	jsonOutFile << json::Serialize<CrystalProfile>::to_json(profile).dump();
-	jsonOutFile.close();
-}
-
-CrystalProfile Crystal::loadMods() {
-    std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append("GH_config.json"));
-
-    if (input && !input.eof()) {
-		auto json = json2::parse(input);
-		std::string ver = std::to_string(Mod::get()->getVersion().getMajor()) + "." + std::to_string(Mod::get()->getVersion().getMinor()) + "." + std::to_string(Mod::get()->getVersion().getPatch());
-		if (ver == json["CrystalVer"]) {
-			//keybinds.clear();
-			//for (int i = 0; i < json["keybindsSize"]; i++) {
-				//keybinds.push_back({json[std::to_string(i).c_str()]["key"], json[std::to_string(i).c_str()]["mod"]});
-			//}
-			const auto& displaysJson = json["displays"];
-            auto& displaysArray = profile.displays;
-            for (std::size_t i = 0; i < std::min(displaysJson.size(), displaysArray.size()); ++i) {
-                displaysArray[i] = displaysJson[i];
-                    
-            }
-			const auto& positionsJson = json["positions"];
-			auto& positionsArray = profile.displayPositions;
-            for (std::size_t i = 0; i < std::min(positionsJson.size(), positionsArray.size()); ++i) {
-            	if (positionsJson[i].is_number_integer()) {
-                	positionsArray[i] = static_cast<LabelPos>(positionsJson[i]);
-                }
-            }
-			const auto& opacitiesJson = json["opacities"];
-            auto& opacitiesArray = profile.displayOpacity;
-            for (std::size_t i = 0; i < std::min(opacitiesJson.size(), opacitiesArray.size()); ++i) {
-            	opacitiesArray[i] = opacitiesJson[i]; 
-            }
-			const auto& scalesJson = json["scales"];
-			auto& scalesArray = profile.displayScale;
-            for (std::size_t i = 0; i < std::min(scalesJson.size(), scalesArray.size()); ++i) {
-            	scalesArray[i] = scalesJson[i]; 
-            }
-
-			for (auto& [key, value] : json.items()) {
-				if (!value.is_null()) { // just in case
-					return CrystalProfile {
-						.message = json["message"],
-						.tclicks = json["tclicks"],
-						.sclicks = json["sclicks"],
-						.oclicks = json["oclicks"],
-						.rclicks = json["rclicks"],
-						.ajumps = json["ajumps"],
-						.tjumps = json["tjumps"],
-						.tattoo = json["tattoo"],
-						.redDying = json["redDying"],
-						.redDeath = json["redDeath"],
-						.hideID = json["hideID"],
-						.author = json["author"], 
-						.iat = json["iat"],
-						.ipm = json["ipm"],
-						.ilt = json["ilt"],
-						.igt = json["igt"],
-						//.noclip = json["noclip"],
-						//.noclipP1 = json["noclipP1"],
-						//.noclipP2 = json["noclipP2"],
-						.tintOnDeath = json["tintOnDeath"],
-						.resetOnAccuracy = json["resetOnAccuracy"],
-						.resetOnDeath = json["resetOnDeath"],
-						.resetAcc = json["resetAcc"],
-						.resetDeath = json["resetDeath"],
-						.deathEffect = json["deathEffect"],
-						.instantdeath = json["instantdeath"],
-						.autoreset = json["autoreset"],
-						.autoresetnum = json["autoresetnum"],
-						.respawnfix = json["respawnfix"],
-						.practiceorbfix = json["practiceorbfix"],
-						.nopulse = json["nopulse"],
-						.trailsize = json["trailsize"],
-						.solidwave = json["solidwave"],
-						.invisibleplayer = json["invisibleplayer"],
-						.customPlayerColor = json["customPlayerColor"],
-						.customWaveColor = json["customWaveColor"],
-						.rainbowIcon = json["rainbowIcon"],
-						.rainbowP1 = json["rainbowP1"],
-						.rainbowP2 = json["rainbowP2"],
-						.rainbowP1wave = json["rainbowP1wave"],
-						.rainbowP2wave = json["rainbowP2wave"],
-						.rainbowspeed = json["rainbowspeed"],
-						.samedual = json["samedual"],
-						.hitboxes = json["hitboxes"],
-						.onDeath = json["onDeath"],
-						.drawTrail = json["drawTrail"],
-						.inEditor = json["inEditor"],
-						.particles = json["particles"],
-						.progressBar = json["progressBar"],
-						.accpercentage = json["accpercentage"],
-						.hideatts = json["hideatts"],
-						.hidenormalatts = json["hidenormalatts"],
-						.hidepracticeatts = json["hidepracticeatts"],
-						.pracmusic = json["pracmusic"],
-						.ignoreESC = json["ignoreESC"],
-						.confirmQuit = json["confirmQuit"],
-						.hidepause = json["hidepause"],
-						.autoldm = json["autoldm"],
-						.autoSong = json["autoSong"],
-						.flippedcontrol = json["flippedcontrol"],
-						.mirrorcontrol = json["mirrorcontrol"],
-						.startpos = json["startpos"],
-						.checkpointswitch = json["checkpointswitch"],
-						.framestep = json["framestep"],
-						.lastCheckpoint = json["lastCheckpoint"],
-						.noglow = json["noglow"],
-						.nospike = json["nospike"],
-						.mirror = json["mirror"],
-						.layout = json["layout"],
-						.autoclick = json["autoclick"],
-						.ACpushframe = json["ACpushframe"],
-						.ACrelframe = json["ACrelframe"],
-						.testmode = json["testmode"],
-						.safeMode = json["safeMode"], 
-						.autoSafeMode = json["autoSafeMode"],
-						.BGColour = { json["BGColour-Red"], json["BGColour-Green"], json["BGColour-Blue"], json["BGColour-Alpha"] },
-						.LightColour = { json["LightColour-Red"], json["LightColour-Green"], json["LightColour-Blue"], json["LightColour-Alpha"] },
-						.TitleColour = { json["TitleColour-Red"], json["TitleColour-Green"], json["TitleColour-Blue"], json["TitleColour-Alpha"] },
-						.borderRounding = json["borderRounding"],
-						.scrollbarSize = json["scrollbarSize"],
-						.scrollbarRounding = json["scrollbarRounding"],
-						.RGBAccent = json["RGBAccent"],
-						.borders = json["borders"],
-						.rounded = json["rounded"],
-						.titlebar = json["titlebar"],
-						.invisBG = json["invisBG"],
-						.diffTitleBar = json["diffTitleBar"],
-						.anticheat = json["anticheat"],
-						.unlockAll = json["unlockAll"],
-						.scalehack = json["scalehack"],
-						.objlimit = json["objlimit"],
-						.customobjlimit = json["customobjlimit"],
-						.verify = json["verify"],
-						.copy = json["copy"],
-						.editorZoom = json["editorZoom"],
-						.levelEdit = json["levelEdit"],
-						.loadfail = json["loadfail"],
-						.FPS = json["FPS"],
-						.FPSbypass = json["FPSbypass"],
-						.TPS = json["TPS"],
-						.TPSbypass = json["TPSbypass"],
-						.lockCursor = json["lockCursor"],
-						.transparentBG = json["transparentBG"],
-						.translists = json["translists"],
-						.betterbg = json["betterbg"],
-						.buttonDL = json["buttonDL"],
-						.buttonCL = json["buttonCL"],
-						.displays = json["displays"],
-						.displayPositions = json["positions"],
-						.displayOpacity = json["opacities"],
-						.displayScale = json["scales"],
-					};
-				}
-			}
-		} else {
-			ghc::filesystem::remove(Mod::get()->getConfigDir() / "Config" / "GH_config.json");
-			auto errorAlert = FLAlertLayer::create(
-				"Version Difference",
-				"Your Crystal Client save file was used for a different version of Crystal, so your save file has been cleared. Thank you for using Crystal!",
-				"OK"
-			);
-			//errorAlert->m_scene = layer;
-			errorAlert->show();
-		}
-    }
-    return Crystal::profile;
-}

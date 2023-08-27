@@ -2,7 +2,6 @@
 #include "../CrystalProfile.hpp"
 
 using namespace Crystal;
-using namespace Icon;
 
 void Icon::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
   float fC = fV * fS; // Chroma
@@ -51,38 +50,44 @@ void Icon::fade(float rgb1[4], float rgb2[4]) {
     B = rgb1[2] * cycle + rgb2[2] * (1-cycle);
 }
 
+void Icon::stat(float color[4]) {
+    R = color[0];
+    G = color[1];
+    B = color[2];
+}
+
 cocos2d::_ccColor3B Icon::getEffectColor(EffectType effect, AffectedType affect) {
     if (effect == EffectType::Static) {
         switch (affect) {
             case P1Color1:
-                colorConv(profile.StaticP1C1, R, G, B);
+                stat(profile.StaticP1C1);
                 break;
             case P1Color2:
-                colorConv(profile.StaticP1C2, R, G, B);
+                stat(profile.StaticP1C2);
                 break;
             case P1Glow:
-                colorConv(profile.StaticP1CG, R, G, B);
+                stat(profile.StaticP1CG);
                 break;
             case P1WaveTrail:
-                colorConv(profile.StaticP1CW, R, G, B);
+                stat(profile.StaticP1CW);
                 break;
             case P1RegularTrail:
-                colorConv(profile.StaticP1CR, R, G, B);
+                stat(profile.StaticP1CR);
                 break;
             case P2Color1:
-                colorConv(profile.StaticP2C1, R, G, B);
+                stat(profile.StaticP2C1);
                 break;
             case P2Color2:
-                colorConv(profile.StaticP2C2, R, G, B);
+                stat(profile.StaticP2C2);
                 break;
             case P2Glow:
-                colorConv(profile.StaticP2CG, R, G, B);
+                stat(profile.StaticP2CG);
                 break;
             case P2WaveTrail:
-                colorConv(profile.StaticP2CW, R, G, B);
+                stat(profile.StaticP2CW);
                 break;
             case P2RegularTrail:
-                colorConv(profile.StaticP2CR, R, G, B);
+                stat(profile.StaticP2CR);
                 break;
         }
     }
@@ -90,34 +95,34 @@ cocos2d::_ccColor3B Icon::getEffectColor(EffectType effect, AffectedType affect)
     if (effect == EffectType::Fade) {
         switch (affect) {
             case P1Color1:
-                fadeConv(profile.FadeP1C1E1, profile.FadeP1C1E2, R, G, B, cycle);
+                fade(profile.FadeP1C1E1, profile.FadeP1C1E2);
                 break;
             case P1Color2:
-                fadeConv(profile.FadeP1C2E1, profile.FadeP1C2E2, R, G, B, cycle);
+                fade(profile.FadeP1C2E1, profile.FadeP1C2E2);
                 break;
             case P1Glow:
-                fadeConv(profile.FadeP1GE1, profile.FadeP1GE2, R, G, B, cycle);
+                fade(profile.FadeP1GE1, profile.FadeP1GE2);
                 break;
             case P1WaveTrail:
-                fadeConv(profile.FadeP1WE1, profile.FadeP1WE2, R, G, B, cycle);
+                fade(profile.FadeP1WE1, profile.FadeP1WE2);
                 break;
             case P1RegularTrail:
-                fadeConv(profile.FadeP1RE1, profile.FadeP1RE2, R, G, B, cycle);
+                fade(profile.FadeP1RE1, profile.FadeP1RE2);
                 break;
             case P2Color1:
-                fadeConv(profile.FadeP2C1E1, profile.FadeP2C1E2, R, G, B, cycle);
+                fade(profile.FadeP2C1E1, profile.FadeP2C1E2);
                 break;
             case P2Color2:
-                fadeConv(profile.FadeP2C2E1, profile.FadeP2C2E2, R, G, B, cycle);
+                fade(profile.FadeP2C2E1, profile.FadeP2C2E2);
                 break;
             case P2Glow:
-                fadeConv(profile.FadeP2GE1, profile.FadeP2GE2, R, G, B, cycle);
+                fade(profile.FadeP2GE1, profile.FadeP2GE2);
                 break;
             case P2WaveTrail:
-                fadeConv(profile.FadeP2WE1, profile.FadeP2WE2, R, G, B, cycle);
+                fade(profile.FadeP2WE1, profile.FadeP2WE2);
                 break;
             case P2RegularTrail:
-                fadeConv(profile.FadeP2RE1, profile.FadeP2RE2, R, G, B, cycle);
+                fade(profile.FadeP2RE1, profile.FadeP2RE2);
                 break;
         }
     }

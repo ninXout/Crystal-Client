@@ -3,12 +3,13 @@
 	"version": "v3.0.0",
 	"id": "ninxout.crystalclient",
 	"name": "Crystal Client",
-	"developer": "ninXout and Nosu",
+	"developer": "ninXout",
 	"description": "Premium Cross-Platform Modded Client",
 	"resources": {
         "files": [
             "resources/Lexend.ttf",
 			"resources/ffmpeg"
         ]
-    }
+    },
+	"incompatibilities": [{"id": "camila.demonlist-button", "version": "*"}]
 }

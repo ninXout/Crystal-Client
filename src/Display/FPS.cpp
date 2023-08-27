@@ -2,18 +2,20 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include "Display.hpp"
 
-// Copied from mateus44/Matcool's FPS Bypass mod
+// Copied from camila314 and alk1m123's FPS Shower mod
 
-double m_resetInterval;
-std::chrono::time_point<std::chrono::high_resolution_clock> previous_frame, last_update;
-float frame_time_sum = 0.f;
-int frame_count = 0;
+int frames;
+double accumulate;
+double resetInterval;
+int lastTime;
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
         Display::get()->setDefaultDisplay(3, "60");
 
         if (!PlayLayer::init(gj)) return false;
+
+        frames = accumulate = resetInterval = lastTime = 0;
 
         Display::get()->arrangeDisplay(3);
         Display::get()->addDisplayChildren(3, this);
@@ -25,23 +27,21 @@ class $modify(PlayLayer) {
 
         Display::get()->updateDisplay(3);
 
-        const auto now = std::chrono::high_resolution_clock::now();
+        ++frames;
+        accumulate += dt;
 
-        const std::chrono::duration<float> diff = now - previous_frame;
-        frame_time_sum += diff.count();
-        frame_count++;
+        if (accumulate > resetInterval) {
+            float framerate = frames / accumulate;
+            framerate = round(framerate * 10) / 10;
+            frames = 0;
+            accumulate = 0;
 
-        int fps;
+            std::string FPSstring = std::to_string(static_cast<int>(framerate));
 
-        if (std::chrono::duration<float>(now - last_update).count() > 1.0f) {
-            last_update = now;
-            fps = static_cast<int>(std::roundf(static_cast<float>(frame_count) / frame_time_sum));
-            frame_time_sum = 0.f;
-            frame_count = 0;
+            if (getVar<bool>("fps_display") && lastTime != static_cast<int>(m_time)) {
+                Display::get()->getDisplay(3)->setString(FPSstring.c_str());
+                lastTime = static_cast<int>(m_time);
+            }
         }
-
-        previous_frame = now;
-
-        if (getVar<bool>("fps_display")) Display::get()->getDisplay(3)->setString((std::to_string(fps)).c_str());
     }
 };

@@ -3,6 +3,8 @@
 
 class $modify(PlayLayer) {
     void checkCollisions(PlayerObject* p, float g) {
+        PlayLayer::checkCollisions(p, g);
+
 		if (getVar<bool>("anticheat")) {
 			m_antiCheatPassed = true;
 			m_shouldTryToKick = false;
@@ -11,7 +13,5 @@ class $modify(PlayLayer) {
 			m_accumulatedKickCounter = 0;
 			m_kickCheckDeltaSnapshot = (float)std::time(nullptr);
 		}
-
-        PlayLayer::checkCollisions(p, g);
     }
 };

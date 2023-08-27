@@ -1,6 +1,7 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/UILayer.hpp>
+#include "StartPosSwitcher.hpp"
 
 // [Partially] Copied from camila314/Camila's StartPos Switcher
 
@@ -10,42 +11,43 @@ CCLabelBMFont* g_startPosText;
 CCSprite* rightButton;
 CCSprite* leftButton;
 
+void updateIndex(bool increment) {
+    auto corner = CCDirector::sharedDirector()->getScreenTop();
+    auto win_size = CCDirector::sharedDirector()->getWinSize();
+    auto pl = PlayLayer::get();
+
+    if (pl->m_isTestMode && getVar<bool>("startpos_switch")) {
+        if (increment) {
+            g_startPosIndex++;
+        } else {
+            g_startPosIndex--;
+        }
+
+        if (g_startPosIndex == g_startPoses.size()) {
+            g_startPosIndex = -1;
+        } else if (g_startPosIndex < -1) {
+            g_startPosIndex = g_startPoses.size() - 1;
+        }
+
+        auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
+        g_startPosText->setString(label.c_str());
+
+        if (pl->m_isTestMode) {
+            pl->m_startPosCheckpoint = nullptr;
+            if (g_startPosIndex == -1) {
+                pl->m_startPos = nullptr;
+                pl->m_playerStartPosition = ccp(0, 105);
+            } else {
+                pl->m_startPos = g_startPoses[g_startPosIndex].first;
+                pl->m_playerStartPosition = g_startPoses[g_startPosIndex].second;
+            }
+        }
+
+        pl->resetLevel();
+    }
+}
+
 class $modify(SPPlayLayer, PlayLayer) {
-    void updateIndex(bool increment) {
-		auto corner = CCDirector::sharedDirector()->getScreenTop();
-		auto win_size = CCDirector::sharedDirector()->getWinSize();
-
-		if (m_isTestMode && getVar<bool>("startpos_switch")) {
-			if (increment) {
-				g_startPosIndex++;
-			} else {
-				g_startPosIndex--;
-			}
-
-			if (g_startPosIndex == g_startPoses.size()) {
-				g_startPosIndex = -1;
-			} else if (g_startPosIndex < -1) {
-				g_startPosIndex = g_startPoses.size() - 1;
-			}
-
-			auto label = std::to_string(g_startPosIndex + 1) + "/" + std::to_string(g_startPoses.size());
-			g_startPosText->setString(label.c_str());
-
-			if (m_isTestMode) {
-				m_startPosCheckpoint = nullptr;
-				if (g_startPosIndex == -1) {
-					m_startPos = nullptr;
-					m_playerStartPosition = ccp(0, 105);
-				} else {
-					m_startPos = g_startPoses[g_startPosIndex].first;
-					m_playerStartPosition = g_startPoses[g_startPosIndex].second;
-				}
-			}
-
-            resetLevel();
-		}
-	}
-
     void addObject(GameObject* g) {
 		PlayLayer::addObject(g);
 		if (g->m_objectID == 31) {

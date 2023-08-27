@@ -1,10 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 
-float frames;
-float noclipped_frames;
-int noclip_deaths;
-
 bool lastDeath;
 
 float opacity;
@@ -32,17 +28,17 @@ class $modify(PlayLayer) {
 			return PlayLayer::destroyPlayer(p,g);
 		}
         if (getVar<bool>("accuracy_limit")) {
-			auto accu = (float)(frames - noclipped_frames) / (float)frames;
+			auto accu = (float)(getTempVar<float>("frames") - getTempVar<float>("noclipped_frames")) / (float)getTempVar<float>("frames");
 			if (accu * 100 <= getVar<float>("accuracy_limit_num")) {
-				frames = noclipped_frames = noclip_deaths = 0;
+				*setTempVar<float>("frames") = *setTempVar<float>("noclipped_frames") = *setTempVar<int>("noclip_deaths") = 0;
 				resetLevel();
 			}
 		}
 		if (getVar<bool>("death_limit")) {
-			if (noclip_deaths >= getVar<int>("death_limit_num")) {
-				frames = noclipped_frames = noclip_deaths = 0;
+			if (*setTempVar<int>("noclip_deaths") >= getVar<int>("death_limit_num")) {
+				*setTempVar<float>("frames") = *setTempVar<float>("noclipped_frames") = *setTempVar<int>("noclip_deaths") = 0;
 				resetLevel();
-				//if (profile.noclipDeath) g_death->setString(std::to_string(noclip_deaths).c_str());
+				//if (profile.noclipDeath) g_death->setString(std::to_string(*setTempVar<int>("noclip_deaths")).c_str());
 			}
 		}
         *setTempVar<bool>("would_die") = true;
@@ -61,25 +57,21 @@ class $modify(PlayLayer) {
     void resetLevel() {
         PlayLayer::resetLevel();
 
-        frames = noclipped_frames = noclip_deaths = 0;
+        *setTempVar<float>("frames") = *setTempVar<float>("noclipped_frames") = *setTempVar<int>("noclip_deaths") = 0;
 		*setTempVar<bool>("would_die") = false;
     }
 
     void update(float dt)  {
-        if (!m_hasCompletedLevel) frames += dt;
-
-		*setTempVar<float>("frames") = frames;
+        if (!m_hasCompletedLevel) *setTempVar<float>("frames") += dt;
 
         if (getTempVar<bool>("would_die") && !lastDeath) {
-			noclip_deaths++;
-			*setTempVar<int>("noclip_deaths") = noclip_deaths;
+			*setTempVar<int>("noclip_deaths") += 1;
 		}
 
 		lastDeath = getTempVar<bool>("would_die");
 
 		if (getTempVar<bool>("would_die") && !m_isDead && !m_hasCompletedLevel) {
-			noclipped_frames += dt;
-			*setTempVar<float>("noclipped_frames") = noclipped_frames;
+			*setTempVar<float>("noclipped_frames") += dt;
 			//dying = true;
 			*setTempVar<bool>("would_die") = false;
 

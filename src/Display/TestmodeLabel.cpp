@@ -6,7 +6,7 @@ class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
         if (!PlayLayer::init(gj)) return false;
 
-        if (getVar<bool>("testmode_label")) {
+        if (!getVar<bool>("testmode_label")) {
 			if (this->getChildrenCount()) {
 				CCArrayExt<CCNode*> children = this->getChildren();
 				for (auto* child : children) {
