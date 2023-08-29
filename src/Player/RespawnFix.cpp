@@ -15,7 +15,7 @@ class $modify(PlayLayer) {
                 smoothOut --;
             }
 
-            if (getVar<bool>("AMT_record") || getVar<bool>("AMT_replay")) time = dt;
+            if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) time = dt;
 
             PlayLayer::update(time);
         }

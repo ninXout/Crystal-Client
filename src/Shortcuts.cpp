@@ -4,6 +4,8 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include "Level/StartPosSwitcher.hpp"
 
+bool pushing = false;
+
 Shortcuts* Shortcuts::get() {
     static auto inst = new Shortcuts;
     return inst;
@@ -18,6 +20,7 @@ void Shortcuts::pushVariable(VarChange var) {
 }
 
 void Shortcuts::executeBinds(int current, bool down, bool global) {
+    if (!PlayLayer::get()) return;
     if (global) {
         switch (current) {
             case 0:
@@ -53,18 +56,25 @@ void Shortcuts::executeBinds(int current, bool down, bool global) {
                 }
                 break;
             case 8:
-                if (down) GJBaseGameLayer::get()->pushButton(1, true);
-                else GJBaseGameLayer::get()->releaseButton(1, true);
+                if (down && !pushing) GJBaseGameLayer::get()->pushButton(1, true);
+                else if (!down && pushing) GJBaseGameLayer::get()->releaseButton(1, true);
                 break;
             case 9:
-                if (down) GJBaseGameLayer::get()->pushButton(1, false);
-                else GJBaseGameLayer::get()->releaseButton(1, false);
+                if (down && !pushing) GJBaseGameLayer::get()->pushButton(1, false);
+                else if (!down && pushing) GJBaseGameLayer::get()->releaseButton(1, false);
                 break;
             case 10:
                 if (PlayLayer::get()->m_isPracticeMode && down) PlayLayer::get()->markCheckpoint();
                 break;
             case 11:
                 if (PlayLayer::get()->m_isPracticeMode && down) PlayLayer::get()->removeLastCheckpoint();
+                break;
+            case 13:
+                if (getVar<bool>("framestep") && down) {
+                    *setTempVar<bool>("should_update") = true;
+                    PlayLayer::get()->update(1.f / getVar<float>("FPS"));
+                    *setTempVar<bool>("should_update") = false;
+                }
                 break;
         }
     } else {
@@ -153,5 +163,17 @@ class $modify(UILayer) {
         Shortcuts::get()->updateKeybinds(key, true, false);
 
         UILayer::keyDown(key);
+    }
+};
+
+class $modify(GJBaseGameLayer) {
+    void pushButton(int i, bool pl) {
+        GJBaseGameLayer::pushButton(i, pl);
+        pushing = true;
+    }
+
+    void releaseButton(int i, bool pl) {
+        GJBaseGameLayer::releaseButton(i, pl);
+        pushing = false;
     }
 };

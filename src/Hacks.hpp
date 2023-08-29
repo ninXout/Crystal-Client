@@ -71,17 +71,6 @@ void fps_shower_init();
 
     // Amethyst
     //AmethystMacro currentMacro;
-
-
-    // Smart Start Pos
-    std::vector<GameObject*> gravityPortals;
-    std::vector<GameObject*> gamemodePortals;
-    std::vector<GameObject*> mirrorPortals;
-    std::vector<GameObject*> miniPortals;
-    std::vector<GameObject*> dualPortals;
-    std::vector<GameObject*> speedChanges;
-    std::vector<StartPosObject*> SPs;
-    std::vector<bool> willFlip;
     
     // Hitbox Visualizer
 
@@ -197,7 +186,6 @@ void fps_shower_init();
     std::string bad;
     bool pausecountdown;
     bool freezeCount;
-    int countdown;
     CCLabelBMFont* g_pauseCount;
     bool inputmirror;
     float speedhack = 1;

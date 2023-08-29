@@ -33,13 +33,11 @@ public:
     void noImage(CCNode* layer);
 
     static cocos2d::enumKeyCodes shortcutKey(int key);
-    float getTimeForXPos(PlayLayer*);
     void arrangeText(int arrayLength, PlayLayer* menulay, bool first);
     void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     static void addTransparentBG(CCNode* layer);
-    void GameTime();
     
     void initPatches();
     void refreshPatches();

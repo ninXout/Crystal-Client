@@ -15,7 +15,7 @@ class $modify(PlayLayer) {
 	}
 
 	void destroyPlayer(PlayerObject* player, GameObject* obj) {
-		if (m_isPracticeMode && obj != m_antiCheatObject && getVar<bool>("practice_music")) {
+		if (!getVar<bool>("noclip") && m_isPracticeMode && obj != m_antiCheatObject && getVar<bool>("practice_music")) {
 			GameSoundManager::sharedManager()->stopBackgroundMusic();
 		}
 		PlayLayer::destroyPlayer(player, obj);

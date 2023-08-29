@@ -27,7 +27,7 @@ class $modify(PlayLayer) {
     }
 
     void update(float dt) {
-        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) dt = 1.f / (getVar<float>("FPS")) / getVar<float>("speed");
+        //if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) dt = 1.f / (getVar<float>("FPS")) / getVar<float>("speed");
 
 		PlayLayer::update(dt);
 

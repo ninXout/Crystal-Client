@@ -199,16 +199,6 @@ cocos2d::enumKeyCodes CrystalClient::shortcutKey(int key) {
 	}
 }
 
-float CrystalClient::getTimeForXPos(PlayLayer* play) {
-    float ret;
-    float xPos = play->m_player1->getPositionX();
-    __asm movss xmm1, xPos;
-    reinterpret_cast<void(__thiscall*)>(geode::base::get() + 0x293eb0); // PlayLayer::timeForXPos2
-    __asm movss ret, xmm0; // return unwrap
-
-    return ret;
-}
-
 void CrystalClient::setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first) {
 	auto corner = CCDirector::sharedDirector()->getScreenTop();
 	int anchorY = ((anchorPos - 1) * 15) + 10;
@@ -280,11 +270,6 @@ void CrystalClient::refreshPatches() {
 		Mod::get()->unpatch(customObjLimit3);
 	}
 	*/
-}
-
-void GameTime() {
-	std::chrono::steady_clock::time_point startTime;
-	startTime = std::chrono::steady_clock::now();
 }
 
 void CrystalClient::firstLoad(CCNode* layer) {

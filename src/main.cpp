@@ -159,6 +159,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Auto Song Downloader", setVar<bool>("auto_song_download"));
 	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"));
 	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"));
+	CrystalClient::ImToggleable("Smart StartPos", setVar<bool>("smart_startpos"));
 	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"));
 	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"));
 	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"));
@@ -333,7 +334,7 @@ void CrystalClient::drawGUI() {
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
     ImGui::InputFloat("Speedhack", setVar<float>("speed"));
-    if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
+	if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
