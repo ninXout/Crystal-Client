@@ -38,7 +38,7 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 			demon_button->addChild(demon_label);
 			demon_button->addChild(demon_icon);
 
-			demon_label->::ModifiedSearchLayer::setScale(0.55);
+			demon_label->setScale(0.55);
 			demon_label->setPosition(ccp(70, 17));
 			demon_icon->setPosition(ccp(140, 16));
 			demon_button->setPosition(reinterpret_cast<CCNode*>(menu->getChildren()->objectAtIndex(0))->getPosition() + ccp(0, 35));
@@ -60,7 +60,7 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 			challenge_button->addChild(challenge_label);
 			challenge_button->addChild(challenge_icon);
 
-			challenge_label->::ModifiedSearchLayer::setScale(0.45);
+			challenge_label->setScale(0.45);
 			challenge_label->setPosition(ccp(70, 17));
 			challenge_icon->setPosition(ccp(145, 16));
 			challenge_icon->setScale(0.8);
@@ -95,7 +95,7 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 };
 
 class $modify(GameLevelManager) {
-	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, int type) {
+	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, GJHttpType type) {
 		std::string url(gdurl);
 		std::string query(gdquery);
 

@@ -6,12 +6,11 @@ class $modify(CustomSongWidget) {
 		CustomSongWidget::init(so,ls, a, b, c, d, hideBackground);
 	
 		if (getVar<bool>("auto_song_download")) {
-			auto button = findFirstChildRecursive<CCMenuItemSpriteExtra>(this, [](CCNode* n) {
-				return n->getPositionY() == -180.0f;
-			});
+			auto menu = this->getChildByID("buttons-menu");
+            auto dbutton = static_cast<CCMenuItem*>(menu->getChildByID("download-button"));
 
-			if (button->isVisible()) {
-				button->activate();
+			if (dbutton->isVisible()) {
+				dbutton->activate();
 			}
 		}
 

@@ -1,4 +1,5 @@
 #include "../CrystalProfile.hpp"
+#include "Unfocus.cpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 
@@ -11,12 +12,21 @@ class $modify(CCScheduler) {
         if (!getTempVar<bool>("gameStarted")) return CCScheduler::update(dt);
 
         float targetDT;
+        float unfocusedDT;
         float speedhack = this->getTimeScale();
 
-        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) targetDT = 1.f / getVar<float>("FPS") / speedhack;
-        else targetDT = (1.f / getVar<float>("FPS")) * speedhack;
+        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
+            targetDT = 1.f / getVar<float>("FPS") / speedhack;
+            unfocusedDT = (1.f / getVar<float>("FPS_unfocused")) / speedhack;
+        } else {
+            targetDT = (1.f / getVar<float>("FPS")) * speedhack;
+            unfocusedDT = (1.f / getVar<float>("FPS_unfocused")) * speedhack;
+        }
 
-        if (getVar<bool>("FPS_bypass") || getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
+        if (getVar<bool>("Unfocused_FPS") && shouldUnfocusedFPS) {
+            CCApplication::sharedApplication()->setAnimationInterval(unfocusedDT);
+            CCScheduler::update(unfocusedDT);
+        } else if (getVar<bool>("FPS_bypass") || getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
             disableRender = true;
 
             CCApplication::sharedApplication()->setAnimationInterval(targetDT);
@@ -32,6 +42,7 @@ class $modify(CCScheduler) {
             leftOver += dt - targetDT * times;
         } else {
             CCScheduler::update(dt);
+            CCApplication::sharedApplication()->setAnimationInterval(1.f / 60);
         }
     }
 };

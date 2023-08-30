@@ -168,7 +168,7 @@ void fps_shower_init();
     float g = 0;
 
     // Unorganized
-    std::string image;
+    // std::string image;
     float pulse = 2;
     float zoom = 1;
     float v_tracking;

@@ -336,7 +336,7 @@ void HitboxNode::trajectoryPerPlayer(PlayerObject* player, PlayerObject* playerB
 	auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
 	player->setPosition(pos);
-	player->pushButton(1);
+	player->pushButton(p0);
 
 	if(playerBase->m_vehicleSize < 1) {
 		player->togglePlayerScale(true);
@@ -357,7 +357,7 @@ void HitboxNode::trajectoryPerPlayer(PlayerObject* player, PlayerObject* playerB
 
 	this->drawForPlayer1(player);
 	player->setPosition(pos);
-	player->releaseButton(1);
+	player->releaseButton(p0);
 	m_pDieInSimulation = false;
 
 	for (size_t i = 0; i < static_cast<int>(winSize.width); i++)

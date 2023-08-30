@@ -223,21 +223,53 @@ void CrystalClient::addTransparentBG(CCNode* layer) {
 	layer->addChild(bg, -2);
 }
 
+void CrystalClient::copyToClipboard(const std::string& text) {
+    FILE* p = popen("pbcopy", "w"); // mac exclusive!
+    if (p != nullptr) { // make sure to replace this if youre building in/for windows
+        fwrite(text.c_str(), 1, text.length(), p);
+        pclose(p);
+    }
+}
+
 void CrystalClient::initPatches() {
 	// scale hack
-	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {'\xeb'}).unwrap();
-	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {'\xeb'}).unwrap();
+	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {static_cast<unsigned char>('\xeb')}).unwrap();
+	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {static_cast<unsigned char>('\xeb')}).unwrap();
 	//auto respawn = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x072419), {'\x00'}).unwrap();
 
 	// object limit
-	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {'\xeb'}).unwrap();
-	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {'\xeb'}).unwrap();
-	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {'\xeb'}).unwrap();
+	objLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18bfa), {static_cast<unsigned char>('\xeb')}).unwrap();
+	objLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18f25), {static_cast<unsigned char>('\xeb')}).unwrap();
+	objLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1b991), {static_cast<unsigned char>('\xeb')}).unwrap();
 
 	// custom object
-	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {'\xe9', '\x98', '\x00', '\x00', '\x00', '\x90'}).unwrap();
-	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {'\x90', '\x90', '\x90', '\x90', '\x90', '\x90'}).unwrap();
-	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {'\xe9', '\xa7', '\x00', '\x00', '\x00', '\x90'}).unwrap();
+
+	customObjLimit1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d67c), {
+    	static_cast<unsigned char>('\xe9'), 
+    	static_cast<unsigned char>('\x98'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x90')
+	}).unwrap();
+
+	customObjLimit2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d869), {
+    	static_cast<unsigned char>('\x90'), 
+    	static_cast<unsigned char>('\x90'), 
+    	static_cast<unsigned char>('\x90'), 
+    	static_cast<unsigned char>('\x90'), 
+    	static_cast<unsigned char>('\x90'), 
+    	static_cast<unsigned char>('\x90')
+	}).unwrap();
+
+	customObjLimit3 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x1d72d), {
+    	static_cast<unsigned char>('\xe9'), 
+    	static_cast<unsigned char>('\xa7'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x00'), 
+    	static_cast<unsigned char>('\x90')
+	}).unwrap();
 }
 
 void CrystalClient::refreshPatches() {
@@ -283,7 +315,7 @@ void CrystalClient::firstLoad(CCNode* layer) {
 	if (layer) {
 		auto alert = geode::createQuickPopup(
 			"Hi!",            // title
-			"Thank you for installing Crystal Client. You can open the mod menu by pressing TAB and you can report any bugs or suggestions in my discord server. Enjoy!",   // content
+			"Thank you for installing <cj>Crystal Client.</c> You can <cg>open the mod menu by pressing TAB</c> and you can <cr>report any bugs</c> or suggestions in my <cj>discord server.</c> Enjoy!",   // content
 			"OK", "Join Discord Server",      // buttons
 			[](auto, bool btn2) {
 				if (btn2) {
@@ -301,7 +333,7 @@ void CrystalClient::noImage(CCNode* layer) {
 	if (layer) {
 		auto alert = geode::createQuickPopup(
 			"Oops",            // title
-			"You are using BetterBG from Crystal but there's no image for it. Please put whatever image with the name background.jpg on GD/Contents/geode/config/ninxout.crystalclient/BetterBG. Thanks for using Crystal <3",   // content
+			"You are using <cg>BetterBG</c> from Crystal but there is <cr>no image for it.</c> Please put <cj>whatever image with the name background.jpg</c> on GD/Contents/geode/config/ninxout.crystalclient/BetterBG. <cp>Thanks for using Crystal <3</c>",   // content
 			"OK", "Join Discord Server",      // buttons
 			[](auto, bool btn2) {
 				if (btn2) {

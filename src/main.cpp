@@ -333,6 +333,10 @@ void CrystalClient::drawGUI() {
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
+	ImGui::InputFloat("##Unfocused FPS", setVar<float>("FPS_unfocused"));
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	CrystalClient::ImToggleable("Unfocused FPS", setVar<bool>("Unfocused_FPS"));
     ImGui::InputFloat("Speedhack", setVar<float>("speed"));
 	if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
@@ -344,11 +348,15 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"));
+	CrystalClient::ImToggleable("No Pause on Unfocus", setVar<bool>("no_pause_unfocus"));
+	CrystalClient::ImToggleable("Mute on Unfocus", setVar<bool>("mute_unfocus"));
 	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"));
 	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"));
-	//CrystalClient::ImToggleable("Better BG", &profile.betterbg);
+	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"));
 	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"));
 	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"));
+	CrystalClient::ImToggleable("Copy SongID", setVar<bool>("copy_songID"));
+	CrystalClient::ImToggleable("Copy LevelID Everywhere", setVar<bool>("copy_levelID"));
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
     CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"));
@@ -537,28 +545,6 @@ class $modify(MenuLayer) {
 		if (!isTiemOn) {
 			tiem = std::chrono::high_resolution_clock::now();
 			isTiemOn = true;
-		}
-
-		if (Crystal::profile.betterbg) {
-			image = geode::Mod::get()->getConfigDir().append("BetterBG").append("background.jpg");
-
-			if (ghc::filesystem::exists(image)) {
-				auto ml = GameManager::sharedState()->m_menuLayer;
-				auto winSize = CCDirector::sharedDirector()->getWinSize();
-				auto sprite = CCSprite::create(image.c_str());
-
-				sprite->setScaleY(winSize.height / sprite->getContentSize().height);
-				sprite->setScaleX(winSize.width / sprite->getContentSize().width);
-				sprite->setPositionX(winSize.width / 2);
-				sprite->setPositionY(winSize.height / 2);
-
-				auto node = ((CCNode*)ml->getChildren()->objectAtIndex(0));
-
-				node->setZOrder(-2);
-				ml->addChild(sprite, -1);
-			} else {
-				CrystalClient::get()->noImage(this);
-			}
 		}
 
 		return true;
