@@ -3,18 +3,24 @@
 #include <Geode/modify/CCDirector.hpp>
 #include <imgui.h>
 #include "./CrystalClient/CrystalClient.hpp"
-#include "Includes.hpp"
+#include <Geode/modify/PlayLayer.hpp>
 #include "Hacks.hpp"
 #include "./Icon/Icon.hpp"
 #include <random>
 #include "./ImGui/ImGui.hpp"
 #include "Shortcuts.hpp"
+#include "CrystalProfile.hpp"
+#include <Geode/Geode.hpp>
+#include "Renderer/Renderer.hpp"
+#include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
 using namespace Crystal;
 using namespace AmethystReplay;
 
-$on_mod(Loaded) {
+Recorder record;
+
+$execute {
     //profile = Crystal::loadMods();
 	loadConfigFromFile();
 	Shortcuts::get()->refreshKeybinds(false);
@@ -24,6 +30,18 @@ $on_mod(Loaded) {
         CrystalClient::get()->drawGUI();
     });
     ImGuiCocos::get().toggle();
+
+	CrystalClient::get()->initPatches();
+
+	new EventListener(+[](const char* pluginName) {
+        CrystalClient::get()->plugins.push_back(pluginName);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<const char*>("ninxout.crystalclient/addPluginName"));
+
+    new EventListener(+[](bool* theAction) {
+        CrystalClient::get()->pluginBools.push_back(theAction);
+        return ListenerResult::Propagate;
+    }, geode::DispatchFilter<bool*>("ninxout.crystalclient/addPluginBool"));
 }
 
 int strpos(const char *haystack, const char *needle, int nth) {
@@ -43,7 +61,7 @@ void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
 
     ImGui::Begin("Player", NULL, window_flags);
-	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"));
+	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"), "Allows the player to be invincible");
 	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Noclip Player 1", setVar<bool>("noclip_P1"));
 		CrystalClient::ImToggleable("Noclip Player 2", setVar<bool>("noclip_P2"));
@@ -89,34 +107,20 @@ void CrystalClient::drawGUI() {
 
 	ImGui::Begin("Icon", NULL, window_flags);
 	if (ImGui::BeginMenu("Player 1")) {
-		CrystalClient::ImIconEffect(&profile.P1Color1, &profile.iconEffects[0], &profile.iconEffects[1], &profile.iconEffects[2], profile.StaticP1C1, profile.FadeP1C1E1, profile.FadeP1C1E2, "Player Color 1");
-		CrystalClient::ImIconEffect(&profile.P1Color2, &profile.iconEffects[3], &profile.iconEffects[4], &profile.iconEffects[5], profile.StaticP1C2, profile.FadeP1C2E1, profile.FadeP1C2E2, "Player Color 2");
-		CrystalClient::ImIconEffect(&profile.P1Glow, &profile.iconEffects[6], &profile.iconEffects[7], &profile.iconEffects[8], profile.StaticP1CG, profile.FadeP1GE1, profile.FadeP1GE2, "Icon Glow");
-		CrystalClient::ImIconEffect(&profile.P1Regular, &profile.iconEffects[9], &profile.iconEffects[10], &profile.iconEffects[11], profile.StaticP1CR, profile.FadeP1RE1, profile.FadeP1RE2, "Regular Trail");
-		CrystalClient::ImIconEffect(&profile.P1Wave, &profile.iconEffects[12], &profile.iconEffects[13], &profile.iconEffects[14], profile.StaticP1CW, profile.FadeP1WE1, profile.FadeP1WE2, "Wave Trail");
+		CrystalClient::ImIconEffect("Player Color 1", "P1C1");
+		CrystalClient::ImIconEffect("Player Color 2", "P1C2");
+		CrystalClient::ImIconEffect("Icon Glow", "P1G");
+		CrystalClient::ImIconEffect("Regular Trail", "P1R");
+		CrystalClient::ImIconEffect("Wave Trail", "P1W");
 		ImGui::EndMenu();
 	}
 	if (ImGui::BeginMenu("Player 2")) {
-		CrystalClient::ImIconEffect(&profile.P2Color1, &profile.iconEffects[15], &profile.iconEffects[16], &profile.iconEffects[17], profile.StaticP2C1, profile.FadeP2C1E1, profile.FadeP2C1E2, "Player Color 1");
-		CrystalClient::ImIconEffect(&profile.P2Color2, &profile.iconEffects[18], &profile.iconEffects[19], &profile.iconEffects[20], profile.StaticP2C2, profile.FadeP2C2E1, profile.FadeP2C2E2, "Player Color 2");
-		CrystalClient::ImIconEffect(&profile.P2Glow, &profile.iconEffects[21], &profile.iconEffects[22], &profile.iconEffects[23], profile.StaticP2CG, profile.FadeP2GE1, profile.FadeP2GE2, "Icon Glow");
-		CrystalClient::ImIconEffect(&profile.P2Regular, &profile.iconEffects[24], &profile.iconEffects[25], &profile.iconEffects[26], profile.StaticP2CR, profile.FadeP2RE1, profile.FadeP2RE2, "Regular Trail");
-		CrystalClient::ImIconEffect(&profile.P2Wave, &profile.iconEffects[27], &profile.iconEffects[28], &profile.iconEffects[29], profile.StaticP2CW, profile.FadeP2WE1, profile.FadeP2WE2, "Wave Trail");
+		CrystalClient::ImIconEffect("Player Color 1", "P2C1");
+		CrystalClient::ImIconEffect("Player Color 2", "P2C2");
+		CrystalClient::ImIconEffect("Icon Glow", "P2G");
+		CrystalClient::ImIconEffect("Regular Trail", "P2R");
+		CrystalClient::ImIconEffect("Wave Trail", "P2W");
 		ImGui::EndMenu();
-	}
-	CrystalClient::ImExtendedToggleable("Rainbow Icon", &Crystal::profile.rainbowIcon);
-	if (ImGui::BeginPopupModal("Rainbow Icon", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Rainbow Player Color 1", &Crystal::profile.rainbowP1);
-		CrystalClient::ImToggleable("Rainbow Player Color 2", &Crystal::profile.rainbowP2);
-		CrystalClient::ImToggleable("Rainbow Wave Trail Player 1", &Crystal::profile.rainbowP1wave);
-		CrystalClient::ImToggleable("Rainbow Wave Trail Player 2", &Crystal::profile.rainbowP2wave);
-		CrystalClient::ImToggleable("Rainbow Glow Player 1", &Crystal::profile.rainbowGlowP1);
-		CrystalClient::ImToggleable("Rainbow Glow Player 2", &Crystal::profile.rainbowGlowP2);
-		ImGui::InputFloat("Rainbow Speed", &Crystal::profile.rainbowspeed);
-		if (ImGui::Button("Close")) {
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("Solid Glow Color", &Crystal::profile.solidGlow);
 	ImGui::End();
@@ -333,11 +337,14 @@ void CrystalClient::drawGUI() {
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
+	ImGui::PushItemWidth(100);
 	ImGui::InputFloat("##Unfocused FPS", setVar<float>("FPS_unfocused"));
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Unfocused FPS", setVar<bool>("Unfocused_FPS"));
+	ImGui::PushItemWidth(100);
     ImGui::InputFloat("Speedhack", setVar<float>("speed"));
+	ImGui::PopItemWidth();
 	if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -355,8 +362,8 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"));
 	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"));
 	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"));
-	CrystalClient::ImToggleable("Copy SongID", setVar<bool>("copy_songID"));
-	CrystalClient::ImToggleable("Copy LevelID Everywhere", setVar<bool>("copy_levelID"));
+	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"));
+	CrystalClient::ImToggleable("Copy Level ID Everywhere", setVar<bool>("copy_levelID"));
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
     CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"));
@@ -497,25 +504,8 @@ void CrystalClient::addTheme() {
     colours[ImGuiCol_CheckMark] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
 }
 
-$execute {
-	CrystalClient::get()->initPatches();
-
-	new EventListener(+[](const char* pluginName) {
-        CrystalClient::get()->plugins.push_back(pluginName);
-        return ListenerResult::Propagate;
-    }, geode::DispatchFilter<const char*>("ninxout.crystalclient/addPluginName"));
-
-    new EventListener(+[](bool* theAction) {
-        CrystalClient::get()->pluginBools.push_back(theAction);
-        return ListenerResult::Propagate;
-    }, geode::DispatchFilter<bool*>("ninxout.crystalclient/addPluginBool"));
-}
-
 class $modify(MenuLayer) {
 	bool init() {
-		if (!ghc::filesystem::exists(framesFol)) {
-			ghc::filesystem::create_directories(framesFol);
-		}
 		if (!ghc::filesystem::exists(macros)) {
 			ghc::filesystem::create_directories(macros);
 		}
@@ -542,54 +532,17 @@ class $modify(MenuLayer) {
 			CrystalClient::get()->firstLoad(this);
 		} 
 
-		if (!isTiemOn) {
-			tiem = std::chrono::high_resolution_clock::now();
-			isTiemOn = true;
-		}
-
 		return true;
 	}
 };
 
 class $modify(Main, PlayLayer) {
     void update(float f4) {
-		if (profile.rainbowIcon) {
-			if (m_player1) {
-				if (Crystal::profile.rainbowP1) m_player1->setColor(col);
-				if (Crystal::profile.rainbowP2) m_player1->setSecondColor(colInverse);
-				if (profile.rainbowGlowP1) {
-					m_player1->m_iconGlow->setColor(col);
-					m_player1->m_vehicleGlow->setChildColor(col);
-					m_player1->m_iconGlow->setBlendFunc(m_player1->m_iconGlow->getBlendFunc());
-					m_player1->m_vehicleGlow->setBlendFunc(m_player1->m_vehicleGlow->getBlendFunc());
-				}
-				if (m_player1->m_waveTrail)
-					if (Crystal::profile.rainbowP1wave) m_player1->m_waveTrail->setColor(col);
-			}
-
-			if (m_player2) {
-				if (Crystal::profile.rainbowP2) m_player2->setColor(colInverse);
-				if (Crystal::profile.rainbowP1) m_player2->setSecondColor(col);
-				if (profile.rainbowGlowP2) {
-					m_player2->m_iconGlow->setColor(colInverse);
-					m_player2->m_vehicleGlow->setChildColor(colInverse);
-				}
-				if (m_player2->m_waveTrail)
-					if (Crystal::profile.rainbowP2wave) m_player2->m_waveTrail->setColor(colInverse);
-			}
-		}
-
-		percent = (m_player1->getPositionX() / m_levelLength) * 100;
-
 		PlayLayer::update(f4);
 		if (profile.renderer) record.handle_recording(this, f4);
 	}
 
     void onQuit() {
-		//if (profile.trajectory) drawer->onQuitTrajectory();
-		std::string renderprocess;
-		//FPSOverlay::sharedState()->removeFromParentAndCleanup(false);
-		std::string basicNAME = (std::string)renderer + "/new.mp4";
 		if (profile.renderer) {
 			record.stop();
 		}
@@ -597,22 +550,6 @@ class $modify(Main, PlayLayer) {
 	}
 
 	bool init(GJGameLevel* gl) {
-		//leftDisplay = 0;
-		timee = 0.0f;
-        
-
-		ss = 0;
-		clickscount = 0;
-		click_count = 0;
-		renderTime = 0;
-
-		if (!ghc::filesystem::exists(framesFol)) {
-			ghc::filesystem::create_directories(framesFol);
-		} else {
-			ghc::filesystem::remove_all(framesFol);
-			ghc::filesystem::create_directory(framesFol);
-		}
-
 		PlayLayer::init(gl);
 
 		if (profile.renderer) {
@@ -620,8 +557,6 @@ class $modify(Main, PlayLayer) {
 			std::string tempPATH = std::string(renderer) + "/temp.mp4";
 			record.start(filePATH, tempPATH);
 		}
-
-		currentFrame = 0;
 		return true;
 	}
 };

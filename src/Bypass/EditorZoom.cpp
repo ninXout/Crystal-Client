@@ -1,5 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/EditorUI.hpp>
+#include <numbers>
 
 class $modify(EditorUI) {
     void zoomIn(cocos2d::CCObject* sender) {

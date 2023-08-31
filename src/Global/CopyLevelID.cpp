@@ -1,5 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/EditLevelLayer.hpp>
+#include "../CrystalClient/CrystalClient.hpp"
 
 struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
     void onCopy(CCObject* sender) {

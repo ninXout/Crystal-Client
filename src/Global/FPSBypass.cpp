@@ -1,5 +1,4 @@
 #include "../CrystalProfile.hpp"
-#include "Unfocus.cpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 
@@ -23,7 +22,7 @@ class $modify(CCScheduler) {
             unfocusedDT = (1.f / getVar<float>("FPS_unfocused")) * speedhack;
         }
 
-        if (getVar<bool>("Unfocused_FPS") && shouldUnfocusedFPS) {
+        if (getVar<bool>("Unfocused_FPS") && getTempVar<bool>("should_unfocus_fps")) {
             CCApplication::sharedApplication()->setAnimationInterval(unfocusedDT);
             CCScheduler::update(unfocusedDT);
         } else if (getVar<bool>("FPS_bypass") || getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
@@ -42,7 +41,7 @@ class $modify(CCScheduler) {
             leftOver += dt - targetDT * times;
         } else {
             CCScheduler::update(dt);
-            CCApplication::sharedApplication()->setAnimationInterval(1.f / 60);
+            //CCApplication::sharedApplication()->setAnimationInterval(1.f / 60);
         }
     }
 };

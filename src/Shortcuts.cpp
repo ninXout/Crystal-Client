@@ -3,6 +3,7 @@
 #include "Hitbox/HitboxNode.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include "Level/StartPosSwitcher.hpp"
+#include "CrystalClient/CrystalClient.hpp"
 
 bool pushing = false;
 

@@ -7,6 +7,7 @@
 #include <Geode/cocos/CCDirector.h>
 
 using u8 = uint8_t;
+using namespace geode::prelude;
 
 class MyRenderTexture {
 public:
@@ -17,8 +18,6 @@ public:
     void begin();
     void end();
     void capture(std::mutex& lock, std::vector<u8>& data, volatile bool& lul);
-    CGImageRef CGImageFromCCImage(const void* data, int newDataLen);
-    bool CGImageWriteToFile(CGImageRef image);
 };
 
 struct Recorder {

@@ -1,6 +1,7 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/LevelSettingsLayer.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
+#include "../CrystalClient/CrystalClient.hpp"
 
 static bool move = false;
 

@@ -3,6 +3,7 @@
 #include "ImGui.hpp"
 #include "../CrystalProfile.hpp"
 #include "../Shortcuts.hpp"
+#include "../CrystalClient/CrystalClient.hpp"
 
 using namespace geode::prelude;
 

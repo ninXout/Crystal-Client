@@ -1,7 +1,10 @@
 #include "../Includes.hpp"
 #include "Renderer.hpp"
 #include "../subprocess.hpp"
+#include "../CrystalProfile.hpp"
+#include <thread>
 
+using namespace geode::prelude;
 using namespace Crystal;
 using namespace subprocess::literals;
 
@@ -195,60 +198,6 @@ void Recorder::handle_recording(PlayLayer* play_layer, float dt) {
     } else {
         stop();
     }
-}
-
-CGImageRef MyRenderTexture::CGImageFromCCImage(const void* data, int newDataLen) {
-    float width = Crystal::profile.targetWidth;
-    float height = Crystal::profile.targetHeight;
-    int dataLen = width * height * 4;
-
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataLen, NULL);
-
-
-    return CGImageCreate(
-        width, height, 
-        8, 8 * 4, width * 4, 
-        CGColorSpaceCreateDeviceRGB(), 
-        kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst, 
-        provider,   // data provider
-        NULL,       // decode
-        true,        // should interpolate
-        kCGRenderingIntentDefault
-    );
-}
-
-bool MyRenderTexture::CGImageWriteToFile(CGImageRef image) {
-    std::stringstream newthing;
-    newthing << (std::string)geode::Mod::get()->getConfigDir();
-    newthing << "/Amethyst/Renderer/Frames/";
-    newthing << "frame_";
-    newthing << std::setw(4) << std::setfill('0') << std::to_string(Crystal::profile.ss);
-    newthing << ".png";
-    std::string name = newthing.str();
-
-    Crystal::profile.ss++;
-
-    CFStringRef file = CFStringCreateWithCString(kCFAllocatorDefault,
-    name.c_str(),
-    kCFStringEncodingMacRoman);
-    CFStringRef type = CFSTR("public.png");
-    CFURLRef urlRef = CFURLCreateWithFileSystemPath( kCFAllocatorDefault, file, kCFURLPOSIXPathStyle, false );
-    CGImageDestinationRef destination = CGImageDestinationCreateWithURL( urlRef, kUTTypePNG, 1, NULL );
-    CGImageDestinationAddImage( destination, image, NULL );
-    CGImageDestinationFinalize( destination );
-    if (!destination) {
-        return false;
-    }
-
-    CGImageDestinationAddImage(destination, image, nil);
-
-    if (!CGImageDestinationFinalize(destination)) {
-        CFRelease(destination);
-        return false;
-    }
-
-    CFRelease(destination);
-    return true;
 }
 
 void Recorder::init_quality() {

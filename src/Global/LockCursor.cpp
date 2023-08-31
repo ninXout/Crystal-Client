@@ -1,6 +1,8 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include "../ImGui/ImGui.hpp"
+#include <CoreGraphics/CoreGraphics.h>
+#include <CoreServices/CoreServices.h>
 
 class $modify(PlayLayer) {
     void update(float dt) {

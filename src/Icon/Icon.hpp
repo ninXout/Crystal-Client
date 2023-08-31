@@ -2,48 +2,38 @@
 
 #include "../Includes.hpp"
 
-#define colorConv(color, r, g, b) {\
-            r = color[0];\
-            g = color[1];\
-            b = color[2];\
-           }
-
-#define fadeConv(color1, color2, r, g, b, cyc) {\
-            r = (color1[0] * cyc) + (color2[0] * (1.0-cyc));\
-            g = (color1[1] * cyc) + (color2[1] * (1.0-cyc));\
-            b = (color1[2] * cyc) + (color2[2] * (1.0-cyc));\
-           }
+enum PlayerType {
+    Player1,
+    Player2
+};
 
 enum EffectType {
-    None,
     Static,
     Rainbow,
-    Fade
+    Fade,
+    None
 };
 
 enum AffectedType {
-    P1Color1,
-    P1Color2,
-    P1Glow,
-    P1WaveTrail,
-    P1RegularTrail,
-    P2Color1,
-    P2Color2,
-    P2Glow,
-    P2WaveTrail,
-    P2RegularTrail
+    Color1,
+    Color2,
+    Glow,
+    WaveTrail,
+    RegularTrail
 };
 
 class Icon {
     public:
         static Icon* get();
-        void update();
-        cocos2d::_ccColor3B getEffectColor(EffectType effect, AffectedType affect);
+        void update(float dt);
+        cocos2d::_ccColor3B getEffectColor(PlayerType player, EffectType effect, AffectedType affect);
+        std::string getKeyForEffect(PlayerType, EffectType, AffectedType);
         void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
         void fade(float first[4], float second[4]);
         void stat(float color[4]);
     
     protected:
+        bool backsweep = false;
         float cycle = 0;
         float R, G, B;
 };

@@ -28,7 +28,7 @@ void CrystalClient::setupFonts(const char* filepath, float size) {
 	m_defaultFont = result;
 }
 
-void CrystalClient::ImToggleable(const char* str_id, bool* v) {
+void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string tooltip) {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -48,17 +48,19 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v) {
 	float ANIM_SPEED = 0.085f;
 	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))// && g.LastActiveIdTimer < ANIM_SPEED)
 		float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
-	if (ImGui::IsItemHovered())
+	if (ImGui::IsItemHovered()) {
+		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * rounding);
-	else
+	} else {
 		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * rounding);
+	}
 	
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
 	//draw_list->AddRectFilled(ImVec2((p.x + center.x) - 9.0f, p.y + 1.5f),
 		//ImVec2((p.x + (width / 2) + center.x) - 9.0f, p.y + height - 1.5f), IM_COL32(255, 255, 255, 255), height * rounding);
 }
 
-void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
+void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip) {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -78,10 +80,12 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
 	float ANIM_SPEED = 0.085f;
 	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))// && g.LastActiveIdTimer < ANIM_SPEED)
 		float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
-	if (ImGui::IsItemHovered())
+	if (ImGui::IsItemHovered()) {
+		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * rounding);
-	else
+	} else {
 		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * rounding);
+	}
 	
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
     //ImGui::SetItemAllowOverlap();
@@ -95,45 +99,43 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v) {
     // Adds 220 to each X for positioning and Adds 3 to each Y
 }
 
-void CrystalClient::ImIconEffect(bool* mainBool, bool* staticBool, bool* fadeBool, bool* rainbowBool, float* staticC, float* fade1, float* fade2, const char* categoryName) {
-	const char* newCategoryName;
-	if (categoryName == "Player Color 1") {newCategoryName = "PlayerColor1";}
-	else if (categoryName == "Player Color 2") {newCategoryName = "PlayerColor2";}
-	else {newCategoryName = categoryName;};
-	/*
-	std::string staticString1 = "Static for " + std::string(categoryName);
-	std::string staticString2 = "Static Color for " + std::string(categoryName);
-	std::string fadeString1 = "Fade for " + std::string(categoryName);
-	std::string fadeString2 = "Fade Color 1 for " + std::string(categoryName);
-	std::string fadeString3 = "Fade Color 2 for " + std::string(categoryName);
-	std::string rainString = "Rainbow for " + std::string(categoryName);
-	*/
-	std::string staticString1 = "Static";
-	std::string staticString2 = "Static Color";
-	std::string fadeString1 = "Fade";
-	std::string fadeString2 = "Fade Color 1";
-	std::string fadeString3 = "Fade Color 2";
-	std::string rainString = "Rainbow";
-	CrystalClient::ImExtendedToggleable(categoryName, mainBool);
+void CrystalClient::Im4FloatColor(const char* label, std::string name) {
+	float col[4];
+	col[0] = getVar<float>(name + "-red");
+	col[1] = getVar<float>(name + "-blue");
+	col[2] = getVar<float>(name + "-green"); 
+	col[3] = getVar<float>(name + "-alpha");
+
+	ImGui::ColorEdit4(label, col, ImGuiColorEditFlags_NoInputs);
+
+	*setVar<float>(name + "-red") = col[0];
+	*setVar<float>(name + "-blue") = col[1];
+	*setVar<float>(name + "-green") = col[2];
+	*setVar<float>(name + "-alpha") = col[3];
+}
+
+
+void CrystalClient::ImIconEffect(const char* categoryName, std::string saveName) {
+	CrystalClient::ImExtendedToggleable(categoryName, setVar<bool>(saveName));
 	if (ImGui::BeginPopupModal(categoryName, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImExtendedToggleable(staticString1.c_str(), staticBool);
-		if (ImGui::BeginPopupModal(staticString1.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::ColorEdit4(staticString2.c_str(), staticC, ImGuiColorEditFlags_NoInputs);
+		CrystalClient::ImExtendedToggleable("Static", setVar<bool>(saveName + "_static"));
+		if (ImGui::BeginPopupModal("Static", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			Im4FloatColor("Static Color", saveName + "_static");
 			if (ImGui::Button("Close")) {
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
 		}
-		CrystalClient::ImExtendedToggleable(fadeString1.c_str(), fadeBool);
-		if (ImGui::BeginPopupModal(fadeString1.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::ColorEdit4(fadeString2.c_str(), fade1, ImGuiColorEditFlags_NoInputs);
-			ImGui::ColorEdit4(fadeString3.c_str(), fade2, ImGuiColorEditFlags_NoInputs);
+		CrystalClient::ImExtendedToggleable("Fade", setVar<bool>(saveName + "_fade"));
+		if (ImGui::BeginPopupModal("Fade", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			Im4FloatColor("Fade Color 1", saveName + "_fade1");
+			Im4FloatColor("Fade Color 2", saveName + "_fade2");
 			if (ImGui::Button("Close")) {
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
 		}
-		CrystalClient::ImToggleable(rainString.c_str(), rainbowBool);
+		CrystalClient::ImToggleable("Rainbow", setVar<bool>(saveName + "_rainbow"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}

@@ -1,7 +1,13 @@
 #include "Icon.hpp"
 #include "../CrystalProfile.hpp"
+#include <Geode/modify/PlayLayer.hpp>
 
 using namespace Crystal;
+
+Icon* Icon::get() {
+    static auto inst = new Icon;
+    return inst;
+}
 
 void Icon::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
   float fC = fV * fS; // Chroma
@@ -56,75 +62,64 @@ void Icon::stat(float color[4]) {
     B = color[2];
 }
 
-cocos2d::_ccColor3B Icon::getEffectColor(EffectType effect, AffectedType affect) {
+std::string Icon::getKeyForEffect(PlayerType pl, EffectType et, AffectedType at) {
+    std::string key;
+
+    switch (pl) {
+        case Player1:
+            key = "P1";
+            break;
+        case Player2:
+            key = "P2";
+            break;
+    }
+
+    switch (at) {
+        case Color1:
+            key += "C1";
+            break;
+        case Color2:
+            key += "C2";
+            break;
+        case Glow:
+            key += "G";
+            break;
+        case WaveTrail:
+            key += "W";
+            break;
+        case RegularTrail:
+            key += "R";
+            break;
+    }
+
+    switch (et) {
+        case Static:
+            key += "_static";
+            break;
+        case Rainbow:
+            key += "_rainbow";
+            break;
+        case Fade:
+            key += "_fade";
+            break;
+        case None:
+            break;
+    }
+
+    return key;
+}
+
+cocos2d::_ccColor3B Icon::getEffectColor(PlayerType player, EffectType effect, AffectedType affect) {
     if (effect == EffectType::Static) {
-        switch (affect) {
-            case P1Color1:
-                stat(profile.StaticP1C1);
-                break;
-            case P1Color2:
-                stat(profile.StaticP1C2);
-                break;
-            case P1Glow:
-                stat(profile.StaticP1CG);
-                break;
-            case P1WaveTrail:
-                stat(profile.StaticP1CW);
-                break;
-            case P1RegularTrail:
-                stat(profile.StaticP1CR);
-                break;
-            case P2Color1:
-                stat(profile.StaticP2C1);
-                break;
-            case P2Color2:
-                stat(profile.StaticP2C2);
-                break;
-            case P2Glow:
-                stat(profile.StaticP2CG);
-                break;
-            case P2WaveTrail:
-                stat(profile.StaticP2CW);
-                break;
-            case P2RegularTrail:
-                stat(profile.StaticP2CR);
-                break;
-        }
+        R = getVar<float>(getKeyForEffect(player, effect, affect) + "-red");
+        B = getVar<float>(getKeyForEffect(player, effect, affect) + "-blue");
+        G = getVar<float>(getKeyForEffect(player, effect, affect) + "-green");
     }
 
     if (effect == EffectType::Fade) {
-        switch (affect) {
-            case P1Color1:
-                fade(profile.FadeP1C1E1, profile.FadeP1C1E2);
-                break;
-            case P1Color2:
-                fade(profile.FadeP1C2E1, profile.FadeP1C2E2);
-                break;
-            case P1Glow:
-                fade(profile.FadeP1GE1, profile.FadeP1GE2);
-                break;
-            case P1WaveTrail:
-                fade(profile.FadeP1WE1, profile.FadeP1WE2);
-                break;
-            case P1RegularTrail:
-                fade(profile.FadeP1RE1, profile.FadeP1RE2);
-                break;
-            case P2Color1:
-                fade(profile.FadeP2C1E1, profile.FadeP2C1E2);
-                break;
-            case P2Color2:
-                fade(profile.FadeP2C2E1, profile.FadeP2C2E2);
-                break;
-            case P2Glow:
-                fade(profile.FadeP2GE1, profile.FadeP2GE2);
-                break;
-            case P2WaveTrail:
-                fade(profile.FadeP2WE1, profile.FadeP2WE2);
-                break;
-            case P2RegularTrail:
-                fade(profile.FadeP2RE1, profile.FadeP2RE2);
-                break;
-        }
+        R = getVar<float>(getKeyForEffect(player, effect, affect) + "1-red") * cycle + getVar<float>(getKeyForEffect(player, effect, affect) + "2-red") * (1 - cycle);
+        B = getVar<float>(getKeyForEffect(player, effect, affect) + "1-blue") * cycle + getVar<float>(getKeyForEffect(player, effect, affect) + "2-blue") * (1 - cycle);
+        G = getVar<float>(getKeyForEffect(player, effect, affect) + "1-green") * cycle + getVar<float>(getKeyForEffect(player, effect, affect) + "2-green") * (1 - cycle);
     }
 
 	if (effect == EffectType::Rainbow) {
@@ -141,118 +136,31 @@ cocos2d::_ccColor3B Icon::getEffectColor(EffectType effect, AffectedType affect)
 	return out;
 }
 
-void Icon::update() {
-    if (cycle >= 1.0) cycle = 0;
-    cycle += 0.01;
+void Icon::update(float dt) {
+    if (cycle >= 1.0) backsweep = true;
+    else if (cycle <= 0.0) backsweep = false;
+
+    if (!backsweep) cycle += dt;
+    else cycle -= dt;
+
     auto pl = PlayLayer::get();
-    if (profile.P1Color1) {
-        if (Crystal::profile.iconEffects[0]) {
-            pl->m_player1->setColor(getEffectColor(Static, P1Color1));
-        }
-        if (Crystal::profile.iconEffects[1]) {
-            pl->m_player1->setColor(getEffectColor(Fade, P1Color1));
-        }
-        if (Crystal::profile.iconEffects[2]) {
-            pl->m_player1->setColor(getEffectColor(Rainbow, P1Color1));
-        }
-    }
-    if (profile.P1Color2) {
-        if (Crystal::profile.iconEffects[3]) {
-            pl->m_player1->setSecondColor(getEffectColor(Static, P1Color2));
-        }
-        if (Crystal::profile.iconEffects[4]) {
-            pl->m_player1->setSecondColor(getEffectColor(Fade, P1Color2));
-        }
-        if (Crystal::profile.iconEffects[5]) {
-            pl->m_player1->setSecondColor(getEffectColor(Rainbow, P1Color2));
-        }
-    }
-    if (profile.P1Glow) {
-        if (Crystal::profile.iconEffects[6]) {
-            pl->m_player1->setGlowColor(getEffectColor(Static, P1Glow));
-        }
-        if (Crystal::profile.iconEffects[7]) {
-            pl->m_player1->setGlowColor(getEffectColor(Fade, P1Glow));
-        }
-        if (Crystal::profile.iconEffects[8]) {
-            pl->m_player1->setGlowColor(getEffectColor(Rainbow, P1Glow));
-        }
-    }
-    if (profile.P1Regular) {
-        if (Crystal::profile.iconEffects[9]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Static, P1RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[10]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Fade, P1RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[11]) {
-            pl->m_player1->m_regularTrail->setColor(getEffectColor(Rainbow, P1RegularTrail));
-        }
-    }
-    if (profile.P1Wave) {
-        if (Crystal::profile.iconEffects[12]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Static, P1WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[13]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Fade, P1WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[14]) {
-            pl->m_player1->m_waveTrail->setColor(getEffectColor(Rainbow, P1WaveTrail));
-        }
-    }
-    if (profile.P2Color1) {
-        if (Crystal::profile.iconEffects[15]) {
-            pl->m_player2->setColor(getEffectColor(Static, P2Color1));
-        }
-        if (Crystal::profile.iconEffects[16]) {
-            pl->m_player2->setColor(getEffectColor(Fade, P2Color1));
-        }
-        if (Crystal::profile.iconEffects[17]) {
-            pl->m_player2->setColor(getEffectColor(Rainbow, P2Color1));
-        }
-    }
-    if (profile.P2Color2) {
-        if (Crystal::profile.iconEffects[18]) {
-            pl->m_player2->setSecondColor(getEffectColor(Static, P2Color2));
-        }
-        if (Crystal::profile.iconEffects[19]) {
-            pl->m_player2->setSecondColor(getEffectColor(Fade, P2Color2));
-        }
-        if (Crystal::profile.iconEffects[20]) {
-            pl->m_player2->setSecondColor(getEffectColor(Rainbow, P2Color2));
-        }
-    }
-    if (profile.P2Glow) {
-        if (Crystal::profile.iconEffects[21]) {
-            pl->m_player2->setGlowColor(getEffectColor(Static, P2Glow));
-        }
-        if (Crystal::profile.iconEffects[22]) {
-            pl->m_player2->setGlowColor(getEffectColor(Fade, P2Glow));
-        }
-        if (Crystal::profile.iconEffects[23]) {
-            pl->m_player2->setGlowColor(getEffectColor(Rainbow, P2Glow));
-        }
-    }
-    if (profile.P2Regular) {
-        if (Crystal::profile.iconEffects[24]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Static, P2RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[25]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Fade, P2RegularTrail));
-        }
-        if (Crystal::profile.iconEffects[26]) {
-            pl->m_player2->m_regularTrail->setColor(getEffectColor(Rainbow, P2RegularTrail));
-        }
-    }
-    if (profile.P2Wave) {
-        if (Crystal::profile.iconEffects[27]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Static, P2WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[28]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Fade, P2WaveTrail));
-        }
-        if (Crystal::profile.iconEffects[29]) {
-            pl->m_player2->m_waveTrail->setColor(getEffectColor(Rainbow, P2WaveTrail));
-        }
-    }
+
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Color1)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Color1))) pl->m_player1->setColor(getEffectColor(Player1, (EffectType)i, Color1));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Color2)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Color2))) pl->m_player1->setSecondColor(getEffectColor(Player1, (EffectType)i, Color2));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Glow)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Glow))) pl->m_player1->setGlowColor(getEffectColor(Player1, (EffectType)i, Glow));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, RegularTrail)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, RegularTrail))) pl->m_player1->m_regularTrail->setColor(getEffectColor(Player1, (EffectType)i, RegularTrail));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, WaveTrail)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, WaveTrail))) pl->m_player1->m_waveTrail->setColor(getEffectColor(Player1, (EffectType)i, WaveTrail));
+
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Color1)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Color1))) pl->m_player2->setColor(getEffectColor(Player2, (EffectType)i, Color1));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Color2)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Color2))) pl->m_player2->setSecondColor(getEffectColor(Player2, (EffectType)i, Color2));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Glow)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Glow))) pl->m_player2->setGlowColor(getEffectColor(Player2, (EffectType)i, Glow));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, RegularTrail)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, RegularTrail))) pl->m_player2->m_regularTrail->setColor(getEffectColor(Player2, (EffectType)i, RegularTrail));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, WaveTrail)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, WaveTrail))) pl->m_player2->m_waveTrail->setColor(getEffectColor(Player2, (EffectType)i, WaveTrail));
 }
+
+class $modify(PlayLayer) {
+    void update(float dt) {
+        Icon::get()->update(dt);
+        PlayLayer::update(dt);
+    }
+};

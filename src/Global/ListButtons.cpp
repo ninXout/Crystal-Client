@@ -95,7 +95,7 @@ class $modify(ModifiedSearchLayer, LevelSearchLayer) {
 };
 
 class $modify(GameLevelManager) {
-	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, GJHttpType type) {
+	void ProcessHttpRequest(gd::string gdurl, gd::string gdquery, gd::string idk, int type) {
 		std::string url(gdurl);
 		std::string query(gdquery);
 

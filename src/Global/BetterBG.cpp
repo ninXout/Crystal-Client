@@ -1,11 +1,12 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/MenuLayer.hpp>
+#include "../CrystalClient/CrystalClient.hpp"
 
 std::string image;
 
 class $modify(MenuLayer) {
 	bool init() {
-		MenuLayer::init();
+		if (!MenuLayer::init()) return false;
 
         if (getVar<bool>("better_BG")) {
 			image = geode::Mod::get()->getConfigDir().append("BetterBG").append("background.jpg");
