@@ -1,6 +1,5 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/EditLevelLayer.hpp>
-#include "../CrystalClient/CrystalClient.hpp"
 
 struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
     void onCopy(CCObject* sender) {
@@ -17,7 +16,7 @@ struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
             }
         }
 
-        CrystalClient::get()->copyToClipboard(numericText);
+        geode::utils::clipboard::write(numericText);
 
         FLAlertLayer::create(
 			"Amazing!",

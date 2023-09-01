@@ -225,14 +225,6 @@ void CrystalClient::addTransparentBG(CCNode* layer) {
 	layer->addChild(bg, -2);
 }
 
-void CrystalClient::copyToClipboard(const std::string& text) {
-    FILE* p = popen("pbcopy", "w"); // mac exclusive!
-    if (p != nullptr) { // make sure to replace this if youre building in/for windows
-        fwrite(text.c_str(), 1, text.length(), p);
-        pclose(p);
-    }
-}
-
 void CrystalClient::initPatches() {
 	// scale hack
 	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {static_cast<unsigned char>('\xeb')}).unwrap();
@@ -317,7 +309,7 @@ void CrystalClient::firstLoad(CCNode* layer) {
 	if (layer) {
 		auto alert = geode::createQuickPopup(
 			"Hi!",            // title
-			"Thank you for installing <cj>Crystal Client.</c> You can <cg>open the mod menu by pressing TAB</c> and you can <cr>report any bugs</c> or suggestions in my <cj>discord server.</c> Enjoy!",   // content
+			"Thank you for installing <cg>Crystal Client.</c> You can <cj>open the mod menu by pressing TAB</c> and you can <cr>report any bugs</c> or suggestions in my <cj>discord server.</c> Enjoy!",   // content
 			"OK", "Join Discord Server",      // buttons
 			[](auto, bool btn2) {
 				if (btn2) {
@@ -335,7 +327,7 @@ void CrystalClient::noImage(CCNode* layer) {
 	if (layer) {
 		auto alert = geode::createQuickPopup(
 			"Oops",            // title
-			"You are using <cg>BetterBG</c> from Crystal but there is <cr>no image for it.</c> Please put <cj>whatever image with the name background.jpg</c> on GD/Contents/geode/config/ninxout.crystalclient/BetterBG. <cp>Thanks for using Crystal <3</c>",   // content
+			"You are using <cg>BetterBG</c> from Crystal but there is <cr>no image for it.</c> Please put <cj>whatever image with the name background.jpg</c> on GD/Contents/geode/config/ninxout.crystalclient/BetterBG. Thanks for using Crystal <cp><3</c>",   // content
 			"OK", "Join Discord Server",      // buttons
 			[](auto, bool btn2) {
 				if (btn2) {

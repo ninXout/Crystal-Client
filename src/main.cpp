@@ -357,6 +357,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"));
 	CrystalClient::ImToggleable("No Pause on Unfocus", setVar<bool>("no_pause_unfocus"));
 	CrystalClient::ImToggleable("Mute on Unfocus", setVar<bool>("mute_unfocus"));
+	CrystalClient::ImToggleable("No Transition", setVar<bool>("no_transition"));
 	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"));
 	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"));
 	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"));

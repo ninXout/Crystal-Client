@@ -1,7 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/LevelSettingsLayer.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
-#include "../CrystalClient/CrystalClient.hpp"
 
 static bool move = false;
 
@@ -19,7 +18,7 @@ struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
             text.clear();
         }
 
-        CrystalClient::get()->copyToClipboard(text);
+        geode::utils::clipboard::write(text);
 
         FLAlertLayer::create(
 			"Amazing!",

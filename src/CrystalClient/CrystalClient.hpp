@@ -39,8 +39,6 @@ public:
     void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
     cocos2d::_ccColor3B getRainbow(float offset);
     static void addTransparentBG(CCNode* layer);
-    static void copyToClipboard(const std::string& text);
-
     
     void initPatches();
     void refreshPatches();
