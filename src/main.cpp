@@ -1,9 +1,5 @@
-#include <Geode/modify/CCKeyboardDispatcher.hpp>
-#include <Geode/modify/AchievementNotifier.hpp>
-#include <Geode/modify/CCDirector.hpp>
 #include <imgui.h>
 #include "./CrystalClient/CrystalClient.hpp"
-#include <Geode/modify/PlayLayer.hpp>
 #include "Hacks.hpp"
 #include "./Icon/Icon.hpp"
 #include <random>
@@ -15,13 +11,11 @@
 #include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
-using namespace Crystal;
 using namespace AmethystReplay;
 
-Recorder record;
+const char* displaySelection[4] = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"};
 
 $execute {
-    //profile = Crystal::loadMods();
 	loadConfigFromFile();
 	Shortcuts::get()->refreshKeybinds(false);
     ImGuiCocos::get().setup([] {
@@ -42,19 +36,6 @@ $execute {
         CrystalClient::get()->pluginBools.push_back(theAction);
         return ListenerResult::Propagate;
     }, geode::DispatchFilter<bool*>("ninxout.crystalclient/addPluginBool"));
-}
-
-int strpos(const char *haystack, const char *needle, int nth) {
-    const char *res = haystack;
-    for(int i = 1; i <= nth; i++)
-    {
-        res = strstr(res, needle);
-        if (!res)
-            return -1;
-        else if(i != nth)
-            res++;
-    }
-    return res - haystack;
 }
 
 void CrystalClient::drawGUI() {
@@ -122,7 +103,7 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImIconEffect("Wave Trail", "P2W");
 		ImGui::EndMenu();
 	}
-	CrystalClient::ImToggleable("Solid Glow Color", &Crystal::profile.solidGlow);
+	CrystalClient::ImToggleable("Solid Glow Color", setVar<bool>("solid_glow"));
 	ImGui::End();
 
 	ImGui::Begin("Level", NULL, window_flags);
@@ -189,7 +170,7 @@ void CrystalClient::drawGUI() {
 	ImGui::InputFloat("Display Spacing", setVar<float>("display_space"));
 	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"));
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-0"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-0"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -197,7 +178,8 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"));
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-1"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		CrystalClient::ImTextbox("Message", setVar<std::string>("message"));
+		ImGui::Combo("Position", setVar<int>("label_pos-1"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -206,7 +188,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"));
 	if (ImGui::BeginPopupModal("CPS display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		//CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
-		ImGui::Combo("Position", setVar<int>("label_pos-2"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-2"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -214,7 +196,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"));
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-3"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-3"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -222,7 +204,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"));
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-4"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-4"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -231,7 +213,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Attempts", setVar<bool>("attempts"));
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Attempts", setVar<bool>("total_attempts"));
-		ImGui::Combo("Position", setVar<int>("label_pos-5"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-5"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -240,7 +222,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Jumps", setVar<bool>("jumps"));
 	if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Jumps", setVar<bool>("total_jumps"));
-		ImGui::Combo("Position", setVar<int>("label_pos-6"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-6"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -248,7 +230,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"));
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-7"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-7"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -256,7 +238,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"));
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-8"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-8"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -265,7 +247,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Noclip Accuracy", setVar<bool>("noclip_accuracy"));
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_accuracy"));
-		ImGui::Combo("Position", setVar<int>("label_pos-9"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-9"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -274,7 +256,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImExtendedToggleable("Noclip Deaths", setVar<bool>("noclip_deaths"));
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_death"));
-		ImGui::Combo("Position", setVar<int>("label_pos-10"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-10"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -284,7 +266,7 @@ void CrystalClient::drawGUI() {
 	if (ImGui::BeginPopupModal("Level Name and ID", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Hide ID", setVar<bool>("hide_ID"));
 		CrystalClient::ImToggleable("Show Author", setVar<bool>("level_info_author"));
-		ImGui::Combo("Position", setVar<int>("label_pos-11"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-11"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -292,7 +274,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"));
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-12"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-12"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -300,7 +282,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"));
 	if (ImGui::BeginPopupModal("Clock", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Combo("Position", setVar<int>("label_pos-13"), profile.displayOptions, IM_ARRAYSIZE(profile.displayOptions));
+		ImGui::Combo("Position", setVar<int>("label_pos-13"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
@@ -308,16 +290,17 @@ void CrystalClient::drawGUI() {
 	}
     ImGui::End();
     ImGui::Begin("Customization", NULL, window_flags);
-    ImGui::ColorEdit4("Accent Color", profile.LightColour, ImGuiColorEditFlags_NoInputs);
-    ImGui::ColorEdit4("Base Color", profile.BGColour, ImGuiColorEditFlags_NoInputs);
-	CrystalClient::ImExtendedToggleable("Different Titlebar Color", &profile.diffTitleBar);
+	CrystalClient::Im4FloatColor("Accent Color", "lightColor");
+	CrystalClient::Im4FloatColor("Base Color", "BGcolor");
+	CrystalClient::ImExtendedToggleable("Different Titlebar Color", setVar<bool>("diff_title"));
 	if (ImGui::BeginPopupModal("Different Titlebar Color", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::ColorEdit4("Titlebar Color", profile.TitleColour, ImGuiColorEditFlags_NoInputs);
+		CrystalClient::Im4FloatColor("Titlebar Color", "diff_title");
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
+	CrystalClient::ImToggleable("Window Borders", setVar<bool>("border"));
     ImGui::End();
     ImGui::Begin("Bypasses", NULL, window_flags);
 	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"));
@@ -375,14 +358,14 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Delta Lock", setVar<bool>("delta_lock"));
 	ImGui::InputFloat("ClickBot Volume", setVar<float>("clickbot_volume"));
     //ImGui::Combo("Macro Type", (int*)&currentMacro.type, macroTypes, IM_ARRAYSIZE(macroTypes));
-    ImGui::InputTextWithHint("Macro Name", "Macro Name", profile.macroname, IM_ARRAYSIZE(profile.macroname));
+	CrystalClient::ImTextbox("Macro Name", setVar<std::string>("AT_macro_name"));
     if (ImGui::Button("Save Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
+		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
 		currentMacro.saveToFile(filename.c_str());
 	}
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + (std::string)profile.macroname + ".thyst";
+		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
 		currentMacro = AmethystMacro::createFromFile(filename.c_str(), false);
 	}
     ImGui::SameLine();
@@ -440,69 +423,55 @@ void CrystalClient::drawGUI() {
 	}
     ImGui::End();
 	ImGui::Begin("Internal Renderer", NULL, window_flags);
-	CrystalClient::ImToggleable("Render Recording", &profile.renderer);
-	CrystalClient::ImToggleable("Include Sound", &profile.includeAudio);
-	CrystalClient::ImToggleable("Include Displays", &profile.includeDisplays);
-	ImGui::InputTextWithHint("Video Name", "Video Name", profile.rendername, IM_ARRAYSIZE(profile.rendername));
-	ImGui::Combo("Render Quality", &currentPreset, renderPresets, IM_ARRAYSIZE(renderPresets));
-	record.init_quality();
-	ImGui::InputInt("Width", &profile.targetWidth);
-	ImGui::InputInt("Height", &profile.targetHeight);
-	ImGui::InputInt("FPS", &profile.targetFPS);
+	CrystalClient::ImToggleable("Render Recording", setVar<bool>("AT_render"));
+	CrystalClient::ImToggleable("Include Displays", setVar<bool>("include_displays"));
+	CrystalClient::ImTextbox("Video Name", setVar<std::string>("video_name"));
+	ImGui::InputInt("Width", setVar<int>("target_width"));
+	ImGui::InputInt("Height", setVar<int>("target_height"));
+	ImGui::InputInt("FPS", setVar<int>("target_FPS"));
 	ImGui::End();
 }
 
 void CrystalClient::addTheme() {
     ImGuiStyle * style = &ImGui::GetStyle();
-    ImVec4* colours = ImGui::GetStyle().Colors;
+    ImVec4* colors = ImGui::GetStyle().Colors;
 
-	//io.IniFilename = (Mod::get()->getSaveDir() / "imgui.ini").c_str();
 	setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
 
-    if (profile.RGBAccent) {
-        profile.LightColour[0] = profile.LightColour[0] + profile.rDir;
-        profile.LightColour[1] = profile.LightColour[1] + profile.gDir;
-        profile.LightColour[2] = profile.LightColour[2] + profile.bDir;
-
-        if (profile.LightColour[0] >= 1 || profile.LightColour[0] <= 0) { profile.rDir = profile.rDir * -1; }
-        if (profile.LightColour[1] >= 1 || profile.LightColour[1] <= 0) { profile.gDir = profile.gDir * -1; }
-        if (profile.LightColour[2] >= 1 || profile.LightColour[2] <= 0) { profile.bDir = profile.bDir * -1; }
-    }
-
-    profile.DarkColour[0] = (profile.LightColour[0] * 0.5f);
-    profile.DarkColour[1] = (profile.LightColour[1] * 0.5f);
-    profile.DarkColour[2] = (profile.LightColour[2] * 0.5f);
-    profile.DarkColour[3] = profile.LightColour[3];
-    profile.VeryLightColour[0] = (profile.LightColour[0] * 1.5f);
-    profile.VeryLightColour[1] = (profile.LightColour[1] * 1.5f);
-    profile.VeryLightColour[2] = (profile.LightColour[2] * 1.5f);
-    profile.VeryLightColour[3] = profile.LightColour[3];
+    *setVar<float>("darkColor-red") = (getVar<float>("lightColor-red") * 0.5f);
+    *setVar<float>("darkColor-green") = (getVar<float>("lightColor-green") * 0.5f);
+    *setVar<float>("darkColor-blue") = (getVar<float>("lightColor-blue") * 0.5f);
+    *setVar<float>("darkColor-alpha") = getVar<float>("lightColor-alpha");
+    *setVar<float>("veryLightColor-red") = (getVar<float>("lightColor-red") * 1.5f);
+    *setVar<float>("veryLightColor-green") = (getVar<float>("lightColor-green") * 1.5f);
+    *setVar<float>("veryLightColor-blue") = (getVar<float>("lightColor-blue") * 1.5f);
+    *setVar<float>("veryLightColor-alpha") = getVar<float>("lightColor-alpha");
 
     style->FrameRounding = 4.0f;
     style->GrabRounding = 4.0f;
     style->Alpha = 1.f;
-    style->WindowRounding = profile.borderRounding;
+    style->WindowRounding = 0;
     style->FrameRounding = 4.f;
-    style->ScrollbarSize = profile.scrollbarSize;
-    style->ScrollbarRounding = profile.scrollbarRounding;
-    style->PopupRounding = profile.borderRounding;
+    style->ScrollbarSize = 12;
+    style->ScrollbarRounding = 12;
+    style->PopupRounding = 0;
     style->WindowBorderSize = 1.5f;
-    colours[ImGuiCol_TitleBg] = CrystalProfile::RGBAtoIV4(profile.diffTitleBar ? profile.TitleColour : profile.BGColour);
-    colours[ImGuiCol_TitleBgActive] = CrystalProfile::RGBAtoIV4(profile.diffTitleBar ? profile.TitleColour : profile.BGColour);
-    colours[ImGuiCol_WindowBg] = CrystalProfile::RGBAtoIV4(profile.BGColour);
-    colours[ImGuiCol_Border] = CrystalProfile::RGBAtoIV4(profile.borders ? profile.LightColour : profile.BGColour);
-    colours[ImGuiCol_FrameBg] = CrystalProfile::RGBAtoIV4(profile.DarkColour);
-    colours[ImGuiCol_FrameBgHovered] = CrystalProfile::RGBAtoIV4(profile.DarkColour);
-    colours[ImGuiCol_FrameBgActive] = CrystalProfile::RGBAtoIV4(profile.LightColour);
-    colours[ImGuiCol_PlotHistogram] = CrystalProfile::RGBAtoIV4(profile.LightColour);
-    colours[ImGuiCol_Button] = CrystalProfile::RGBAtoIV4(profile.LightColour);
-    colours[ImGuiCol_ButtonHovered] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
-    colours[ImGuiCol_Header] = CrystalProfile::RGBAtoIV4(profile.DarkColour);
-    colours[ImGuiCol_HeaderHovered] = CrystalProfile::RGBAtoIV4(profile.LightColour);
-    colours[ImGuiCol_HeaderActive] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
-    colours[ImGuiCol_SliderGrab] = CrystalProfile::RGBAtoIV4(profile.LightColour);
-    colours[ImGuiCol_SliderGrabActive] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
-    colours[ImGuiCol_CheckMark] = CrystalProfile::RGBAtoIV4(profile.VeryLightColour);
+    colors[ImGuiCol_TitleBg] = VarToIV4(getVar<bool>("diff_title") ? "diff_title" : "BGcolor");
+    colors[ImGuiCol_TitleBgActive] = VarToIV4(getVar<bool>("diff_title") ? "diff_title" : "BGcolor");
+    colors[ImGuiCol_WindowBg] = VarToIV4("BGcolor");
+    colors[ImGuiCol_Border] = VarToIV4(getVar<bool>("border") ? "lightColor" : "BGcolor");
+    colors[ImGuiCol_FrameBg] = VarToIV4("darkColor");
+    colors[ImGuiCol_FrameBgHovered] = VarToIV4("darkColor");
+    colors[ImGuiCol_FrameBgActive] = VarToIV4("lightColor");
+    colors[ImGuiCol_PlotHistogram] = VarToIV4("lightColor");
+    colors[ImGuiCol_Button] = VarToIV4("lightColor");
+    colors[ImGuiCol_ButtonHovered] = VarToIV4("veryLightColor");
+    colors[ImGuiCol_Header] = VarToIV4("darkColor");
+    colors[ImGuiCol_HeaderHovered] = VarToIV4("lightColor");
+    colors[ImGuiCol_HeaderActive] = VarToIV4("veryLightColor");
+    colors[ImGuiCol_SliderGrab] = VarToIV4("lightColor");
+    colors[ImGuiCol_SliderGrabActive] = VarToIV4("veryLightColor");
+    colors[ImGuiCol_CheckMark] = VarToIV4("veryLightColor");
 }
 
 class $modify(MenuLayer) {
@@ -525,39 +494,12 @@ class $modify(MenuLayer) {
 		std::string pathInit = "export PATH='" + std::string(Mod::get()->getConfigDir() / "Amethyst" / "Renderer") + ":${PATH}'";
 		system(pathInit.c_str());
 
-		MenuLayer::init();
+		if (!MenuLayer::init()) return false;
 
-		std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append("GH_config.json"));
+		std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append("GH_config-01.json"));
 
-		if (!input) {
-			CrystalClient::get()->firstLoad(this);
-		} 
+		if (!input) CrystalClient::get()->firstLoad(this);
 
-		return true;
-	}
-};
-
-class $modify(Main, PlayLayer) {
-    void update(float f4) {
-		PlayLayer::update(f4);
-		if (profile.renderer) record.handle_recording(this, f4);
-	}
-
-    void onQuit() {
-		if (profile.renderer) {
-			record.stop();
-		}
-		PlayLayer::onQuit();
-	}
-
-	bool init(GJGameLevel* gl) {
-		PlayLayer::init(gl);
-
-		if (profile.renderer) {
-			std::string filePATH = std::string(renderer) + "/" + (const char*)profile.rendername + ".mp4";
-			std::string tempPATH = std::string(renderer) + "/temp.mp4";
-			record.start(filePATH, tempPATH);
-		}
 		return true;
 	}
 };

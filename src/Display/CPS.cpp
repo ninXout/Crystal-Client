@@ -2,8 +2,11 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include "Display.hpp"
+#include <mach/mach_time.h>
 
 int clicks = 0;
+int cpsclicks = 0;
+std::vector<float> clicksArr;
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
@@ -21,11 +24,22 @@ class $modify(PlayLayer) {
 
         Display::get()->updateDisplay(2);
         
-        int cps = 0;
-        if (m_time > 0 && clicks > 0) cps = clicks / m_time;
-        std::string cpsDisplay = std::to_string(cps) + "/" + std::to_string(clicks);
+        if (clicksArr.size() > 0) {
+			float currentTime = mach_absolute_time();
+			for (int i = 0; i < clicksArr.size(); i++) {
+				if ((currentTime - clicksArr[i]) / 1000.0f >= 1) clicksArr.erase(clicksArr.begin() + i);
+			}
+		}
+        std::string cpsDisplay = std::to_string(clicksArr.size()) + "/" + std::to_string(clicks);
 
         if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(cpsDisplay.c_str());
+    }
+
+    void resetLevel() {
+        PlayLayer::resetLevel();
+        
+        clicks = 0;
+        clicksArr.clear();
     }
 };
 
@@ -34,5 +48,6 @@ class $modify(GJBaseGameLayer) {
         GJBaseGameLayer::pushButton(i, b);
 
         clicks++;
+        clicksArr.push_back(mach_absolute_time());
     }
 };

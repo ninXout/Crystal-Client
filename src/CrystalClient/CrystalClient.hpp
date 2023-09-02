@@ -17,6 +17,7 @@ protected:
     static void Im4FloatColor(const char* label, std::string name);
     static void ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip = "N/A");
     static void ImIconEffect(const char* categoryName, std::string saveName);
+    static void ImTextbox(const char* name, std::string* str);
 
     void setupFonts(const char* filepath, float size);
 

@@ -8,10 +8,6 @@
 #include "../Renderer/Renderer.hpp"
 
 using namespace geode::prelude;
-
-//using namespace Shortcuts;
-//using namespace Variables;
-using namespace Crystal;
 using namespace AmethystReplay;
 
 CrystalClient* CrystalClient::get() {
@@ -114,6 +110,12 @@ void CrystalClient::Im4FloatColor(const char* label, std::string name) {
 	*setVar<float>(name + "-alpha") = col[3];
 }
 
+void CrystalClient::ImTextbox(const char* name, std::string* str) {
+	char buf[255]{};
+	strncpy(buf, str->c_str(), sizeof(buf) - 1);
+    ImGui::InputTextWithHint(name, name, buf, sizeof(buf));
+    *str = buf;
+}
 
 void CrystalClient::ImIconEffect(const char* categoryName, std::string saveName) {
 	CrystalClient::ImExtendedToggleable(categoryName, setVar<bool>(saveName));

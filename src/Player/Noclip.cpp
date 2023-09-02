@@ -6,8 +6,6 @@ bool lastDeath;
 float opacity;
 CCSprite* noclipRed;
 
-using namespace Crystal;
-
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
         if (!PlayLayer::init(gj)) return false;
@@ -38,7 +36,6 @@ class $modify(PlayLayer) {
 			if (*setTempVar<int>("noclip_deaths") >= getVar<int>("death_limit_num")) {
 				*setTempVar<float>("frames") = *setTempVar<float>("noclipped_frames") = *setTempVar<int>("noclip_deaths") = 0;
 				resetLevel();
-				//if (profile.noclipDeath) g_death->setString(std::to_string(*setTempVar<int>("noclip_deaths")).c_str());
 			}
 		}
         *setTempVar<bool>("would_die") = true;

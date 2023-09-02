@@ -17,5 +17,7 @@ class $modify(PlayLayer) {
         PlayLayer::update(dt);
 
         Display::get()->updateDisplay(1);
+
+        if (getVar<bool>("custom_message")) Display::get()->getDisplay(1)->setString(getVar<std::string>("message").c_str());
     }
 };

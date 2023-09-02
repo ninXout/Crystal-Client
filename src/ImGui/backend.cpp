@@ -29,13 +29,11 @@ ImGuiCocos& ImGuiCocos::draw(std::function<void()> fun) {
 void ImGuiCocos::toggle() {
 	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
     if (!m_visible) {
-		//ImGui::LoadIniSettingsFromDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		platform->showCursor();
 	}
     if (m_visible) {
-		//ImGui::SaveIniSettingsToDisk((Mod::get()->getSaveDir() / "imgui.ini").c_str());
 		CrystalClient::get()->refreshPatches();
-		//Crystal::saveMods(Crystal::profile);
+		CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
 		Shortcuts::get()->refreshKeybinds(true);
 		saveConfigToFile();
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();

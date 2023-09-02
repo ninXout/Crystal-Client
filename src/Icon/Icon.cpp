@@ -2,8 +2,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 
-using namespace Crystal;
-
 Icon* Icon::get() {
     static auto inst = new Icon;
     return inst;
@@ -48,18 +46,6 @@ void Icon::HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float
   fR += fM;
   fG += fM;
   fB += fM;
-}
-
-void Icon::fade(float rgb1[4], float rgb2[4]) {
-    R = rgb1[0] * cycle + rgb2[0] * (1-cycle);
-    G = rgb1[1] * cycle + rgb2[1] * (1-cycle);
-    B = rgb1[2] * cycle + rgb2[2] * (1-cycle);
-}
-
-void Icon::stat(float color[4]) {
-    R = color[0];
-    G = color[1];
-    B = color[2];
 }
 
 std::string Icon::getKeyForEffect(PlayerType pl, EffectType et, AffectedType at) {
@@ -147,13 +133,13 @@ void Icon::update(float dt) {
 
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Color1)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Color1))) pl->m_player1->setColor(getEffectColor(Player1, (EffectType)i, Color1));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Color2)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Color2))) pl->m_player1->setSecondColor(getEffectColor(Player1, (EffectType)i, Color2));
-    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Glow)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Glow))) pl->m_player1->setGlowColor(getEffectColor(Player1, (EffectType)i, Glow));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, Glow)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, Glow))) pl->m_player1->m_iconGlow->setColor(getEffectColor(Player1, (EffectType)i, Glow));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, RegularTrail)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, RegularTrail))) pl->m_player1->m_regularTrail->setColor(getEffectColor(Player1, (EffectType)i, RegularTrail));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player1, None, WaveTrail)) && getVar<bool>(getKeyForEffect(Player1, (EffectType)i, WaveTrail))) pl->m_player1->m_waveTrail->setColor(getEffectColor(Player1, (EffectType)i, WaveTrail));
 
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Color1)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Color1))) pl->m_player2->setColor(getEffectColor(Player2, (EffectType)i, Color1));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Color2)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Color2))) pl->m_player2->setSecondColor(getEffectColor(Player2, (EffectType)i, Color2));
-    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Glow)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Glow))) pl->m_player2->setGlowColor(getEffectColor(Player2, (EffectType)i, Glow));
+    for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, Glow)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, Glow))) pl->m_player2->m_iconGlow->setColor(getEffectColor(Player2, (EffectType)i, Glow));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, RegularTrail)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, RegularTrail))) pl->m_player2->m_regularTrail->setColor(getEffectColor(Player2, (EffectType)i, RegularTrail));
     for (int i = 0; i < 3; i++) if (getVar<bool>(getKeyForEffect(Player2, None, WaveTrail)) && getVar<bool>(getKeyForEffect(Player2, (EffectType)i, WaveTrail))) pl->m_player2->m_waveTrail->setColor(getEffectColor(Player2, (EffectType)i, WaveTrail));
 }
@@ -161,6 +147,12 @@ void Icon::update(float dt) {
 class $modify(PlayLayer) {
     void update(float dt) {
         Icon::get()->update(dt);
+
         PlayLayer::update(dt);
+
+        if (getVar<bool>("solid_glow")) {
+            m_player1->m_iconGlow->setOpacity(255);
+            m_player1->m_iconGlow->setBlendFunc(m_player1->m_iconGlow->getBlendFunc());
+        }
     }
 };

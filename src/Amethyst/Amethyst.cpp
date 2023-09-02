@@ -5,7 +5,6 @@
 #define mbo(type, class, offset) *reinterpret_cast<type*>(reinterpret_cast<uintptr_t>(class) + offset)
 
 namespace fs = ghc::filesystem;
-using namespace Crystal;
 
 AmethystMacro AmethystMacro::createFromFile(const char* filename, bool legacy) {
     AmethystMacro ret;
@@ -118,8 +117,8 @@ void AmethystMacro::resetActions(bool recording) {
 		currentP2index = 0;
         currentR2index = 0;
         currentFrame = 0;
-        //if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, true);
-		//if (profile.replay) GJBaseGameLayer::get()->releaseButton(1, false);
+        if (getVar<bool>("AT_replay")) GJBaseGameLayer::get()->releaseButton(1, true);
+		if (getVar<bool>("AT_replay")) GJBaseGameLayer::get()->releaseButton(1, false);
     }
 }
 

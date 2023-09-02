@@ -29,8 +29,6 @@ class Icon {
         cocos2d::_ccColor3B getEffectColor(PlayerType player, EffectType effect, AffectedType affect);
         std::string getKeyForEffect(PlayerType, EffectType, AffectedType);
         void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
-        void fade(float first[4], float second[4]);
-        void stat(float color[4]);
     
     protected:
         bool backsweep = false;

@@ -2,13 +2,14 @@
 #include "Renderer.hpp"
 #include "../subprocess.hpp"
 #include "../CrystalProfile.hpp"
+#include <Geode/modify/PlayLayer.hpp>
 #include <thread>
 
 using namespace geode::prelude;
-using namespace Crystal;
 using namespace subprocess::literals;
 
 FILE * pFile;
+Recorder record;
 
 Recorder::Recorder() : m_width(3840), m_height(2160), m_fps(60) {}
 
@@ -24,15 +25,15 @@ void Recorder::start(const std::string& path, const std::string& temp) {
     m_recording = true;
     m_frame_has_data = false;
     init_quality();
-    m_current_frame.resize(Crystal::profile.targetWidth * Crystal::profile.targetHeight * 3, 0);
+    m_current_frame.resize(getVar<int>("target_width") * getVar<int>("target_height") * 3, 0);
     m_finished_level = false;
     m_last_frame_t = m_extra_t = 0;
     m_after_end_extra_time = 0.f;
-    m_renderer.m_width = Crystal::profile.targetWidth;
-    m_renderer.m_height = Crystal::profile.targetHeight;
-    m_width = Crystal::profile.targetWidth;
-    m_height = Crystal::profile.targetHeight;
-    m_fps = Crystal::profile.targetFPS;
+    m_renderer.m_width = getVar<int>("target_width");
+    m_renderer.m_height = getVar<int>("target_height");
+    m_width = getVar<int>("target_width");
+    m_height = getVar<int>("target_height");
+    m_fps = getVar<int>("target_FPS");
     m_renderer.begin();
     auto gm = GameManager::sharedState();
     auto play_layer = gm->getPlayLayer();
@@ -79,7 +80,6 @@ void Recorder::start(const std::string& path, const std::string& temp) {
             else m_lock.unlock();
         }
         //pclose(pFile);
-        //if (Crystal::profile.includeAudio) stream << "-ss " << std::to_string(song_offset) << " -i " << std::string(song_file) << " ";
         log::info("actual video is done");
         wchar_t buffer[128];
         //auto temp_path = narrow(buffer) + "." + std::filesystem::path(path).filename().string();
@@ -151,7 +151,7 @@ void MyRenderTexture::capture(std::mutex& lock, std::vector<u8>& data, volatile 
         for (auto* child : children) {
             using namespace std::literals::string_view_literals;
             if ((typeinfo_cast<CCLabelBMFont*>(child) && typeinfo_cast<CCLabelBMFont*>(child)->getString() == "Testmode"sv) || child->getZOrder() == 1000) {
-                if (profile.includeDisplays) child->visit();
+                if (getVar<bool>("include_displays")) child->visit();
             } else {
                 child->visit();
             }
@@ -202,20 +202,43 @@ void Recorder::handle_recording(PlayLayer* play_layer, float dt) {
 
 void Recorder::init_quality() {
     if (currentPreset == 0) {
-        profile.targetWidth = 3840;
-        profile.targetHeight = 2160;
-        profile.targetFPS = 60;
+        *setVar<int>("target_width") = 3840;
+        *setVar<int>("target_height") = 2160;
+        *setVar<int>("target_FPS") = 60;
     } else if (currentPreset == 1) {
-        profile.targetWidth = 1920;
-        profile.targetHeight = 1080;
-        profile.targetFPS = 60;
+        *setVar<int>("target_width") = 1920;
+        *setVar<int>("target_height") = 1080;
+        *setVar<int>("target_FPS") = 60;
     } else if (currentPreset == 2) {
-        profile.targetWidth = 1280;
-        profile.targetHeight = 720;
-        profile.targetFPS = 60;
+        *setVar<int>("target_width") = 1280;
+        *setVar<int>("target_height") = 720;
+        *setVar<int>("target_FPS") = 60;
     } else if (currentPreset == 3) {
-        profile.targetWidth = 640;
-        profile.targetHeight = 480;
-        profile.targetFPS = 30;
+        *setVar<int>("target_width") = 640;
+        *setVar<int>("target_height") = 480;
+        *setVar<int>("target_FPS") = 30;
     }
 }
+
+class $modify(PlayLayer) {
+    void update(float dt) {
+		PlayLayer::update(dt);
+		if (getVar<bool>("AT_render")) record.handle_recording(this, dt);
+	}
+
+    void onQuit() {
+		if (getVar<bool>("AT_render")) record.stop();
+		PlayLayer::onQuit();
+	}
+
+	bool init(GJGameLevel* gl) {
+		if (!PlayLayer::init(gl)) return false;
+
+		if (getVar<bool>("AT_render")) {
+			std::string filePATH = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").string() + "/" + getVar<std::string>("video_name") + ".mp4";
+			std::string tempPATH = Mod::get()->getConfigDir().append("Amethyst").append("Renderer").string() + "/temp.mp4";
+			record.start(filePATH, tempPATH);
+		}
+		return true;
+	}
+};
