@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(9);
-
         char accString[20];
         float accuracy = ((float)(getTempVar<float>("frames") - getTempVar<float>("noclipped_frames")) / (float)getTempVar<float>("frames")) * 100;
 

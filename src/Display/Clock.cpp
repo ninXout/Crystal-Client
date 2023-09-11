@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(13);
-
         auto t = std::time(nullptr);
         std::tm tm = *std::localtime(&t);
 

@@ -4,8 +4,6 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 
-bool gameStarted = false;
-
 class $modify(CheckpointObject) {
 	static CheckpointObject* create() {
 		auto cpo = CheckpointObject::create();
@@ -27,8 +25,6 @@ class $modify(PlayLayer) {
     }
 
     void update(float dt) {
-        //if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) dt = 1.f / (getVar<float>("FPS")) / getVar<float>("speed");
-
 		PlayLayer::update(dt);
 
 		if ((getVar<bool>("AT_replay") || getVar<bool>("AT_record")) && getTempVar<bool>("gameStarted")) currentMacro.updateReplay(dt, getVar<bool>("AT_replay"));

@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(11);
-
         std::string levelInfo;
         std::string levelName = m_level->m_levelName;
         std::string levelAuthor = m_level->m_creatorName;

@@ -22,12 +22,6 @@ class $modify(PlayLayer) {
         return true;
     }
 
-    void update(float dt) {
-        PlayLayer::update(dt);
-
-        Display::get()->updateDisplay(8);
-    }
-
     void destroyPlayer(PlayerObject* p, GameObject* g) {
         currentEnd = getPercentage();
         PlayLayer::destroyPlayer(p, g);

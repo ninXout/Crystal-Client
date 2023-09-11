@@ -25,8 +25,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(3);
-
         ++frames;
         accumulate += dt;
 

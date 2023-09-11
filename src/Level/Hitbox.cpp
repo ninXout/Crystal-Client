@@ -36,6 +36,8 @@ class $modify(PlayLayer) {
     void checkCollisions(PlayerObject* p, float idk) {
         PlayLayer::checkCollisions(p, idk);
 
+		if (!getVar<bool>("hitboxes")) return;
+
         if (p == m_player1) {
             drawer->addToPlayer1Queue(m_player1->getObjectRect());
         }
@@ -49,19 +51,21 @@ class $modify(PlayLayer) {
 
         PlayLayer::update(dt);
 
+		if (!getVar<bool>("hitboxes")) return;
+
         if (s_showOnDeath) {
-			if (!s_drawOnDeath || !getVar<bool>("hitboxes")) return;
+			if (!s_drawOnDeath) return;
 			drawer->setVisible(true);
-		}		
+		}
 
 		for (size_t i = 0; i < coins.size(); i++) {
-			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && getVar<bool>("hitboxes") && getVar<bool>("coin_tracker")) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
+			if (coins[i] && m_player1->getPositionX() <= coins[i]->getPositionX() && getVar<bool>("coin_tracker")) drawer->drawSegment(m_player1->getPosition(), coins[i]->getPosition(), 0.5f, ccc4f(0, 1, 0, 1));
 		}
 
-		if (m_player1 && getVar<bool>("hitboxes")) {
+		if (m_player1) {
 			drawer->drawForPlayer1(m_player1);
 		}
-		if (m_player2 && getVar<bool>("hitboxes")) {
+		if (m_player2) {
 			drawer->drawForPlayer2(m_player2);
 		}
 
@@ -81,7 +85,7 @@ class $modify(PlayLayer) {
 				if (obj->m_objectID != 749 && obj->getType() == GameObjectType::Decoration) continue;
 				if (!obj->m_active) continue;
 
-				if (getVar<bool>("hitboxes")) drawer->drawForObject(obj);
+				drawer->drawForObject(obj);
 			}
 		}
     }

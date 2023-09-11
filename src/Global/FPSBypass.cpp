@@ -8,26 +8,17 @@ bool disableRender;
 class $modify(CCScheduler) {
     void update(float dt) {
         if (!PlayLayer::get()) return CCScheduler::update(dt);
-        if (!getTempVar<bool>("gameStarted")) return CCScheduler::update(dt);
+        if (getVar<bool>("framestep") && !getTempVar<bool>("should_update") && getTempVar<bool>("gameStarted")) return;
 
-        float unfocusedDT;
         float speedhack = this->getTimeScale();
 
-        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
-            *setTempVar<float>("target_DT") = 1.f / getVar<float>("FPS") / speedhack;
-            unfocusedDT = (1.f / getVar<float>("FPS_unfocused")) / speedhack;
-        } else {
-            *setTempVar<float>("target_DT") = (1.f / getVar<float>("FPS")) * speedhack;
-            unfocusedDT = (1.f / getVar<float>("FPS_unfocused")) * speedhack;
-        }
+        if (getVar<bool>("AT_record") || getVar<bool>("AT_replay")) *setTempVar<float>("target_DT") = 1.f / getVar<float>("FPS") / speedhack;
+        else *setTempVar<float>("target_DT") = (1.f / getVar<float>("FPS")) * speedhack;
 
-        if (getVar<bool>("Unfocused_FPS") && getTempVar<bool>("should_unfocus_fps")) {
-            CCApplication::sharedApplication()->setAnimationInterval(unfocusedDT);
-            CCScheduler::update(unfocusedDT);
-        } else if (getVar<bool>("FPS_bypass") || getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
+        if (getVar<bool>("FPS_bypass") || getVar<bool>("AT_record") || getVar<bool>("AT_replay")) {
             disableRender = true;
 
-            const int times = std::min(static_cast<int>((dt + leftOver) / getTempVar<float>("target_DT")), 150);
+            const int times = std::min(static_cast<int>((dt + leftOver) / getTempVar<float>("target_DT")), 100);
 
             for (int i = 0; i < times; i++) {
                 if (i == times - 1) {

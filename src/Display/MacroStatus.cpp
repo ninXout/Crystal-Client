@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(12);
-
         std::string status;
         if (getVar<bool>("macro_status")) {
             if (getVar<bool>("AT_replay") && !getVar<bool>("AT_render")) {

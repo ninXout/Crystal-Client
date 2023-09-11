@@ -19,7 +19,7 @@ $execute {
 	loadConfigFromFile();
 	Shortcuts::get()->refreshKeybinds(false);
     ImGuiCocos::get().setup([] {
-        CrystalClient::get()->addTheme();
+        CrystalClient::get()->addTheme(true);
     }).draw([] {
         CrystalClient::get()->drawGUI();
     });
@@ -62,9 +62,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("No Death Effect", setVar<bool>("no_death_effect"));
+	CrystalClient::ImToggleable("No Death Effect", setVar<bool>("no_death_effect"), "Removes the player's death effect");
 	//CrystalClient::ImToggleable("Instant Death Respawn", setVar<bool>("instant_death_respawn"));
-	CrystalClient::ImExtendedToggleable("Auto Reset", setVar<bool>("auto_reset"));
+	CrystalClient::ImExtendedToggleable("Auto Reset", setVar<bool>("auto_reset"), "Resets the player at a certain percentage");
 	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::InputFloat("Auto Reset Percentage", setVar<float>("auto_reset_num"));
 		if (ImGui::Button("Close")) {
@@ -72,9 +72,9 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Respawn Bug Fix", setVar<bool>("respawn_fix"));
-	CrystalClient::ImToggleable("Practice Bug Fix", setVar<bool>("practice_fix"));
-	CrystalClient::ImExtendedToggleable("No Wave Pulse", setVar<bool>("no_wave_pulse"));
+	CrystalClient::ImToggleable("Respawn Bug Fix", setVar<bool>("respawn_fix"), "Removes the lag when respawning");
+	CrystalClient::ImToggleable("Practice Bug Fix", setVar<bool>("practice_fix"), "Fixes the Practice Mode bug that allows you to hit an orb twice");
+	CrystalClient::ImExtendedToggleable("No Wave Pulse", setVar<bool>("no_wave_pulse"), "Stops the wave trail on a player from pulsing");
 	if (ImGui::BeginPopupModal("No Wave Pulse", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::InputFloat("Wave Trail Size", setVar<float>("wave_size"));
 		if (ImGui::Button("Close")) {
@@ -82,8 +82,8 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"));
-	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"));
+	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"), "Removes the blending from the wave trail");
+	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"), "Makes the player icon invisible");
 	ImGui::End();
 
 	ImGui::Begin("Icon", NULL, window_flags);
@@ -103,11 +103,11 @@ void CrystalClient::drawGUI() {
 		CrystalClient::ImIconEffect("Wave Trail", "P2W");
 		ImGui::EndMenu();
 	}
-	CrystalClient::ImToggleable("Solid Glow Color", setVar<bool>("solid_glow"));
+	CrystalClient::ImToggleable("Solid Glow Color", setVar<bool>("solid_glow"), "Removes the blending from the icon glow");
 	ImGui::End();
 
 	ImGui::Begin("Level", NULL, window_flags);
-	CrystalClient::ImExtendedToggleable("Hitbox Viewer", setVar<bool>("hitboxes"));
+	CrystalClient::ImExtendedToggleable("Hitbox Viewer", setVar<bool>("hitboxes"), "Shows the hitboxes of every object in a level");
 	if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Show Hitboxes on Death", setVar<bool>("hitbox_on_death"));
 		CrystalClient::ImToggleable("Show Hitbox Trail", setVar<bool>("hitbox_trail"));
@@ -118,8 +118,8 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("No Progress Bar", setVar<bool>("no_progress_bar"));
-	CrystalClient::ImExtendedToggleable("Accurate Percentage", setVar<bool>("acc_percentage"));
+	CrystalClient::ImToggleable("No Progress Bar", setVar<bool>("no_progress_bar"), "Removes the progress bar, and centers the percentage text");
+	CrystalClient::ImExtendedToggleable("Accurate Percentage", setVar<bool>("acc_percentage"), "Adds decimals to the percentage text");
 	if (ImGui::BeginPopupModal("Accurate Percentage", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::InputInt("Percentage Decimal Points", setVar<int>("acc_percentage_decimals"));
 		if (ImGui::Button("Close")) {
@@ -127,7 +127,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Hide Attempts Label", setVar<bool>("hide_attempts"));
+	CrystalClient::ImExtendedToggleable("Hide Attempts Label", setVar<bool>("hide_attempts"), "Hides the Attempt label at the beginning of a level");
 	if (ImGui::BeginPopupModal("Hide Attempts Label", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Hide in Normal Mode", setVar<bool>("hide_attempts_normal"));
 		CrystalClient::ImToggleable("Hide in Practice Mode", setVar<bool>("hide_attempts_practice"));
@@ -136,22 +136,22 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Practice Music Hack", setVar<bool>("practice_music"));
-	CrystalClient::ImToggleable("Hide Pause Menu", setVar<bool>("hide_pause"));
-	CrystalClient::ImToggleable("Ignore ESC", setVar<bool>("ignore_esc"));
-	CrystalClient::ImToggleable("Confirm Quit", setVar<bool>("confirm_quit"));
-	CrystalClient::ImToggleable("Auto LDM", setVar<bool>("auto_ldm"));
-	CrystalClient::ImToggleable("Auto Song Downloader", setVar<bool>("auto_song_download"));
-	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"));
-	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"));
-	CrystalClient::ImToggleable("Smart StartPos", setVar<bool>("smart_startpos"));
-	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"));
-	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"));
-	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"));
-	CrystalClient::ImToggleable("No Glow", setVar<bool>("no_glow"));
-	CrystalClient::ImToggleable("No Mirror Effect", setVar<bool>("no_mirror"));
-	CrystalClient::ImToggleable("Layout Mode", setVar<bool>("layout_mode"));
-	CrystalClient::ImExtendedToggleable("AutoClicker", setVar<bool>("autoclicker"));
+	CrystalClient::ImToggleable("Practice Music Hack", setVar<bool>("practice_music"), "Plays the normal music in practice mode");
+	CrystalClient::ImToggleable("Hide Pause Menu", setVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
+	CrystalClient::ImToggleable("Ignore ESC", setVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
+	CrystalClient::ImToggleable("Confirm Quit", setVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
+	CrystalClient::ImToggleable("Auto LDM", setVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
+	CrystalClient::ImToggleable("Auto Song Downloader", setVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
+	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"), "Flips the 2 player inputs");
+	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"), "Mirrors the 2 player inputs");
+	CrystalClient::ImToggleable("Smart StartPos [BETA]", setVar<bool>("smart_startpos"), "Automatically sets up all StartPoses in a level");
+	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"), "Allows you to switch between StartPoses while in a level");
+	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
+	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click the Restart button");
+	CrystalClient::ImToggleable("No Glow", setVar<bool>("no_glow"), "Removes all glow from objects in a level");
+	CrystalClient::ImToggleable("No Mirror Effect", setVar<bool>("no_mirror"), "Disables all Mirror portals from working");
+	CrystalClient::ImToggleable("Layout Mode", setVar<bool>("layout_mode"), "Shows the layout of a level");
+	CrystalClient::ImExtendedToggleable("AutoClicker", setVar<bool>("autoclicker"), "Automatically clicks at a fixed interval");
 	if (ImGui::BeginPopupModal("AutoClicker", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Autoclick Player 1", setVar<bool>("AC_player1"));
 		CrystalClient::ImToggleable("Autoclick Player 2", setVar<bool>("AC_player2"));
@@ -168,7 +168,7 @@ void CrystalClient::drawGUI() {
 	ImGui::InputFloat("Display Scale", setVar<float>("display_scale"));
 	ImGui::InputFloat("Display Opacity", setVar<float>("display_opacity"));
 	ImGui::InputFloat("Display Spacing", setVar<float>("display_space"));
-	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"));
+	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"), "Displays whether you are cheating or not");
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-0"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -176,7 +176,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"));
+	CrystalClient::ImExtendedToggleable("Custom Message", setVar<bool>("custom_message"), "Displays a custom message");
 	if (ImGui::BeginPopupModal("Custom Message", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImTextbox("Message", setVar<std::string>("message"));
 		ImGui::Combo("Position", setVar<int>("label_pos-1"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -185,7 +185,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"));
+	CrystalClient::ImExtendedToggleable("CPS display", setVar<bool>("cps_display"), "Displays your clicks per second");
 	if (ImGui::BeginPopupModal("CPS display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		//CrystalClient::ImToggleable("Green Pulse On Click", &Crystal::profile.tclicks);
 		ImGui::Combo("Position", setVar<int>("label_pos-2"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -194,7 +194,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"));
+	CrystalClient::ImExtendedToggleable("FPS Display", setVar<bool>("fps_display"), "Displays your frames per second");
 	if (ImGui::BeginPopupModal("FPS Display", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-3"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -202,7 +202,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"));
+	CrystalClient::ImExtendedToggleable("Last Death", setVar<bool>("last_death"), "Displays the last death percentage");
 	if (ImGui::BeginPopupModal("Last Death", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-4"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -210,7 +210,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Attempts", setVar<bool>("attempts"));
+	CrystalClient::ImExtendedToggleable("Attempts", setVar<bool>("attempts"), "Displays your attempt count");
 	if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Attempts", setVar<bool>("total_attempts"));
 		ImGui::Combo("Position", setVar<int>("label_pos-5"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -219,7 +219,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Jumps", setVar<bool>("jumps"));
+	CrystalClient::ImExtendedToggleable("Jumps", setVar<bool>("jumps"), "Displays your jumps");
 	if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Total Jumps", setVar<bool>("total_jumps"));
 		ImGui::Combo("Position", setVar<int>("label_pos-6"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -228,7 +228,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"));
+	CrystalClient::ImExtendedToggleable("Run From", setVar<bool>("run_from"), "Displays the percentage you started from");
 	if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-7"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -236,7 +236,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"));
+	CrystalClient::ImExtendedToggleable("Best Run", setVar<bool>("best_run"), "Displays your best run on a level");
 	if (ImGui::BeginPopupModal("Best Run", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-8"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -244,7 +244,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Noclip Accuracy", setVar<bool>("noclip_accuracy"));
+	CrystalClient::ImExtendedToggleable("Noclip Accuracy", setVar<bool>("noclip_accuracy"), "Displays how accurately you can noclip through a percentage");
 	if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_accuracy"));
 		ImGui::Combo("Position", setVar<int>("label_pos-9"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -253,7 +253,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Noclip Deaths", setVar<bool>("noclip_deaths"));
+	CrystalClient::ImExtendedToggleable("Noclip Deaths", setVar<bool>("noclip_deaths"), "Displays how accurately you can noclip through a death counter");
 	if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Red Pulse on Death", setVar<bool>("red_on_death"));
 		ImGui::Combo("Position", setVar<int>("label_pos-10"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -262,7 +262,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Level Name and ID", setVar<bool>("level_info"));
+	CrystalClient::ImExtendedToggleable("Level Name and ID", setVar<bool>("level_info"), "Displays the level's information");
 	if (ImGui::BeginPopupModal("Level Name and ID", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Hide ID", setVar<bool>("hide_ID"));
 		CrystalClient::ImToggleable("Show Author", setVar<bool>("level_info_author"));
@@ -272,7 +272,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"));
+	CrystalClient::ImExtendedToggleable("Macro Status", setVar<bool>("macro_status"), "Displays information about the currently loaded macro");
 	if (ImGui::BeginPopupModal("Macro Status", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-12"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -280,7 +280,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"));
+	CrystalClient::ImExtendedToggleable("Clock", setVar<bool>("clock"), "Displays the current time in your timezone");
 	if (ImGui::BeginPopupModal("Clock", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-13"), displaySelection, IM_ARRAYSIZE(displaySelection));
 		if (ImGui::Button("Close")) {
@@ -303,16 +303,16 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Window Borders", setVar<bool>("border"));
     ImGui::End();
     ImGui::Begin("Bypasses", NULL, window_flags);
-	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"));
-	CrystalClient::ImToggleable("Unlock All", setVar<bool>("unlock_all"));
-	CrystalClient::ImToggleable("Scale Hack", setVar<bool>("scalehack"));
-	CrystalClient::ImToggleable("Object Limit Bypass", setVar<bool>("obj_limit"));
-	CrystalClient::ImToggleable("Custom Object Object Limit Bypass", setVar<bool>("custom_obj_limit"));
-	CrystalClient::ImToggleable("Verify Bypass", setVar<bool>("verify"));
-	CrystalClient::ImToggleable("Copy Bypass", setVar<bool>("copy_hack"));
-	CrystalClient::ImToggleable("Editor Zoom Bypass", setVar<bool>("editor_zoom"));
-	CrystalClient::ImToggleable("Level Edit Bypass", setVar<bool>("level_edit"));
-	CrystalClient::ImToggleable("Load Failed Bypass", setVar<bool>("load_failed"));
+	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"), "Disables the game's Anticheat system");
+	CrystalClient::ImToggleable("Unlock All", setVar<bool>("unlock_all"), "Unlock all icons in the game");
+	CrystalClient::ImToggleable("Scale Hack", setVar<bool>("scalehack"), "Bypass the scaling limit for objects");
+	CrystalClient::ImToggleable("Object Limit Bypass", setVar<bool>("obj_limit"), "Bypass the object limit for levels");
+	CrystalClient::ImToggleable("Custom Object Object Limit Bypass", setVar<bool>("custom_obj_limit"), "Bypass the object limit for custom objects");
+	CrystalClient::ImToggleable("Verify Bypass", setVar<bool>("verify"), "Automatically sets levels as Verified");
+	CrystalClient::ImToggleable("Copy Bypass", setVar<bool>("copy_hack"), "Allows you to copy any level");
+	CrystalClient::ImToggleable("Editor Zoom Bypass", setVar<bool>("editor_zoom"), "Bypass the limits on the zoom in the editor");
+	CrystalClient::ImToggleable("Level Edit Bypass", setVar<bool>("level_edit"), "Allows you to edit any level");
+	CrystalClient::ImToggleable("Load Failed Bypass", setVar<bool>("load_failed"), "Bypasses the LOAD FAILED error in levels");
     ImGui::End();
     ImGui::Begin("Global", NULL, window_flags);
 	ImGui::PushItemWidth(100);
@@ -320,16 +320,18 @@ void CrystalClient::drawGUI() {
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
+	/*
 	ImGui::PushItemWidth(100);
 	ImGui::InputFloat("##Unfocused FPS", setVar<float>("FPS_unfocused"));
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Unfocused FPS", setVar<bool>("Unfocused_FPS"));
+	*/
 	ImGui::PushItemWidth(100);
     ImGui::InputFloat("Speedhack", setVar<float>("speed"));
 	ImGui::PopItemWidth();
 	if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
-	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"));
+	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
 		if (ImGui::Button("Close")) {
@@ -337,27 +339,26 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"));
-	CrystalClient::ImToggleable("No Pause on Unfocus", setVar<bool>("no_pause_unfocus"));
-	CrystalClient::ImToggleable("Mute on Unfocus", setVar<bool>("mute_unfocus"));
-	CrystalClient::ImToggleable("No Transition", setVar<bool>("no_transition"));
-	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"));
-	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"));
-	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"));
-	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"));
-	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"));
-	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"));
-	CrystalClient::ImToggleable("Copy Level ID Everywhere", setVar<bool>("copy_levelID"));
+	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"), "Locks your cursor to the game window");
+	CrystalClient::ImToggleable("No Pause on Unfocus", setVar<bool>("no_pause_unfocus"), "Keeps the game running when you are tabbed out");
+	CrystalClient::ImToggleable("Mute on Unfocus", setVar<bool>("mute_unfocus"), "Mutes the game when you are tabbed out");
+	CrystalClient::ImToggleable("No Transition", setVar<bool>("no_transition"), "Removes the fade transition when switching menus");
+	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
+	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
+	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"), "Adds an image to the background of the main menu");
+	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"), "Adds a demon list button to the Search Menu");
+	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"), "Adds a challenge list button to the Search Menu");
+	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"), "Adds a Copy button to all songs to copy their song ID");
+	CrystalClient::ImToggleable("Copy Level ID Everywhere", setVar<bool>("copy_levelID"), "Allows you to copy a level ID by clicking on it in the editor");
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
-    CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"));
+    CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"), "Record a macro");
 	ImGui::SameLine();
-    CrystalClient::ImToggleable("Replay", setVar<bool>("AT_replay"));
-	CrystalClient::ImToggleable("ClickBot", setVar<bool>("clickbot"));
+    CrystalClient::ImToggleable("Replay", setVar<bool>("AT_replay"), "Replay a macro");
+	CrystalClient::ImToggleable("ClickBot", setVar<bool>("clickbot"), "Plays fake clicks for a macro");
 	ImGui::SameLine();
-	CrystalClient::ImToggleable("Delta Lock", setVar<bool>("delta_lock"));
+	CrystalClient::ImToggleable("Delta Lock", setVar<bool>("delta_lock"), "Locks the time to the framerate");
 	ImGui::InputFloat("ClickBot Volume", setVar<float>("clickbot_volume"));
-    //ImGui::Combo("Macro Type", (int*)&currentMacro.type, macroTypes, IM_ARRAYSIZE(macroTypes));
 	CrystalClient::ImTextbox("Macro Name", setVar<std::string>("AT_macro_name"));
     if (ImGui::Button("Save Macro")) {
 		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
@@ -430,13 +431,17 @@ void CrystalClient::drawGUI() {
 	ImGui::InputInt("Height", setVar<int>("target_height"));
 	ImGui::InputInt("FPS", setVar<int>("target_FPS"));
 	ImGui::End();
+	ImGui::Begin("Screenshots", NULL, window_flags);
+	//CrystalClient::ImToggleable("Include Players", setVar<bool>("SS_players"));
+	CrystalClient::ImToggleable("Include Displays", setVar<bool>("SS_displays"), "Include Display texts in your Screenshot");
+	ImGui::End();
 }
 
-void CrystalClient::addTheme() {
+void CrystalClient::addTheme(bool first) {
     ImGuiStyle * style = &ImGui::GetStyle();
     ImVec4* colors = ImGui::GetStyle().Colors;
 
-	setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
+	if (first) setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
 
     *setVar<float>("darkColor-red") = (getVar<float>("lightColor-red") * 0.5f);
     *setVar<float>("darkColor-green") = (getVar<float>("lightColor-green") * 0.5f);

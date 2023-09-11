@@ -4,6 +4,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include "Level/StartPosSwitcher.hpp"
 #include "CrystalClient/CrystalClient.hpp"
+#include "Renderer/Screenshot.hpp"
 
 bool pushing = false;
 
@@ -21,7 +22,7 @@ void Shortcuts::pushVariable(VarChange var) {
 }
 
 void Shortcuts::executeBinds(int current, bool down, bool global) {
-    if (!PlayLayer::get()) return;
+    if (!PlayLayer::get() || ((current == 8 || current == 9) && !GJBaseGameLayer::get())) return;
     if (global) {
         switch (current) {
             case 0:
@@ -73,9 +74,12 @@ void Shortcuts::executeBinds(int current, bool down, bool global) {
             case 13:
                 if (getVar<bool>("framestep") && down) {
                     *setTempVar<bool>("should_update") = true;
-                    PlayLayer::get()->update(1.f / getVar<float>("FPS"));
+                    CCDirector::sharedDirector()->getScheduler()->update(1.f / getVar<float>("FPS"));
                     *setTempVar<bool>("should_update") = false;
                 }
+                break;
+            case 14:
+                if (down) Screenshot::create().saveImage(false);
                 break;
         }
     } else {

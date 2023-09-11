@@ -126,7 +126,7 @@ void AmethystMacro::updateReplay(float dt, bool replay) {
     currentFrame += dt;
 
     if (replay) {
-        if (P1pushes.size() > 0) {
+        if (P1pushes.size() > 0 && currentR1index < P1releases.size()) {
             if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
                 GJBaseGameLayer::get()->pushButton(1, true);
                 currentP1index++;
@@ -138,7 +138,7 @@ void AmethystMacro::updateReplay(float dt, bool replay) {
             }
         }
 
-        if (P2pushes.size() > 0) {
+        if (P2pushes.size() > 0 && currentR2index < P2releases.size()) {
             if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
                 GJBaseGameLayer::get()->pushButton(1, false);
                 currentP2index++;

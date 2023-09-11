@@ -13,12 +13,6 @@ class $modify(PlayLayer) {
         return true;
     }
 
-    void update(float dt) {
-        PlayLayer::update(dt);
-
-        Display::get()->updateDisplay(4);
-    }
-
     void resetLevel() {
         double deathPercent = getPercentage();
 

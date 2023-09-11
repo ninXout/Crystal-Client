@@ -18,8 +18,6 @@ class $modify(PlayLayer) {
 
     void update(float dt) {
         PlayLayer::update(dt);
-
-        Display::get()->updateDisplay(0);
         if (getVar<bool>("cheat_indicator")) Display::get()->getDisplay(0)->setColor(isCheating() ? ccc3(255, 0, 0) : ccc3(0, 255, 0));
     }
 };

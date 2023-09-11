@@ -4,6 +4,7 @@
 #include "../CrystalProfile.hpp"
 #include "../Shortcuts.hpp"
 #include "../CrystalClient/CrystalClient.hpp"
+#include "../Display/Display.hpp"
 
 using namespace geode::prelude;
 
@@ -30,12 +31,18 @@ void ImGuiCocos::toggle() {
 	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
     if (!m_visible) {
 		platform->showCursor();
+		CrystalClient::get()->addTheme(false);
 	}
     if (m_visible) {
 		CrystalClient::get()->refreshPatches();
 		CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
 		Shortcuts::get()->refreshKeybinds(true);
 		saveConfigToFile();
+		if (PlayLayer::get()) {
+			for (int i = 0; i < 14; i++) {
+				Display::get()->updateDisplay(i);
+			}
+		}
         if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
 	this->setVisible(!m_visible);
@@ -150,8 +157,8 @@ void ImGuiCocos::newFrame() {
 	);
 	//io.DeltaTime = director->getDeltaTime();
 
-	//const auto mouse = cocosToFrame(geode::cocos::getMousePos());
-	//io.AddMousePosEvent(mouse.x, mouse.y);
+	const auto mouse = cocosToFrame(geode::cocos::getMousePos());
+	io.AddMousePosEvent(mouse.x, mouse.y);
 
 	auto* kb = director->getKeyboardDispatcher();
 	io.KeyAlt = kb->getAltKeyPressed() || kb->getCommandKeyPressed(); // look

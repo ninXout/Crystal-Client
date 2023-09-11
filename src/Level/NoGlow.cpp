@@ -8,10 +8,3 @@ class $modify(PlayLayer) {
 		PlayLayer::addObject(g);
 	}	
 };
-
-class $modify(GameObject) {
-    virtual void update(float dt) {
-		if (getVar<bool>("no_glow")) m_isGlowDisabled = true;
-        GameObject::update(dt);
-    }
-};

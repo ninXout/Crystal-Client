@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(10);
-
         if (getTempVar<bool>("would_die") && getVar<bool>("red_on_death")) Display::get()->getDisplay(10)->setColor(ccc3(255, 0, 0));
         else Display::get()->getDisplay(10)->setColor(ccc3(255, 255, 255));
 

@@ -16,8 +16,6 @@ class $modify(PlayLayer) {
     void update(float dt) {
         PlayLayer::update(dt);
 
-        Display::get()->updateDisplay(6);
-
         int jump;
 
         if (getVar<bool>("total_jumps")) jump = m_level->m_jumps;

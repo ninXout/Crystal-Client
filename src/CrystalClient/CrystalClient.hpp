@@ -29,7 +29,7 @@ public:
     void loadFromFile();
 
     void drawGUI();
-    void addTheme();
+    void addTheme(bool first);
 
     void firstLoad(CCNode* layer);
     void noImage(CCNode* layer);

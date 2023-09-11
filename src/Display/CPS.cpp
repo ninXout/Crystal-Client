@@ -4,9 +4,9 @@
 #include "Display.hpp"
 #include <mach/mach_time.h>
 
-int clicks = 0;
-int cpsclicks = 0;
-std::vector<float> clicksArr;
+std::chrono::time_point<std::chrono::high_resolution_clock> previousFrame, lastUpdate;
+float timeSum = 0.f;
+int clicksCount = 0;
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
@@ -21,25 +21,27 @@ class $modify(PlayLayer) {
 
     void update(float dt) {
         PlayLayer::update(dt);
-
-        Display::get()->updateDisplay(2);
         
-        if (clicksArr.size() > 0) {
-			float currentTime = mach_absolute_time();
-			for (int i = 0; i < clicksArr.size(); i++) {
-				if ((currentTime - clicksArr[i]) / 1000.0f >= 1) clicksArr.erase(clicksArr.begin() + i);
-			}
-		}
-        std::string cpsDisplay = std::to_string(clicksArr.size()) + "/" + std::to_string(clicks);
+        const auto now = std::chrono::high_resolution_clock::now();
 
-        if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(cpsDisplay.c_str());
+		const std::chrono::duration<float> diff = now - previousFrame;
+		timeSum += diff.count();
+
+        if (std::chrono::duration<float>(now - lastUpdate).count() > 1.0f) {
+            lastUpdate = now;
+            const auto cps = static_cast<int>(std::roundf(static_cast<float>(clicksCount) / timeSum));
+            timeSum = 0.f;
+            clicksCount = 0;
+            if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(std::to_string(cps).c_str());
+        }
+
+		previousFrame = now;
     }
 
     void resetLevel() {
         PlayLayer::resetLevel();
         
-        clicks = 0;
-        clicksArr.clear();
+        clicksCount = 0;
     }
 };
 
@@ -47,7 +49,6 @@ class $modify(GJBaseGameLayer) {
     void pushButton(int i, bool b) {
         GJBaseGameLayer::pushButton(i, b);
 
-        clicks++;
-        clicksArr.push_back(mach_absolute_time());
+        clicksCount++;
     }
 };
