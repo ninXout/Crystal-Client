@@ -42,6 +42,9 @@ void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
 
     ImGui::Begin("Player", NULL, window_flags);
+	ImGui::PushItemWidth(100);
+	ImGui::InputFloat("Opacity Wave Trail", setVar<float>("opacity_wave_trail"));
+	ImGui::PopItemWidth();
 	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"), "Allows the player to be invincible");
 	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Noclip Player 1", setVar<bool>("noclip_P1"));
@@ -72,8 +75,12 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
+
 	CrystalClient::ImToggleable("Respawn Bug Fix", setVar<bool>("respawn_fix"), "Removes the lag when respawning");
 	CrystalClient::ImToggleable("Practice Bug Fix", setVar<bool>("practice_fix"), "Fixes the Practice Mode bug that allows you to hit an orb twice");
+	CrystalClient::ImToggleable("No Rotation", setVar<bool>("no_rotation"), "Stops the player from rotating");
+	CrystalClient::ImToggleable("No Trail", setVar<bool>("no_trail"), "Removes the regular trail");
+	CrystalClient::ImToggleable("Trail Always On", setVar<bool>("always_trail"), "Does the regular trail always visible");
 	CrystalClient::ImExtendedToggleable("No Wave Pulse", setVar<bool>("no_wave_pulse"), "Stops the wave trail on a player from pulsing");
 	if (ImGui::BeginPopupModal("No Wave Pulse", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::InputFloat("Wave Trail Size", setVar<float>("wave_size"));
@@ -83,6 +90,7 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"), "Removes the blending from the wave trail");
+	CrystalClient::ImToggleable("Solid Regular Trail", setVar<bool>("solid_trail"), "Removes the blending from the regular trail");
 	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"), "Makes the player icon invisible");
 	ImGui::End();
 
@@ -137,18 +145,24 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("Practice Music Hack", setVar<bool>("practice_music"), "Plays the normal music in practice mode");
+	CrystalClient::ImToggleable("Freeze Attempts", setVar<bool>("freeze_attempts"), "The attempts doesn't update");
 	CrystalClient::ImToggleable("Hide Pause Menu", setVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
+	CrystalClient::ImToggleable("Hide Pause Button", setVar<bool>("hide_pause_button"), "Hides the pause button when playing");
 	CrystalClient::ImToggleable("Ignore ESC", setVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
 	CrystalClient::ImToggleable("Confirm Quit", setVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
 	CrystalClient::ImToggleable("Auto LDM", setVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
 	CrystalClient::ImToggleable("Auto Song Downloader", setVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
+	CrystalClient::ImToggleable("Play Song on Level Page", setVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
 	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"), "Flips the 2 player inputs");
 	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"), "Mirrors the 2 player inputs");
 	CrystalClient::ImToggleable("Smart StartPos [BETA]", setVar<bool>("smart_startpos"), "Automatically sets up all StartPoses in a level");
 	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"), "Allows you to switch between StartPoses while in a level");
 	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
-	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click the Restart button");
+	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
 	CrystalClient::ImToggleable("No Glow", setVar<bool>("no_glow"), "Removes all glow from objects in a level");
+	CrystalClient::ImToggleable("No Particles", setVar<bool>("no_particles"), "Removes all the particles");
+	CrystalClient::ImToggleable("No Portal Flash", setVar<bool>("no_portal_flash"), "Removes the flash that happens when you enter a portal");
+	CrystalClient::ImToggleable("No Ghost Trail", setVar<bool>("no_ghost"), "Removes the trail that one trigger gives you");
 	CrystalClient::ImToggleable("No Mirror Effect", setVar<bool>("no_mirror"), "Disables all Mirror portals from working");
 	CrystalClient::ImToggleable("Layout Mode", setVar<bool>("layout_mode"), "Shows the layout of a level");
 	CrystalClient::ImExtendedToggleable("AutoClicker", setVar<bool>("autoclicker"), "Automatically clicks at a fixed interval");
@@ -348,7 +362,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"), "Adds an image to the background of the main menu");
 	CrystalClient::ImToggleable("Demon List Button", setVar<bool>("demonlist_button"), "Adds a demon list button to the Search Menu");
 	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"), "Adds a challenge list button to the Search Menu");
-	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"), "Adds a Copy button to all songs to copy their song ID");
+	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"), "Allows you to copy a song ID by clicking on it");
 	CrystalClient::ImToggleable("Copy Level ID Everywhere", setVar<bool>("copy_levelID"), "Allows you to copy a level ID by clicking on it in the editor");
     ImGui::End();
     ImGui::Begin("Amethyst [BETA]", NULL, window_flags);

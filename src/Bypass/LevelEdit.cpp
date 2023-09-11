@@ -17,12 +17,26 @@ class $modify(PauseLayer) {
 			auto menu = static_cast<CCMenu*>(pause->getChildByID("center-button-menu"));
 			auto editorButton = CCMenuItemSpriteExtra::create(editorSprite, pause, menu_selector(PauseLayer::goEdit));
 
-			if (menu->getChildrenCount() != 5) {
-				editorButton->setPosition({-212.25f, 0.0f});
-				editorButton->setScale(0.8f);
-				editorButton->setAnchorPoint({0.5f, 0.5f});
+			editorButton->setID("crystal-edit-button");
 
-				menu->setPosition({325.0f, 130.0f});
+			if (menu->getChildrenCount() == 4 && GameManager::get()->getGameVariable("0074")) {
+				editorButton->setPosition({-212.25f, 0.0f});
+				editorButton->setContentSize({62.0f, 65.0f});
+
+				editorSprite->setScale(0.8f);
+				editorSprite->setPosition({31.0f, 32.5f});
+
+				menu->setPosition({325.5f, 130.0f});
+				menu->addChild(editorButton);
+				menu->updateLayout();
+			} else if (menu->getChildrenCount() == 3) {
+				editorButton->setPosition({-175.0f, 0.0f});
+				editorButton->setContentSize({62.0f, 65.0f});
+
+				editorSprite->setScale(0.8f);
+				editorSprite->setPosition({31.0f, 32.5f});
+
+				menu->setPosition({325.5f, 130.0f});
 				menu->addChild(editorButton);
 				menu->updateLayout();
 			}

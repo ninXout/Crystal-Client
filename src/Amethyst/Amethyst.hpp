@@ -153,6 +153,13 @@ namespace Clickbot {
     std::string pickRandomRelease();
     std::string pickRandomSoftRelease();
 
+    static bool isDirectoryEmpty(const ghc::filesystem::path& directoryPath);
+
+    static inline ghc::filesystem::path clicksCB = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "clicks";
+    static inline ghc::filesystem::path softC = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softClicks";
+    static inline ghc::filesystem::path releasesCB = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "releases";
+    static inline ghc::filesystem::path softR = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softReleases";
+
     static inline bool firstClick = false;
     static inline std::chrono::system_clock::time_point start, now;
     static inline std::chrono::duration<double> cycleTime;

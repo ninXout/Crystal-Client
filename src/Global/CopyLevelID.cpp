@@ -3,10 +3,7 @@
 
 struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
     void onCopy(CCObject* sender) {
-        auto button = static_cast<CCMenuItemSpriteExtra*>(sender);
-        button->setScale(1);
-
-        auto buttonText = static_cast<CCLabelBMFont*>(button->getNormalImage());
+        auto buttonText = static_cast<CCLabelBMFont*>(this->getChildByID("level-id-label"));
         std::string text = buttonText->getString();
 
         std::string numericText;
@@ -14,6 +11,10 @@ struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
             if (isdigit(c)) {
                 numericText += c;
             }
+        }
+
+        if (numericText.empty()) {
+            numericText = "0 (na)";
         }
 
         geode::utils::clipboard::write(numericText);
@@ -27,19 +28,32 @@ struct CopyLevelID :  Modify<CopyLevelID, EditLevelLayer> {
 
 	bool init(GJGameLevel* level) {
 	    EditLevelLayer::init(level);
-		    auto text = static_cast<CCLabelBMFont*>(this->getChildByID("level-id-label"));
-            auto menu = CCMenu::create();
-            auto buttonText = CCLabelBMFont::create(text->getString(), "goldFont.fnt" );
-            auto button = CCMenuItemSpriteExtra::create(buttonText, this, menu_selector(CopyLevelID::onCopy));
 
             if (getVar<bool>("copy_levelID")) {
+		        auto text = static_cast<CCLabelBMFont*>(this->getChildByID("level-id-label"));
+                auto biText = this->getChildByID("bi-level-id-menu");
+                auto textanchor = text->getAnchorPoint();
+                auto menu = CCMenu::create();
+                auto buttonText = CCLabelBMFont::create(text->getString(), "goldFont.fnt" );
+                auto button = CCMenuItemSpriteExtra::create(buttonText, this, menu_selector(CopyLevelID::onCopy));
+
                 text->setVisible(false);
-                buttonText->setScale(0.6);
 
-                button->setPosition({75.0f, -146.0f});
-                button->setScale(1);
-			    button->setAnchorPoint({0.5f, 0.5f});
+                if (biText && button) {
+                    button->setVisible(false);
+                }
 
+                button->setPosition({75.0f, 15.5f});
+                button->setContentSize({135.25f, 20.75f});
+                button->setAnchorPoint(textanchor);
+                button->setID("copy-id-button");
+
+                buttonText->setScale(0.6f);
+                buttonText->setPosition({67.125f, 10.0f});
+
+                menu->setPosition({284.5f, -1.0f});
+                menu->setContentSize({150.0f, 30.0f});
+                menu->setID("copy-id-menu");
                 menu->addChild(button);
 
                 this->addChild(menu);

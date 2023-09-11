@@ -342,3 +342,39 @@ void CrystalClient::noImage(CCNode* layer) {
 		alert->show();
 	}
 }
+
+void CrystalClient::noFoldersCB(CCNode* layer) {
+	if (layer) {
+		auto alert = geode::createQuickPopup(
+			"Oops",            // title
+			"You are using <cg>Clickbot</c> from Crystal but there is <cr>no folders for it.</c> Please create this folders: <cj>clicks, softClicks, releases and softReleases</c> on GD/Contents/geode/config/ninxout.crystalclient/Amethyst/Clickbot. Thanks for using Crystal <3 <cr>(Tap ESC to exit)</c>", // content
+			"OK", "Join Discord Server",      // buttons
+			[](auto, bool btn2) {
+				if (btn2) {
+					CCApplication::sharedApplication()->openURL("https://discord.gg/xV5dekWHTd");
+				}
+			},
+			false
+		);
+		alert->m_scene = layer;
+		alert->show();
+	}
+}
+
+void CrystalClient::emptyFoldersCB(CCNode* layer) {
+	if (layer) {
+		auto alert = geode::createQuickPopup(
+			"Oops",            // title
+			"You are using <cg>Clickbot</c> from Crystal but there is <cr>no sounds for it.</c> Please put <cj>at least one .mp3 file</c> inside all the Clickbot folders. Thanks for using Crystal <3 <cr>(Tap ESC to exit)</c>", // content
+			"OK", "Join Discord Server",      // buttons
+			[](auto, bool btn2) {
+				if (btn2) {
+					CCApplication::sharedApplication()->openURL("https://discord.gg/xV5dekWHTd");
+				}
+			},
+			false
+		);
+		alert->m_scene = layer;
+		alert->show();
+	}
+}

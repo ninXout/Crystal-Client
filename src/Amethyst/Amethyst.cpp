@@ -225,37 +225,71 @@ CheckpointData store(PlayerObject* player) {
 std::string Clickbot::pickRandomClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "clicks";
-    for (const auto & entry : fs::directory_iterator(path))
-    {
+
+    if (fs::exists(clicksCB)) {
+        for (const auto & entry : fs::directory_iterator(clicksCB))
+        {
         clicks.push_back(entry.path().string());
+        }
     }
-    return clicks[rand() % clicks.size()];
+
+    if (!clicks.empty()) {
+        return clicks[rand() % clicks.size()];
+    }
+
+    return "This folder is empty!";
 }
+
 std::string Clickbot::pickRandomSoftClick() {
     std::vector<std::string> clicks;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softClicks";
-    for (const auto & entry : fs::directory_iterator(path))
-    {
-        clicks.push_back(entry.path().string());
+
+    if (fs::exists(softC)) {
+        for (const auto & entry : fs::directory_iterator(softC))
+        {
+            clicks.push_back(entry.path().string());
+        }
     }
-    return clicks[rand() % clicks.size()];
+
+    if (!clicks.empty()) {
+        return clicks[rand() % clicks.size()];
+    }
+
+    return "This folder is empty!";
 }
+
 std::string Clickbot::pickRandomRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "releases";
-    for (const auto & entry : fs::directory_iterator(path))
-        releases.push_back(entry.path().string());
-    return releases[rand() % releases.size()];
+
+    if (fs::exists(releasesCB)) {
+        for (const auto & entry : fs::directory_iterator(releasesCB))
+        {
+            releases.push_back(entry.path().string());
+        }
+    }
+
+    if (!releases.empty()) {
+        return releases[rand() % releases.size()];
+    }
+
+    return "This folder is empty!";
 }
+
 std::string Clickbot::pickRandomSoftRelease() {
     std::vector<std::string> releases;
     std::vector<std::string> out;
-    ghc::filesystem::path path = geode::Mod::get()->getConfigDir() / "Amethyst" / "ClickBot" / "softReleases";
-    for (const auto & entry : fs::directory_iterator(path))
-        releases.push_back(entry.path().string());
-    return releases[rand() % releases.size()];
+
+    if (fs::exists(softR)) {
+        for (const auto & entry : fs::directory_iterator(softR))
+        {
+            releases.push_back(entry.path().string());
+        }
+    }
+
+    if (!releases.empty()) {
+        return releases[rand() % releases.size()];
+    } 
+        return "This folder is empty!";
 }
 

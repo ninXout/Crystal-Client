@@ -33,6 +33,8 @@ public:
 
     void firstLoad(CCNode* layer);
     void noImage(CCNode* layer);
+    void noFoldersCB(CCNode* layer);
+    void emptyFoldersCB(CCNode* layer);
 
     static cocos2d::enumKeyCodes shortcutKey(int key);
     void arrangeText(int arrayLength, PlayLayer* menulay, bool first);

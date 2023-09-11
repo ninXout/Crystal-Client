@@ -1,5 +1,6 @@
 #include "Amethyst.hpp"
 #include "../CrystalProfile.hpp"
+#include "../CrystalClient/CrystalClient.hpp"
 #include <Geode/modify/CheckpointObject.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
@@ -20,7 +21,18 @@ class $modify(PlayLayer) {
 
         if (!PlayLayer::init(gl)) return false;
 
-        if (getVar<bool>("clickbot")) Clickbot::start = std::chrono::system_clock::now();
+        if (getVar<bool>("clickbot")) {
+			Clickbot::start = std::chrono::system_clock::now();
+
+			if (!ghc::filesystem::exists(Clickbot::clicksCB) || !ghc::filesystem::exists(Clickbot::softC) 
+			|| !ghc::filesystem::exists(Clickbot::releasesCB) || !ghc::filesystem::exists(Clickbot::softR)) {
+				CrystalClient::get()->noFoldersCB(this);
+			} else if (Clickbot::pickRandomClick() == "This folder is empty!" || Clickbot::pickRandomSoftClick() == "This folder is empty!" 
+				|| Clickbot::pickRandomRelease() == "This folder is empty!" || Clickbot::pickRandomSoftRelease()  == "This folder is empty!") {
+					CrystalClient::get()->emptyFoldersCB(this);
+			}
+		}
+
         return true;
     }
 

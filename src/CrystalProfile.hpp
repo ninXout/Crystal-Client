@@ -31,6 +31,7 @@ inline std::map<std::string, int> modsMapI = {
 };
 inline std::map<std::string, float> modsMapF = {
     {"wave_size", 2.1},
+    {"opacity_wave_trail", 255},
     {"FPS", 60.0},
     {"FPS_unfocused", 15.0},
     {"display_scale", 1.0},

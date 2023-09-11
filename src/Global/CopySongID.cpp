@@ -1,22 +1,12 @@
 #include "../CrystalProfile.hpp"
-#include <Geode/modify/LevelSettingsLayer.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
 
-static bool move = false;
+int songID;
+std::string NONG = "NONG";
 
 struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
     void onCopy(CCObject* sender) {
-        auto button = static_cast<CCMenuItemSpriteExtra*>(sender);
-        button->setScale(1);
-
-        auto copyText = static_cast<CCLabelBMFont*>(this->getChildByID("id-and-size-label"));
-        std::string text = copyText->getString();
-
-        if (text.length() > 22) { 
-            text = text.substr(8, text.length() - 22); // deleting the Size things and SongID: text
-        } else {
-            text.clear();
-        }
+        std::string text = std::to_string(songID);
 
         geode::utils::clipboard::write(text);
 
@@ -27,69 +17,70 @@ struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
 		)->show();
     }
 
-	bool init(SongInfoObject* so, LevelSettingsObject* ls, bool a, bool b , bool c, bool d, bool hideBackground) {
-	    CustomSongWidget::init(so,ls, a, b, c, d, hideBackground);
+	bool init(SongInfoObject* song, LevelSettingsObject* ls, bool a, bool b , bool c, bool defaultSong, bool hideBackground) {
+	    CustomSongWidget::init(song,ls, a, b, c, defaultSong, hideBackground);
 
             if (getVar<bool>("copy_songID")) {
+                auto originalText = static_cast<CCLabelBMFont*>(this->getChildByID("id-and-size-label"));
+                auto nongLabel = static_cast<CCLabelBMFont*>(this->getChildByID("nongd-id-and-size-label"));
+                auto textanchor = originalText->getAnchorPoint();
                 auto menu = this->getChildByID("buttons-menu");
-                auto atext = this->getChildByID("author-name-label");
-                auto mbutton = menu->getChildByID("more-button");
-                auto dbutton = menu->getChildByID("download-button");
-                auto cbutton = menu->getChildByID("cancel-button");
-                auto rbutton = menu->getChildByID("refresh-button");
-                auto ubutton = menu->getChildByID("use-button");
-                auto pbutton = menu->getChildByID("play-song-button");
-                auto buttonSprite = ButtonSprite::create("Copy");
-                auto button = CCMenuItemSpriteExtra::create(buttonSprite, this, menu_selector(CopySongID::onCopy));
+                auto buttonText = CCLabelBMFont::create(originalText->getString(), "bigFont.fnt");
+                auto button = CCMenuItemSpriteExtra::create(buttonText, this, menu_selector(CopySongID::onCopy));
 
-                if (atext->getContentSize().width >= 178.5f) {
-                    move = true;
-                    dbutton->setScale(0.7f);
-                    cbutton->setScale(0.7f);
-                    rbutton->setScale(0.7f);
-                    ubutton->setScale(0.7f);
-                    pbutton->setScale(0.6f);
-                    dbutton->setPositionY(-184.0f);
-                    cbutton->setPositionY(-184.0f);
-                    rbutton->setPositionY(-184.0f);
-                    ubutton->setPositionY(-184.0f);
-                    pbutton->setPositionY(-132.0f);
-                } else {
-                    move = false;
-                }   
+                songID = song->m_songID;
 
-                if (!mbutton->isVisible()) {
+                if (nongLabel) {
+                    nongLabel->setVisible(false);
+                    std::string nongText = nongLabel->getString();
+
+                    if (nongText.find(NONG) != std::string::npos) {
+                        button->setVisible(false);
+                        nongLabel->setVisible(true);
+                    }
+                }
+
+                if (defaultSong) {
                     button->setVisible(false);
                 }
-            
-                auto mbpos = mbutton->getPosition();
-                auto mcs = mbutton->getContentSize();
-                button->setPositionX(mbpos.x + 45);
-                buttonSprite->setPositionY(12.5f);
-                button->setPositionY(-157.0f);
-                button->setContentSize(mcs);
-                buttonSprite->setContentSize({101.6f, 25.0f});
-            
-                buttonSprite->setScale(0.575f);
+
+                originalText->setVisible(false);
+
+                button->setPosition({-284.450f, -191.950f});
+                button->setContentSize({208.0f, 20.0f});
+                button->setAnchorPoint(textanchor);
+                button->setID("copy-id-button");
+
+                buttonText->setScale(0.4f);
+                buttonText->setPosition(104.625f, 9.875f);
 
                 menu->addChild(button);
             }
-            
-		return true;
-	}
-};
-
-class $modify(LevelSettingsLayer) {
-    bool init(LevelSettingsObject* levelSettings, LevelEditorLayer* editor) {
-        LevelSettingsLayer::init(levelSettings, editor);
-            auto newbutton = findFirstChildRecursive<CCNode>(this, [](CCNode* n) {
-                return n->getPositionX() == 127.0f; // theres no node ids im so sorry :(
-            });
-
-            if (move && getVar<bool>("copy_songID")) {
-                newbutton->setPositionY(-97.0f);
-            }
 
         return true;
+    }
+
+    void updateSongObject(SongInfoObject* song) {
+        CustomSongWidget::updateSongObject(song);
+
+        if (getVar<bool>("copy_songID")) {
+            auto nongLabel = static_cast<CCLabelBMFont*>(this->getChildByID("nongd-id-and-size-label"));
+            auto menu = this->getChildByID("buttons-menu");
+            auto button = menu->getChildByID("copy-id-button");
+
+            if (button) {
+                button->setVisible(true);
+            }
+
+            if (nongLabel) {
+                nongLabel->setVisible(false);
+                std::string nongText = nongLabel->getString();
+
+                if (nongText.find(NONG) != std::string::npos && button) {
+                    button->setVisible(false);
+                    nongLabel->setVisible(true);
+                }
+            }
+        }
     }
 };

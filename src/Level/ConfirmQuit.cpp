@@ -5,7 +5,7 @@ bool shouldQuit = false;
 
 class $modify(PlayLayer) {
     void onQuit() {
-        if (!shouldQuit && getVar<bool>("confirm_quit") && !m_hasLevelCompleteMenu) {
+        if (!shouldQuit && getVar<bool>("confirm_quit") && !m_hasLevelCompleteMenu && getTempVar<bool>("should_popup")) {
 			geode::createQuickPopup(
 				"Confirm Quit",
 				"Are you sure you would like to Quit?",
@@ -17,9 +17,12 @@ class $modify(PlayLayer) {
 					}
 				}
 			);
-		} else {
+		} else if (getVar<bool>("load_from_last_CP") && getTempVar<bool>("should_quit")) {
+			PlayLayer::onQuit();
+		} else if (!getVar<bool>("load_from_last_CP")) {
 			PlayLayer::onQuit();
 		}
+		
         shouldQuit = false;
     }
 };
