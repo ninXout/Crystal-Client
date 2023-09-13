@@ -1,15 +1,13 @@
 {
 	"geode": "1.0.0",
-	"version": "v3.0.0",
+	"version": "v4.0.0",
 	"id": "ninxout.crystalclient",
 	"name": "Crystal Client",
 	"developer": "ninXout",
-	"description": "Premium Cross-Platform Modded Client",
+	"description": "Premium MacOS Modded Client",
 	"resources": {
         "files": [
-            "resources/Lexend.ttf",
-			"resources/ffmpeg"
+            "resources/Lexend.ttf"
         ]
-    },
-	"incompatibilities": [{"id": "camila.demonlist-button", "version": "*"}]
+    }
 }

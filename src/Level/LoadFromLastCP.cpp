@@ -26,7 +26,7 @@ struct LoadFromLastCP : Modify<LoadFromLastCP, EndLevelLayer> {
 			*setTempVar<bool>("should_quit") = true;
 			endLayer = end;
 			PlayLayer::get()->m_checkpoints->retain();
-			button->setID("load_last_cp");
+			button->setID("GH_load-last-cp");
 
 			if (menu->getChildrenCount() == 2) {
 				button->setPositionY(-125.0f);
@@ -65,9 +65,7 @@ class $modify(PlayLayer) {
 	}
 
 	void onQuit() {
-		if (getVar<bool>("load_from_last_CP") && getTempVar<bool>("should_quit")) {
-			PlayLayer::onQuit();
-		} else if (!getVar<bool>("load_from_last_CP")) {
+		if ((getVar<bool>("load_from_last_CP") && getTempVar<bool>("should_quit")) || !getVar<bool>("load_from_last_CP")) {
 			PlayLayer::onQuit();
 		}
 	}

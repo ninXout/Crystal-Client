@@ -1,5 +1,6 @@
 #include "ImGui.hpp"
 #include "../Shortcuts.hpp"
+#include "../CrystalProfile.hpp"
 
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMouseDispatcher.hpp>

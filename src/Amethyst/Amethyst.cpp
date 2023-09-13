@@ -120,13 +120,15 @@ void AmethystMacro::resetActions(bool recording) {
         if (getVar<bool>("AT_replay")) GJBaseGameLayer::get()->releaseButton(1, true);
 		if (getVar<bool>("AT_replay")) GJBaseGameLayer::get()->releaseButton(1, false);
     }
+
+    *setTempVar<int>("current-ATstatus-frame") = currentFrame * static_cast<int>(getVar<float>("FPS"));
 }
 
 void AmethystMacro::updateReplay(float dt, bool replay) {
     currentFrame += dt;
 
     if (replay) {
-        if (P1pushes.size() > 0 && currentR1index < P1releases.size()) {
+        if (P1pushes.size() > 0) {
             if (P1pushes[currentP1index] <= currentFrame && currentP1index < P1pushes.size()) {
                 GJBaseGameLayer::get()->pushButton(1, true);
                 currentP1index++;
@@ -138,7 +140,7 @@ void AmethystMacro::updateReplay(float dt, bool replay) {
             }
         }
 
-        if (P2pushes.size() > 0 && currentR2index < P2releases.size()) {
+        if (P2pushes.size() > 0) {
             if (P2pushes[currentP2index] <= currentFrame && currentP2index < P2pushes.size()) {
                 GJBaseGameLayer::get()->pushButton(1, false);
                 currentP2index++;
@@ -150,6 +152,9 @@ void AmethystMacro::updateReplay(float dt, bool replay) {
             }
         }
     }
+
+    *setTempVar<int>("current-ATstatus-index") = currentP1index + currentP2index + currentR1index + currentR2index;
+    *setTempVar<int>("current-ATstatus-size") = P1pushes.size() + P1releases.size() + P2pushes.size() + P2releases.size();
 }
 
 void AmethystMacro::createCheckpointData() {
@@ -181,12 +186,14 @@ void AmethystMacro::setPushingData(bool pushing, bool b) {
         if (b) P1pushing = true;
 		if (!b) P2pushing = true;
         log::info("[pushing] currentFrame: {}", currentFrame);
+        if (!getVar<bool>("AT_record")) return;
         if (b) P1pushes.push_back(currentFrame);
 		if (!b) P2pushes.push_back(currentFrame);
     } else  {
         if (b) P1pushing = false;
 		if (!b) P2pushing = false;
         log::info("[releasing] currentFrame: {}", currentFrame);
+        if (!getVar<bool>("AT_record")) return;
         if (b) P1releases.push_back(currentFrame);
 		if (!b) P2releases.push_back(currentFrame);
     }

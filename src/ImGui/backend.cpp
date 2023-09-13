@@ -5,6 +5,7 @@
 #include "../Shortcuts.hpp"
 #include "../CrystalClient/CrystalClient.hpp"
 #include "../Display/Display.hpp"
+#include "../Level/HidePause.hpp"
 
 using namespace geode::prelude;
 
@@ -43,7 +44,8 @@ void ImGuiCocos::toggle() {
 				Display::get()->updateDisplay(i);
 			}
 		}
-        if (PlayLayer::get() && !PlayLayer::get()->m_isPaused && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
+		if (PlayLayer::get() && thelayer && getTempVar<bool>("is-paused")) thelayer->setVisible(!getVar<bool>("hide_pause"));
+        if (PlayLayer::get() && !getTempVar<bool>("is-paused") && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
     }
 	this->setVisible(!m_visible);
 }

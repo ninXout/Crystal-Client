@@ -143,6 +143,9 @@ void Shortcuts::updateVariables() {
             case 6:
                 PlayLayer::get()->m_player1->m_vehicleSize = variables[i].activeValue;
                 break;
+            case 7:
+                PlayLayer::get()->m_player1->m_waveTrail->setOpacity(variables[i].activeValue);
+                break;
         }
     }
 }

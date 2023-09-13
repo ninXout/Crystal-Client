@@ -9,11 +9,40 @@
 #include <Geode/Geode.hpp>
 #include "Renderer/Renderer.hpp"
 #include <Geode/modify/MenuLayer.hpp>
+#define STB_RECT_PACK_IMPLEMENTATION
+#include <imstb_rectpack.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
 
 using namespace geode::prelude;
 using namespace AmethystReplay;
 
 const char* displaySelection[4] = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"};
+size_t sortIndex = 0;
+constexpr int sortPadding = 3;
+std::vector<stbrp_rect> sortRects;
+
+void windowPreBegin(size_t& sortIndex) {
+	if (getVar<bool>("manual_positioning")) return;
+    if (getTempVar<int>("should-sort-windows") == 1) {
+        auto rect = sortRects[sortIndex++];
+        ImGui::SetNextWindowPos({
+            (float)rect.x + sortPadding,
+            (float)rect.y + sortPadding
+        });
+    }
+	//ImGui::SetNextWindowSize({-1.f, -1.f});
+}
+void windowPreEnd() {
+	if (getVar<bool>("manual_positioning")) return;
+    ImVec2 size = ImGui::GetWindowSize();
+    if (getTempVar<int>("should-sort-windows") == 2) {
+        sortRects.push_back({
+            0,
+            (int)size.x + sortPadding,
+            (int)size.y + sortPadding
+        });
+    }
+}
 
 $execute {
 	loadConfigFromFile();
@@ -40,11 +69,10 @@ $execute {
 
 void CrystalClient::drawGUI() {
 	ImGuiWindowFlags window_flags = 0;
+	if (!getVar<bool>("manual_positioning")) window_flags = ImGuiWindowFlags_AlwaysAutoResize;
 
-    ImGui::Begin("Player", NULL, window_flags);
-	ImGui::PushItemWidth(100);
-	ImGui::InputFloat("Opacity Wave Trail", setVar<float>("opacity_wave_trail"));
-	ImGui::PopItemWidth();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Player", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Noclip", setVar<bool>("noclip"), "Allows the player to be invincible");
 	if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Noclip Player 1", setVar<bool>("noclip_P1"));
@@ -92,8 +120,10 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"), "Removes the blending from the wave trail");
 	CrystalClient::ImToggleable("Solid Regular Trail", setVar<bool>("solid_trail"), "Removes the blending from the regular trail");
 	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"), "Makes the player icon invisible");
+	windowPreEnd();
 	ImGui::End();
 
+	windowPreBegin(sortIndex);
 	ImGui::Begin("Icon", NULL, window_flags);
 	if (ImGui::BeginMenu("Player 1")) {
 		CrystalClient::ImIconEffect("Player Color 1", "P1C1");
@@ -112,8 +142,10 @@ void CrystalClient::drawGUI() {
 		ImGui::EndMenu();
 	}
 	CrystalClient::ImToggleable("Solid Glow Color", setVar<bool>("solid_glow"), "Removes the blending from the icon glow");
+	windowPreEnd();
 	ImGui::End();
 
+	windowPreBegin(sortIndex);
 	ImGui::Begin("Level", NULL, window_flags);
 	CrystalClient::ImExtendedToggleable("Hitbox Viewer", setVar<bool>("hitboxes"), "Shows the hitboxes of every object in a level");
 	if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -176,12 +208,16 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-    ImGui::End();
-    ImGui::Begin("Display", NULL, window_flags);
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Display", NULL, window_flags);
 	CrystalClient::ImToggleable("Testmode Label", setVar<bool>("testmode_label"));
+	ImGui::PushItemWidth(100);
 	ImGui::InputFloat("Display Scale", setVar<float>("display_scale"));
 	ImGui::InputFloat("Display Opacity", setVar<float>("display_opacity"));
 	ImGui::InputFloat("Display Spacing", setVar<float>("display_space"));
+	ImGui::PopItemWidth();
 	CrystalClient::ImExtendedToggleable("Cheat Indicator", setVar<bool>("cheat_indicator"), "Displays whether you are cheating or not");
 	if (ImGui::BeginPopupModal("Cheat Indicator", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Combo("Position", setVar<int>("label_pos-0"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -302,8 +338,10 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-    ImGui::End();
-    ImGui::Begin("Customization", NULL, window_flags);
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Customization", NULL, window_flags);
 	CrystalClient::Im4FloatColor("Accent Color", "lightColor");
 	CrystalClient::Im4FloatColor("Base Color", "BGcolor");
 	CrystalClient::ImExtendedToggleable("Different Titlebar Color", setVar<bool>("diff_title"));
@@ -315,8 +353,12 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("Window Borders", setVar<bool>("border"));
-    ImGui::End();
-    ImGui::Begin("Bypasses", NULL, window_flags);
+	CrystalClient::ImToggleable("Force Manual Positioning", setVar<bool>("manual_positioning"), "Stops rearranging the windows whenever you open the game");
+	if (ImGui::Button("Rearrange Windows")) *setTempVar<int>("should-sort-windows") = 3;
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Bypasses", NULL, window_flags);
 	CrystalClient::ImToggleable("Anticheat Bypass", setVar<bool>("anticheat"), "Disables the game's Anticheat system");
 	CrystalClient::ImToggleable("Unlock All", setVar<bool>("unlock_all"), "Unlock all icons in the game");
 	CrystalClient::ImToggleable("Scale Hack", setVar<bool>("scalehack"), "Bypass the scaling limit for objects");
@@ -327,24 +369,22 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Editor Zoom Bypass", setVar<bool>("editor_zoom"), "Bypass the limits on the zoom in the editor");
 	CrystalClient::ImToggleable("Level Edit Bypass", setVar<bool>("level_edit"), "Allows you to edit any level");
 	CrystalClient::ImToggleable("Load Failed Bypass", setVar<bool>("load_failed"), "Bypasses the LOAD FAILED error in levels");
-    ImGui::End();
-    ImGui::Begin("Global", NULL, window_flags);
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Global", NULL, window_flags);
 	ImGui::PushItemWidth(100);
     ImGui::InputFloat("##FPS Bypass", setVar<float>("FPS"));
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("FPS Bypass", setVar<bool>("FPS_bypass"));
-	/*
 	ImGui::PushItemWidth(100);
-	ImGui::InputFloat("##Unfocused FPS", setVar<float>("FPS_unfocused"));
+    ImGui::InputFloat("##Speedhack", setVar<float>("speed"));
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
-	CrystalClient::ImToggleable("Unfocused FPS", setVar<bool>("Unfocused_FPS"));
-	*/
-	ImGui::PushItemWidth(100);
-    ImGui::InputFloat("Speedhack", setVar<float>("speed"));
-	ImGui::PopItemWidth();
-	if (getVar<float>("speed") != 0) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
+	CrystalClient::ImToggleable("Speedhack", setVar<bool>("speedhack"));
+	if (getVar<float>("speed") != 0 && getVar<bool>("speedhack")) CCDirector::sharedDirector()->getScheduler()->setTimeScale(getVar<float>("speed"));
+	else CCDirector::sharedDirector()->getScheduler()->setTimeScale(1.0);
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
@@ -364,16 +404,20 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Challenge List Button", setVar<bool>("challengelist_button"), "Adds a challenge list button to the Search Menu");
 	CrystalClient::ImToggleable("Copy Song ID", setVar<bool>("copy_songID"), "Allows you to copy a song ID by clicking on it");
 	CrystalClient::ImToggleable("Copy Level ID Everywhere", setVar<bool>("copy_levelID"), "Allows you to copy a level ID by clicking on it in the editor");
-    ImGui::End();
-    ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Amethyst [BETA]", NULL, window_flags);
     CrystalClient::ImToggleable("Record", setVar<bool>("AT_record"), "Record a macro");
 	ImGui::SameLine();
     CrystalClient::ImToggleable("Replay", setVar<bool>("AT_replay"), "Replay a macro");
 	CrystalClient::ImToggleable("ClickBot", setVar<bool>("clickbot"), "Plays fake clicks for a macro");
 	ImGui::SameLine();
 	CrystalClient::ImToggleable("Delta Lock", setVar<bool>("delta_lock"), "Locks the time to the framerate");
+	ImGui::PushItemWidth(150);
 	ImGui::InputFloat("ClickBot Volume", setVar<float>("clickbot_volume"));
 	CrystalClient::ImTextbox("Macro Name", setVar<std::string>("AT_macro_name"));
+	ImGui::PopItemWidth();
     if (ImGui::Button("Save Macro")) {
 		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
 		currentMacro.saveToFile(filename.c_str());
@@ -387,8 +431,10 @@ void CrystalClient::drawGUI() {
     if (ImGui::Button("Clear Macro")) {
         currentMacro.clearData();
     }
-    ImGui::End();
-    ImGui::Begin("Shortcuts", NULL, window_flags);
+    windowPreEnd();
+	ImGui::End();
+    windowPreBegin(sortIndex);
+	ImGui::Begin("Shortcuts", NULL, window_flags);
     if (ImGui::Button("Open Songs Folder")) {
         system("open ~/Library/Caches");
     }
@@ -402,8 +448,10 @@ void CrystalClient::drawGUI() {
         OptionsLayer::addToCurrentScene(false);
     }
     ImGui::Separator();
+	ImGui::PushItemWidth(150);
     ImGui::Combo("Keybind", &Shortcuts::get()->currentKey, Shortcuts::get()->keybindings, IM_ARRAYSIZE(Shortcuts::get()->keybindings));
     ImGui::Combo("Mod to Switch", &Shortcuts::get()->currentMod, Shortcuts::get()->modbindings, IM_ARRAYSIZE(Shortcuts::get()->modbindings));
+	ImGui::PopItemWidth();
     if (ImGui::Button("Add Keybind")) {
         Shortcuts::get()->keybinds.push_back({Shortcuts::get()->currentKey, Shortcuts::get()->currentMod});
     }
@@ -418,10 +466,14 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::Separator();
 	}
-    ImGui::End();
+    windowPreEnd();
+	ImGui::End();
+	windowPreBegin(sortIndex);
 	ImGui::Begin("Variable Changer", NULL, window_flags);
+	ImGui::PushItemWidth(150);
     ImGui::Combo("Variable", &Shortcuts::get()->currentVar, Shortcuts::get()->playerVars, IM_ARRAYSIZE(Shortcuts::get()->playerVars));
 	ImGui::InputFloat("Value", &Shortcuts::get()->currentValue);
+	ImGui::PopItemWidth();
     if (ImGui::Button("Add Change")) {
         Shortcuts::get()->variables.push_back({Shortcuts::get()->currentVar, Shortcuts::get()->currentValue});
     }
@@ -436,19 +488,45 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::Separator();
 	}
-    ImGui::End();
+    windowPreEnd();
+	ImGui::End();
+	windowPreBegin(sortIndex);
 	ImGui::Begin("Internal Renderer", NULL, window_flags);
 	CrystalClient::ImToggleable("Render Recording", setVar<bool>("AT_render"));
 	CrystalClient::ImToggleable("Include Displays", setVar<bool>("include_displays"));
+	ImGui::PushItemWidth(150);
 	CrystalClient::ImTextbox("Video Name", setVar<std::string>("video_name"));
 	ImGui::InputInt("Width", setVar<int>("target_width"));
 	ImGui::InputInt("Height", setVar<int>("target_height"));
 	ImGui::InputInt("FPS", setVar<int>("target_FPS"));
+	ImGui::PopItemWidth();
+	windowPreEnd();
 	ImGui::End();
+	windowPreBegin(sortIndex);
 	ImGui::Begin("Screenshots", NULL, window_flags);
 	//CrystalClient::ImToggleable("Include Players", setVar<bool>("SS_players"));
 	CrystalClient::ImToggleable("Include Displays", setVar<bool>("SS_displays"), "Include Display texts in your Screenshot");
+	windowPreEnd();
 	ImGui::End();
+
+	if (getTempVar<int>("should-sort-windows") == 2) {
+		ImGuiIO& io = ImGui::GetIO();
+		stbrp_context ctx;
+		auto nodeCount = static_cast<int>(io.DisplaySize.x * 2.f);
+		auto* nodes = new stbrp_node[nodeCount];
+		memset(nodes, 0, sizeof(stbrp_node) * nodeCount);
+
+		stbrp_init_target(&ctx, static_cast<int>(io.DisplaySize.x), static_cast<int>(io.DisplaySize.y), nodes, nodeCount);
+		stbrp_pack_rects(&ctx, sortRects.data(), static_cast<int>(sortRects.size()));
+
+		delete[] nodes;
+	}
+	else if(getTempVar<int>("should-sort-windows") == 1) {
+		sortRects.clear();
+	}
+
+	if (getTempVar<int>("should-sort-windows") > 0)
+		*setTempVar<int>("should-sort-windows") -= 1;
 }
 
 void CrystalClient::addTheme(bool first) {
@@ -456,6 +534,7 @@ void CrystalClient::addTheme(bool first) {
     ImVec4* colors = ImGui::GetStyle().Colors;
 
 	if (first) setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
+	if (first) *setTempVar<int>("should-sort-windows") = 3;
 
     *setVar<float>("darkColor-red") = (getVar<float>("lightColor-red") * 0.5f);
     *setVar<float>("darkColor-green") = (getVar<float>("lightColor-green") * 0.5f);
@@ -494,6 +573,10 @@ void CrystalClient::addTheme(bool first) {
 }
 
 class $modify(MenuLayer) {
+	bool versionMatch() {
+		return (getVar<int>("ver-major") == Mod::get()->getVersion().getMajor() && getVar<int>("ver-minor") == Mod::get()->getVersion().getMinor() && getVar<int>("ver-patch") == Mod::get()->getVersion().getPatch());
+	}
+
 	bool init() {
 		if (!ghc::filesystem::exists(macros)) {
 			ghc::filesystem::create_directories(macros);
@@ -518,6 +601,48 @@ class $modify(MenuLayer) {
 		std::fstream input(geode::Mod::get()->getConfigDir().append("Config").append("GH_config-01.json"));
 
 		if (!input) CrystalClient::get()->firstLoad(this);
+
+		if (!versionMatch()) {
+			modsMapB = {
+				{"noclip_P1", true},
+				{"noclip_P2", true}
+			};
+			modsMapI = {
+				{"AC_pushFrame", 1},
+				{"AC_releaseFrame", 1},
+				{"acc_percentage_decimals", 2}
+			};
+			modsMapF = {
+				{"wave_size", 2.1},
+				{"FPS", 60.0},
+				{"FPS_unfocused", 15.0},
+				{"display_scale", 1.0},
+				{"display_opacity", 200.0},
+				{"display_space", 20.0},
+				{"speed", 1.0},
+				{"BGcolor-red", 0.12f},
+				{"BGcolor-blue", 0.12f},
+				{"BGcolor-green", 0.12f},
+				{"BGcolor-alpha", 1.0f},
+				{"lightColor-red", 0.262715f},
+				{"lightColor-blue", 0.624691f},
+				{"lightColor-green", 0.818605f},
+				{"lightColor-alpha", 1.0f},
+				{"clickbot_volume", 100.0f}
+			};
+			modsMapS = {};
+			saveConfigToFile();
+			FLAlertLayer* mismatch = FLAlertLayer::create(
+				"Version Mismatch",
+				"Your Crystal save file's version didn't match your current one, so your save file has been cleared. Thank you for using Crystal Client!",
+				"OK"
+			);
+			mismatch->m_scene = this;
+			mismatch->show();
+			*setVar<int>("ver-major") = Mod::get()->getVersion().getMajor();
+			*setVar<int>("ver-minor") = Mod::get()->getVersion().getMinor();
+			*setVar<int>("ver-patch") = Mod::get()->getVersion().getPatch();
+		}
 
 		return true;
 	}
