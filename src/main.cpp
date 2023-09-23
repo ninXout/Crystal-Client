@@ -648,47 +648,7 @@ class $modify(MenuLayer) {
 	}
 };
 while (true) {
-	if () {
-modsMapF = {
-    {"wave_size", 2.1},
-    {"opacity_wave_trail", 255},
-    {"FPS", 60.0},
-    {"FPS_unfocused", 15.0},
-    {"display_scale", 1.0},
-    {"display_opacity", 200.0},
-    {"display_space", 20.0},
-    {"speed", 1.0},
-    {"BGcolor-red", 0.12f},
-    {"BGcolor-blue", 0.12f},
-    {"BGcolor-green", 0.12f},
-    {"BGcolor-alpha", 1.0f},
-    {"lightColor-red", 0.262715f},
-    {"lightColor-blue", 0.624691f},
-    {"lightColor-green", 0.818605f},
-    {"lightColor-alpha", 1.0f},
-    {"clickbot_volume", 100.0f}
-};
+	if (modsMapF["speed"] == 0.0) {
+		modsMapF["speed"] == 1.0)
 	}
 }
-
-
-
-//inline std::map<std::string, float> modsMapF = {
-//    {"wave_size", 2.1},
-//    {"opacity_wave_trail", 255},
-//    {"FPS", 60.0},
-//    {"FPS_unfocused", 15.0},
-//    {"display_scale", 1.0},
-//    {"display_opacity", 200.0},
-//    {"display_space", 20.0},
-//    {"speed", 1.0},
-//    {"BGcolor-red", 0.12f},
-//    {"BGcolor-blue", 0.12f},
-//    {"BGcolor-green", 0.12f},
-//    {"BGcolor-alpha", 1.0f},
-//    {"lightColor-red", 0.262715f},
-//    {"lightColor-blue", 0.624691f},
-//    {"lightColor-green", 0.818605f},
-//    {"lightColor-alpha", 1.0f},
-//    {"clickbot_volume", 100.0f}
-//};
