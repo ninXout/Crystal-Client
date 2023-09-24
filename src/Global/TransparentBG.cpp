@@ -49,16 +49,6 @@ class $modify(LeaderboardsLayer) {
     }
 };
 
-class $modify(LocalLevelManager) {
-	bool init() {
-		LocalLevelManager::init();
-
-        if (getVar<bool>("transparent_BG")) CrystalClient::get()->addTransparentBG(this);
-
-        return true;
-    }
-};
-
 class $modify(LevelSearchLayer) {
 	virtual bool init() {
 		LevelSearchLayer::init();

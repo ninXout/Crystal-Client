@@ -4,6 +4,7 @@
 
 CCLayer* endLayer;
 
+#ifdef GEODE_IS_MACOS
 struct LoadFromLastCP : Modify<LoadFromLastCP, EndLevelLayer> {
 	void onLastCP(CCObject* sender) {
 		*setTempVar<bool>("should_quit") = false;
@@ -70,3 +71,5 @@ class $modify(PlayLayer) {
 		}
 	}
 };
+
+#endif

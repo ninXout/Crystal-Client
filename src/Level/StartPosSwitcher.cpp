@@ -75,11 +75,11 @@ class $modify(SPPlayLayer, PlayLayer) {
         g_startPosText->setScale(0.5);
         g_startPosText->setOpacity(50);
 
-        rightButton->::SPPlayLayer::setPosition(win_size.width / 2 - 30, corner - 275);
+        rightButton->setPosition(ccp(win_size.width / 2 - 30, corner - 275));
         rightButton->setScale(0.5);
         rightButton->setOpacity(50);
         
-        leftButton->::SPPlayLayer::setPosition(win_size.width / 2 + 30, corner - 275);
+        leftButton->setPosition(ccp(win_size.width / 2 + 30, corner - 275));
         leftButton->setFlipX(true);
         leftButton->setScale(0.5);
         leftButton->setOpacity(50);

@@ -4,7 +4,10 @@
 #include <cocos2d.h>
 #include <Geode/utils/cocos.hpp>
 #include <unordered_map>
+
+#ifdef GEODE_IS_MACOS
 #include <dispatch/dispatch.h>
+#endif
 
 using namespace geode::prelude;
 

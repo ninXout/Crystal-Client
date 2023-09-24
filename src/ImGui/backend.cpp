@@ -29,14 +29,16 @@ ImGuiCocos& ImGuiCocos::draw(std::function<void()> fun) {
 }
 
 void ImGuiCocos::toggle() {
-	auto platform = reinterpret_cast<PlatformToolbox*>(AppDelegate::get());
     if (!m_visible) {
-		platform->showCursor();
+#ifdef GEODE_IS_MACOS
+		PlatformToolbox::showCursor();
+#endif
 		CrystalClient::get()->addTheme(false);
 	}
     if (m_visible) {
 		CrystalClient::get()->refreshPatches();
-		CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
+		if (getTempVar<float>("target_DT"))
+			CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
 		Shortcuts::get()->refreshKeybinds(true);
 		saveConfigToFile();
 		if (PlayLayer::get()) {
@@ -45,7 +47,9 @@ void ImGuiCocos::toggle() {
 			}
 		}
 		if (PlayLayer::get() && thelayer && getTempVar<bool>("is-paused")) thelayer->setVisible(!getVar<bool>("hide_pause"));
-        if (PlayLayer::get() && !getTempVar<bool>("is-paused") && !PlayLayer::get()->m_hasLevelCompleteMenu) platform->hideCursor();
+#ifdef GEODE_IS_MACOS
+        if (PlayLayer::get() && !getTempVar<bool>("is-paused") && !PlayLayer::get()->m_hasLevelCompleteMenu) PlatformToolbox::hideCursor();
+#endif
     }
 	this->setVisible(!m_visible);
 }

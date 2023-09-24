@@ -1,12 +1,15 @@
 #include "../Includes.hpp"
 #include "Renderer.hpp"
-#include "../subprocess.hpp"
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include <thread>
 
 using namespace geode::prelude;
+#ifdef GEODE_IS_MACOS
+#include "../subprocess.hpp"
+
 using namespace subprocess::literals;
+#endif
 
 FILE * pFile;
 Recorder record;
@@ -22,6 +25,7 @@ std::string getOffsetTime(float time) {
 }
 
 void Recorder::start(const std::string& path, const std::string& temp) {
+#ifdef GEODE_IS_MACOS
     m_recording = true;
     m_frame_has_data = false;
     init_quality();
@@ -105,6 +109,7 @@ void Recorder::start(const std::string& path, const std::string& temp) {
         ghc::filesystem::remove(temp);
         log::info("deleted temp");
     }).detach();
+#endif
 }
 
 void Recorder::stop() {
