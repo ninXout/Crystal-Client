@@ -19,16 +19,14 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 
-set(GEODE_LINK_NIGHTLY ON)
-add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
-
-include(cmake/CPM.cmake)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/build)
 
 CPMAddPackage("gh:ocornut/imgui#c191faf")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_SOURCE_DIR})
-target_compile_options(${PROJECT_NAME} PRIVATE -fno-inline)
+if (APPLE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fno-inline)
+endif()
 
 target_sources(${PROJECT_NAME} PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -40,7 +38,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/glew32.lib)
+    target_link_libraries(${PROJECT_NAME} opengl32)
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL -framework Cocoa")
 elseif(ANDROID)
