@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include <Geode/Modify.hpp>
 #include <vector>
 
 namespace tulip {

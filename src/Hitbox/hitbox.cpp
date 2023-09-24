@@ -1,5 +1,4 @@
 #include <Geode/Geode.hpp>
-#include <Geode/Modify.hpp>
 #include "../CrystalProfile.hpp"
 #include "HitboxNode.hpp"
 
