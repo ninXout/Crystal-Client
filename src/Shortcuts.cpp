@@ -1,7 +1,6 @@
 #include "Shortcuts.hpp"
 #include "CrystalProfile.hpp"
 #include "Hitbox/HitboxNode.hpp"
-#include <Geode/modify/PlayLayer.hpp>
 #include "Level/StartPosSwitcher.hpp"
 #include "CrystalClient/CrystalClient.hpp"
 #include "Renderer/Screenshot.hpp"
@@ -152,6 +151,8 @@ void Shortcuts::updateVariables() {
     }
 }
 
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
+
 class $modify(CCKeyboardDispatcher) {
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
         Shortcuts::get()->updateKeybinds(key, down, true);
@@ -159,6 +160,8 @@ class $modify(CCKeyboardDispatcher) {
         return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
     }
 };
+
+#include <Geode/modify/PlayLayer.hpp>
 
 class $modify(PlayLayer) {
     void update(float dt) {
@@ -168,6 +171,8 @@ class $modify(PlayLayer) {
     }
 };
 
+#include <Geode/modify/UILayer.hpp>
+
 class $modify(UILayer) {
     void keyDown(cocos2d::enumKeyCodes key) {
         Shortcuts::get()->updateKeybinds(key, true, false);
@@ -175,6 +180,8 @@ class $modify(UILayer) {
         UILayer::keyDown(key);
     }
 };
+
+#include <Geode/modify/GJBaseGameLayer.hpp>
 
 class $modify(GJBaseGameLayer) {
     void pushButton(int i, bool pl) {
