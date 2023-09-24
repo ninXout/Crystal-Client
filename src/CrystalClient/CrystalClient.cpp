@@ -228,6 +228,7 @@ void CrystalClient::addTransparentBG(CCNode* layer) {
 }
 
 void CrystalClient::initPatches() {
+#ifdef GEODE_IS_MACOS
 	// scale hack
 	scaleHack1 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D811), {static_cast<unsigned char>('\xeb')}).unwrap();
 	scaleHack2 = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x18D7D9), {static_cast<unsigned char>('\xeb')}).unwrap();
@@ -266,6 +267,7 @@ void CrystalClient::initPatches() {
     	static_cast<unsigned char>('\x00'), 
     	static_cast<unsigned char>('\x90')
 	}).unwrap();
+#endif
 }
 
 void CrystalClient::refreshPatches() {
