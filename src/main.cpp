@@ -354,7 +354,7 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImToggleable("Window Borders", setVar<bool>("border"));
 	CrystalClient::ImToggleable("Force Manual Positioning", setVar<bool>("manual_positioning"), "Stops rearranging the windows whenever you open the game");
-	if (ImGui::Button("Rearrange Windows")) *setTempVar<int>("should-sort-windows") = 3;
+	//if (ImGui::Button("Rearrange Windows")) *setTempVar<int>("should-sort-windows") = 3;
     windowPreEnd();
 	ImGui::End();
     windowPreBegin(sortIndex);
@@ -490,6 +490,7 @@ void CrystalClient::drawGUI() {
 	}
     windowPreEnd();
 	ImGui::End();
+	/*
 	windowPreBegin(sortIndex);
 	ImGui::Begin("Internal Renderer", NULL, window_flags);
 	CrystalClient::ImToggleable("Render Recording", setVar<bool>("AT_render"));
@@ -503,6 +504,7 @@ void CrystalClient::drawGUI() {
 	windowPreEnd();
 	ImGui::End();
 	windowPreBegin(sortIndex);
+	*/
 	ImGui::Begin("Screenshots", NULL, window_flags);
 	//CrystalClient::ImToggleable("Include Players", setVar<bool>("SS_players"));
 	CrystalClient::ImToggleable("Include Displays", setVar<bool>("SS_displays"), "Include Display texts in your Screenshot");
@@ -590,13 +592,6 @@ class $modify(MenuLayer) {
 		if (!ghc::filesystem::exists(betterBG)) {
 			ghc::filesystem::create_directory(betterBG);
 		}
-
-#ifdef GEODE_IS_MACOS
-		std::string renderInit = "chmod +x " + geode::Mod::get()->getConfigDir() / "Amethyst" / "Renderer" / "ffmpeg".string();
-		system(renderInit.c_str());
-		std::string pathInit = "export PATH='" + Mod::get()->getConfigDir() / "Amethyst" / "Renderer".string() + ":${PATH}'";
-		system(pathInit.c_str());
-#endif
 
 		if (!MenuLayer::init()) return false;
 

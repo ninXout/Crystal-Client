@@ -1,10 +1,10 @@
 {
 	"geode": "1.0.0",
-	"version": "v4.0.0",
+	"version": "v4.0.1",
 	"id": "ninxout.crystalclient",
 	"name": "Crystal Client",
 	"developer": "ninXout",
-	"description": "Premium MacOS Modded Client",
+	"description": "Premium Cross-Platform Modded Client",
 	"resources": {
         "files": [
             "resources/Lexend.ttf"

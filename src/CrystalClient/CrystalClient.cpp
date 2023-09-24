@@ -29,6 +29,22 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string toolti
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+	bool no_win = (tooltip == "This mod is not available for Windows");
+
+	ImVec4 regularColor;
+	if (no_win) {
+		regularColor = ImVec4(0.85f, 0.85f, 0.85f, 0.1f);
+	} else {
+		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+	}
+
+	ImVec4 activeColor;
+	if (no_win) {
+		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.1f);
+	} else {
+		activeColor = *v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f);
+	}
+
 	float height = ImGui::GetFrameHeight();
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
@@ -38,22 +54,18 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string toolti
 	ImGui::SetItemAllowOverlap();
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y));
-	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
-	if (ImGui::IsItemClicked()) *v = !*v;
+	ImGui::TextColored(regularColor, "%s", str_id);
+	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
 	ImGuiContext& gg = *GImGui;
 	float ANIM_SPEED = 0.085f;
 	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))// && g.LastActiveIdTimer < ANIM_SPEED)
 		float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
 	if (ImGui::IsItemHovered()) {
 		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
-		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * rounding);
+		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(activeColor), height * rounding);
 	} else {
-		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * rounding);
+		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(regularColor), height * rounding);
 	}
-	
-	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
-	//draw_list->AddRectFilled(ImVec2((p.x + center.x) - 9.0f, p.y + 1.5f),
-		//ImVec2((p.x + (width / 2) + center.x) - 9.0f, p.y + height - 1.5f), IM_COL32(255, 255, 255, 255), height * rounding);
 }
 
 void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip) {

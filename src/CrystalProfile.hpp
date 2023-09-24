@@ -53,7 +53,9 @@ inline std::map<std::string, std::string> modsMapS = {};
 
 inline std::map<std::string, bool> TEMPmodsMapB = {};
 inline std::map<std::string, int> TEMPmodsMapI = {};
-inline std::map<std::string, float> TEMPmodsMapF = {};
+inline std::map<std::string, float> TEMPmodsMapF = {
+    {"target_DT", 0.01666666666f}
+};
 
 template <typename T>
 T getVar(std::string const& key);
