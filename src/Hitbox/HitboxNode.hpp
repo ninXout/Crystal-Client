@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace tulip {
-	class __attribute__((visibility("hidden"))) HitboxNode : public cocos2d::CCDrawNode {
+	class HitboxNode : public cocos2d::CCDrawNode {
 	public:
 		HitboxNode();
 		static HitboxNode* create();

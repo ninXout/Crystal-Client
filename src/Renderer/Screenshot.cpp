@@ -1,5 +1,6 @@
 #include "Screenshot.hpp"
 
+#ifdef GEODE_IS_MACOS
 Screenshot Screenshot::create() {
     Screenshot ret;
     return ret;
@@ -78,3 +79,4 @@ void Screenshot::saveImage(bool toClipboard) {
     auto img = renderer->newCCImage(true);
     CGImageWriteToFile(CGImageFromCCImage(img));    
 }
+#endif

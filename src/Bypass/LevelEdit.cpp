@@ -9,13 +9,13 @@ class $modify(LevelTools) {
 	}
 };
 
-class $modify(PauseLayer) {
+class $modify(MyPauseLayer, PauseLayer) {
 	static PauseLayer* create(bool isPaused) {
 		auto pause = PauseLayer::create(isPaused);
 		if (getVar<bool>("level_edit")) {
 			auto editorSprite = CCSprite::createWithSpriteFrameName("GJ_editBtn_001.png");
 			auto menu = static_cast<CCMenu*>(pause->getChildByID("center-button-menu"));
-			auto editorButton = CCMenuItemSpriteExtra::create(editorSprite, pause, menu_selector(PauseLayer::goEdit));
+			auto editorButton = CCMenuItemSpriteExtra::create(editorSprite, pause, menu_selector(MyPauseLayer::goEditReal));
 
 			editorButton->setID("crystal-edit-button");
 
@@ -42,5 +42,9 @@ class $modify(PauseLayer) {
 			}
 		}
 		return pause;
+	}
+
+	void goEditReal(CCObject*) {
+		this->goEdit();
 	}
 };

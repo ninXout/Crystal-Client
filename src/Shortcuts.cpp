@@ -79,7 +79,9 @@ void Shortcuts::executeBinds(int current, bool down, bool global) {
                 }
                 break;
             case 14:
+            #ifdef GEODE_IS_MACOS
                 if (down) Screenshot::create().saveImage(false);
+            #endif
                 break;
         }
     } else {

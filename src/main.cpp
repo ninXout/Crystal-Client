@@ -419,12 +419,12 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImTextbox("Macro Name", setVar<std::string>("AT_macro_name"));
 	ImGui::PopItemWidth();
     if (ImGui::Button("Save Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
+		std::string filename = (geode::Mod::get()->getConfigDir() / "Amethyst" / "Macros" / (getVar<std::string>("AT_macro_name") + ".thyst")).string();
 		currentMacro.saveToFile(filename.c_str());
 	}
 	ImGui::SameLine();
     if (ImGui::Button("Load Macro")) {
-		std::string filename = (std::string)geode::Mod::get()->getConfigDir() + "/Amethyst/Macros/" + getVar<std::string>("AT_macro_name") + ".thyst";
+		std::string filename = (geode::Mod::get()->getConfigDir() / "Amethyst" / "Macros" / (getVar<std::string>("AT_macro_name") + ".thyst")).string();
 		currentMacro = AmethystMacro::createFromFile(filename.c_str(), false);
 	}
     ImGui::SameLine();
@@ -533,7 +533,7 @@ void CrystalClient::addTheme(bool first) {
     ImGuiStyle * style = &ImGui::GetStyle();
     ImVec4* colors = ImGui::GetStyle().Colors;
 
-	if (first) setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").c_str(), 14.0f);
+	if (first) setupFonts((Mod::get()->getResourcesDir() / "Lexend.ttf").string().c_str(), 14.0f);
 	if (first) *setTempVar<int>("should-sort-windows") = 3;
 
     *setVar<float>("darkColor-red") = (getVar<float>("lightColor-red") * 0.5f);
@@ -591,10 +591,12 @@ class $modify(MenuLayer) {
 			ghc::filesystem::create_directory(betterBG);
 		}
 
-		std::string renderInit = "chmod +x " + std::string(geode::Mod::get()->getConfigDir() / "Amethyst" / "Renderer" / "ffmpeg");
+#ifdef GEODE_IS_MACOS
+		std::string renderInit = "chmod +x " + geode::Mod::get()->getConfigDir() / "Amethyst" / "Renderer" / "ffmpeg".string();
 		system(renderInit.c_str());
-		std::string pathInit = "export PATH='" + std::string(Mod::get()->getConfigDir() / "Amethyst" / "Renderer") + ":${PATH}'";
+		std::string pathInit = "export PATH='" + Mod::get()->getConfigDir() / "Amethyst" / "Renderer".string() + ":${PATH}'";
 		system(pathInit.c_str());
+#endif
 
 		if (!MenuLayer::init()) return false;
 

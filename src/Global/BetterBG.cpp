@@ -9,7 +9,7 @@ class $modify(MenuLayer) {
 		if (!MenuLayer::init()) return false;
 
         if (getVar<bool>("better_BG")) {
-			image = geode::Mod::get()->getConfigDir().append("BetterBG").append("background.jpg");
+			image = (geode::Mod::get()->getConfigDir() / "BetterBG" / "background.jpg").string();
 
 			if (ghc::filesystem::exists(image)) {
 				auto bg = this->getChildByID("main-menu-bg");

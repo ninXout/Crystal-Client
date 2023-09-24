@@ -1,6 +1,8 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include "../ImGui/ImGui.hpp"
+
+#ifdef GEODE_IS_MACOS
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreServices/CoreServices.h>
 
@@ -15,3 +17,4 @@ class $modify(PlayLayer) {
 		if (!ImGuiCocos::get().isVisible() && getVar<bool>("lock_cursor") && !m_hasCompletedLevel) CGWarpMouseCursorPosition(point);
     } 
 };
+#endif

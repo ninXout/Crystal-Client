@@ -2,7 +2,9 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include "Display.hpp"
+#ifdef GEODE_IS_MACOS
 #include <mach/mach_time.h>
+#endif
 
 std::chrono::time_point<std::chrono::high_resolution_clock> previousFrame, lastUpdate;
 float timeSum = 0.f;

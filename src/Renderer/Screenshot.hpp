@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../CrystalProfile.hpp"
+
+#ifdef GEODE_IS_MACOS
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
 #include <CoreServices/CoreServices.h>
@@ -14,3 +16,4 @@ class Screenshot {
         CGImageRef CGImageFromCCImage(CCImage* img);
         bool CGImageWriteToFile(CGImageRef image);
 };
+#endif
