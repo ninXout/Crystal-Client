@@ -94,6 +94,7 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("No Death Effect", setVar<bool>("no_death_effect"), "Removes the player's death effect");
+	CrystalClient::ImToggleable("Jump Hack", setVar<bool>("jump_hack"), "Allows you to always be able to jump");
 	//CrystalClient::ImToggleable("Instant Death Respawn", setVar<bool>("instant_death_respawn"));
 	CrystalClient::ImExtendedToggleable("Auto Reset", setVar<bool>("auto_reset"), "Resets the player at a certain percentage");
 	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -117,6 +118,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
+	CrystalClient::ImToggleable("No Wave Trail Behind", setVar<bool>("no_wt_behind"), "Removes the regular trail if you're a wave");
 	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"), "Removes the blending from the wave trail");
 	CrystalClient::ImToggleable("Solid Regular Trail", setVar<bool>("solid_trail"), "Removes the blending from the regular trail");
 	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"), "Makes the player icon invisible");

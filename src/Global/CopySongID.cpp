@@ -28,8 +28,12 @@ struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
                 auto buttonText = CCLabelBMFont::create(originalText->getString(), "bigFont.fnt");
                 auto button = CCMenuItemSpriteExtra::create(buttonText, this, menu_selector(CopySongID::onCopy));
 
-                songID = song->m_songID;
-
+                if (song) {
+                    songID = song->m_songID;
+                } else {
+                    songID = 0;
+                }
+                
                 if (nongLabel) {
                     nongLabel->setVisible(false);
                     std::string nongText = nongLabel->getString();
@@ -43,13 +47,13 @@ struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
                 if (defaultSong) {
                     button->setVisible(false);
                 }
-
+                
                 originalText->setVisible(false);
-
+                
                 button->setPosition({-284.450f, -191.950f});
                 button->setContentSize({208.0f, 20.0f});
                 button->setAnchorPoint(textanchor);
-                button->setID("copy-id-button");
+                button->setID("GH_copy-id-button");
 
                 buttonText->setScale(0.4f);
                 buttonText->setPosition(104.625f, 9.875f);
@@ -66,7 +70,7 @@ struct CopySongID :  Modify<CopySongID, CustomSongWidget> {
         if (getVar<bool>("copy_songID")) {
             auto nongLabel = static_cast<CCLabelBMFont*>(this->getChildByID("nongd-id-and-size-label"));
             auto menu = this->getChildByID("buttons-menu");
-            auto button = menu->getChildByID("copy-id-button");
+            auto button = menu->getChildByID("GH_copy-id-button");
 
             if (button) {
                 button->setVisible(true);
