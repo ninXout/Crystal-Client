@@ -42,12 +42,10 @@ class $modify(PlayLayer) {
 		if ((getVar<bool>("AT_replay") || getVar<bool>("AT_record")) && getTempVar<bool>("gameStarted")) currentMacro.updateReplay(dt, getVar<bool>("AT_replay"));
     }
 
-#ifdef GEODE_IS_MACOS
     void startGame() {
 		PlayLayer::startGame();
 		*setTempVar<bool>("gameStarted") = true;
 	}
-#endif
 
     void resetLevel() {
 		PlayLayer::resetLevel();

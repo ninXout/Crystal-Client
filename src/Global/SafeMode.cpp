@@ -8,12 +8,10 @@ bool shouldNotSave() {
 }
 
 class $modify(GJGameLevel) {
-#ifdef GEODE_IS_MACOS
 	void savePercentage(int percentage, bool practice, int clicks, int attemptTime, bool vfDChk) {
 		if (shouldNotSave()) return;
 		return GJGameLevel::savePercentage(percentage, practice, clicks, attemptTime, vfDChk);
 	}
-#endif
 };
 
 class $modify(PlayLayer) {

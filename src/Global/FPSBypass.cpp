@@ -38,10 +38,8 @@ class $modify(PlayLayer) {
 		if (!disableRender) PlayLayer::updateVisibility();
 	}
 
-#ifdef GEODE_IS_MACOS
     void startGame() {
         PlayLayer::startGame();
         CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
     }
-#endif
 };

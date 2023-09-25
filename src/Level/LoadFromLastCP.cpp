@@ -4,13 +4,20 @@
 
 CCLayer* endLayer;
 
-#ifdef GEODE_IS_MACOS
 struct LoadFromLastCP : Modify<LoadFromLastCP, EndLevelLayer> {
 	void onLastCP(CCObject* sender) {
 		*setTempVar<bool>("should_quit") = false;
 		endLayer->keyBackClicked();
 		if (PlayLayer::get()->m_checkpoints != nullptr) {
+		#ifdef GEODE_IS_MACOS
 			PlayLayer::get()->loadLastCheckpoint();
+		#else
+			// geode itself should define this function imo..
+			auto* pl = PlayLayer::get();
+			if (pl->m_checkpoints->count()) {
+				pl->loadFromCheckpoint(static_cast<CheckpointObject*>(pl->m_checkpoints->lastObject()));
+			}
+		#endif
 		}
 		PlayLayer::get()->resetLevel();
 	}
@@ -71,5 +78,3 @@ class $modify(PlayLayer) {
 		}
 	}
 };
-
-#endif
