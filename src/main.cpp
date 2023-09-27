@@ -30,7 +30,6 @@ void windowPreBegin(size_t& sortIndex) {
             (float)rect.y + sortPadding
         });
     }
-	//ImGui::SetNextWindowSize({-1.f, -1.f});
 }
 void windowPreEnd() {
 	if (getVar<bool>("manual_positioning")) return;
@@ -94,7 +93,7 @@ void CrystalClient::drawGUI() {
 		ImGui::EndPopup();
 	}
 	CrystalClient::ImToggleable("No Death Effect", setVar<bool>("no_death_effect"), "Removes the player's death effect");
-	CrystalClient::ImToggleable("Jump Hack", setVar<bool>("jump_hack"), "Allows you to always be able to jump");
+	//CrystalClient::ImToggleable("Jump Hack", setVar<bool>("jump_hack"), "Allows you to always be able to jump");
 	//CrystalClient::ImToggleable("Instant Death Respawn", setVar<bool>("instant_death_respawn"));
 	CrystalClient::ImExtendedToggleable("Auto Reset", setVar<bool>("auto_reset"), "Resets the player at a certain percentage");
 	if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -118,7 +117,7 @@ void CrystalClient::drawGUI() {
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("No Wave Trail Behind", setVar<bool>("no_wt_behind"), "Removes the regular trail if you're a wave");
+	CrystalClient::ImToggleable("No Trail Behind", setVar<bool>("no_wt_behind"), "Removes the regular trail when you are in wave");
 	CrystalClient::ImToggleable("Solid Wave Trail", setVar<bool>("solid_wave"), "Removes the blending from the wave trail");
 	CrystalClient::ImToggleable("Solid Regular Trail", setVar<bool>("solid_trail"), "Removes the blending from the regular trail");
 	CrystalClient::ImToggleable("Invisible Player", setVar<bool>("invis_player"), "Makes the player icon invisible");
@@ -189,7 +188,7 @@ void CrystalClient::drawGUI() {
 	CrystalClient::ImToggleable("Play Song on Level Page", setVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
 	CrystalClient::ImToggleable("Flipped Dual Controls", setVar<bool>("flipped_dual"), "Flips the 2 player inputs");
 	CrystalClient::ImToggleable("Mirrored Dual Controls", setVar<bool>("mirrored_dual"), "Mirrors the 2 player inputs");
-	CrystalClient::ImToggleable("Smart StartPos [BETA]", setVar<bool>("smart_startpos"), "Automatically sets up all StartPoses in a level");
+	//CrystalClient::ImToggleable("Smart StartPos [BETA]", setVar<bool>("smart_startpos"), "Automatically sets up all StartPoses in a level");
 	CrystalClient::ImToggleable("StartPos Switcher", setVar<bool>("startpos_switch"), "Allows you to switch between StartPoses while in a level");
 	CrystalClient::ImToggleable("Frame Stepper", setVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
 	CrystalClient::ImToggleable("Load from Last Checkpoint", setVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
@@ -356,7 +355,6 @@ void CrystalClient::drawGUI() {
 	}
 	CrystalClient::ImToggleable("Window Borders", setVar<bool>("border"));
 	CrystalClient::ImToggleable("Force Manual Positioning", setVar<bool>("manual_positioning"), "Stops rearranging the windows whenever you open the game");
-	//if (ImGui::Button("Rearrange Windows")) *setTempVar<int>("should-sort-windows") = 3;
     windowPreEnd();
 	ImGui::End();
     windowPreBegin(sortIndex);
@@ -389,16 +387,16 @@ void CrystalClient::drawGUI() {
 	else CCDirector::sharedDirector()->getScheduler()->setTimeScale(1.0);
 	CrystalClient::ImExtendedToggleable("Safe Mode", setVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
 	if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"));
+		CrystalClient::ImToggleable("Auto Safe Mode", setVar<bool>("auto_safe_mode"), "Only enables safe mode when you are cheating");
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
 	}
-	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"), "Locks your cursor to the game window");
+	CrystalClient::ImToggleable("Lock Cursor", setVar<bool>("lock_cursor"), "Locks your cursor to the game window", true);
 	CrystalClient::ImToggleable("No Pause on Unfocus", setVar<bool>("no_pause_unfocus"), "Keeps the game running when you are tabbed out");
 	CrystalClient::ImToggleable("Mute on Unfocus", setVar<bool>("mute_unfocus"), "Mutes the game when you are tabbed out");
-	CrystalClient::ImToggleable("No Transition", setVar<bool>("no_transition"), "Removes the fade transition when switching menus");
+	CrystalClient::ImToggleable("No Transition", setVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
 	CrystalClient::ImToggleable("Transparent BG", setVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
 	CrystalClient::ImToggleable("Transparent Lists", setVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
 	CrystalClient::ImToggleable("Better BG", setVar<bool>("better_BG"), "Adds an image to the background of the main menu");

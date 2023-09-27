@@ -24,24 +24,23 @@ void CrystalClient::setupFonts(const char* filepath, float size) {
 	m_defaultFont = result;
 }
 
-void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string tooltip) {
+void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string tooltip, bool no_win) {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-	bool no_win = (tooltip == "This mod is not available for Windows");
+	#ifdef GEODE_IS_MACOS
+		no_win = false;
+	#endif
 
 	ImVec4 regularColor;
-	if (no_win) {
-		regularColor = ImVec4(0.85f, 0.85f, 0.85f, 0.1f);
-	} else {
-		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
-	}
-
 	ImVec4 activeColor;
 	if (no_win) {
-		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.1f);
+		regularColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		tooltip = "This mod is not available for Windows";
 	} else {
+		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
 		activeColor = *v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f);
 	}
 
@@ -58,7 +57,7 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string toolti
 	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
 	ImGuiContext& gg = *GImGui;
 	float ANIM_SPEED = 0.085f;
-	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))// && g.LastActiveIdTimer < ANIM_SPEED)
+	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))
 		float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
 	if (ImGui::IsItemHovered()) {
 		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
@@ -68,35 +67,46 @@ void CrystalClient::ImToggleable(const char* str_id, bool* v, std::string toolti
 	}
 }
 
-void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip) {
+void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip, bool no_win) {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+	#ifdef GEODE_IS_MACOS
+		no_win = false;
+	#endif
+
+	ImVec4 regularColor;
+	ImVec4 activeColor;
+	if (no_win) {
+		regularColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		tooltip = "This mod is not available for Windows";
+	} else {
+		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+		activeColor = *v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f);
+	}
 
 	float height = ImGui::GetFrameHeight();
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
 	float rounding = 0;
 
-	//ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
-	//ImGui::SetItemAllowOverlap();
-	//ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y));
-	ImGui::TextColored(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
-	if (ImGui::IsItemClicked()) *v = !*v;
+	ImGui::TextColored(regularColor, "%s", str_id);
+	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
 	ImGuiContext& gg = *GImGui;
 	float ANIM_SPEED = 0.085f;
-	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))// && g.LastActiveIdTimer < ANIM_SPEED)
+	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id))
 		float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
 	if (ImGui::IsItemHovered()) {
 		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
-		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * rounding);
+		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(activeColor), height * rounding);
 	} else {
-		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * rounding);
+		draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(regularColor), height * rounding);
 	}
 	
 	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
-    //ImGui::SetItemAllowOverlap();
     ImGui::SameLine();
 	ImGui::PushStyleColor(0, *v ? colors[ImGuiCol_Button] : ImVec4(255,255,255,255));
     ImGui::PushStyleColor(21, ImVec4(0,0,0,0));
@@ -104,7 +114,6 @@ void CrystalClient::ImExtendedToggleable(const char* str_id, bool* v, std::strin
         ImGui::OpenPopup(str_id);
 	ImGui::PopStyleColor();
     ImGui::PopStyleColor();
-    // Adds 220 to each X for positioning and Adds 3 to each Y
 }
 
 void CrystalClient::Im4FloatColor(const char* label, std::string name) {

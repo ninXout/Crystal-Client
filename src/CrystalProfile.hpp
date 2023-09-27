@@ -23,7 +23,9 @@ enum LabelPos
 
 inline std::map<std::string, bool> modsMapB = {
     {"noclip_P1", true},
-    {"noclip_P2", true}
+    {"noclip_P2", true},
+    {"AC_player1", true},
+    {"AC_player2", true}
 };
 inline std::map<std::string, int> modsMapI = {
     {"AC_pushFrame", 1},

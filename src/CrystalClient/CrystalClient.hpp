@@ -15,10 +15,10 @@ class CrystalClient {
 protected:
     ImFont* m_defaultFont;
 
-    static void ImToggleable(const char* label, bool* toggle, std::string tooltip = "N/A");
+    static void ImToggleable(const char* label, bool* toggle, std::string tooltip = "N/A", bool no_win = false);
     static void ImSelectable(const char* label, int* toggle, int value);
     static void Im4FloatColor(const char* label, std::string name);
-    static void ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip = "N/A");
+    static void ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip = "N/A", bool no_win = false);
     static void ImIconEffect(const char* categoryName, std::string saveName);
     static void ImTextbox(const char* name, std::string* str);
 
