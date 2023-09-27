@@ -1,6 +1,9 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayerObject.hpp>
 
+// Until I fix this reliably, this is gone
+
+/*
 class $modify(PlayerObject) {
 	void pushButton(PlayerButton p0) {
 		if (getVar<bool>("jump_hack")) {
@@ -9,4 +12,4 @@ class $modify(PlayerObject) {
 
 		PlayerObject::pushButton(p0);
 	}
-};
+};*/
