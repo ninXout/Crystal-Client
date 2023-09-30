@@ -1,5 +1,7 @@
 #include "HidePause.hpp"
+#include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
 
 class $modify(PauseLayer) {
 	static PauseLayer* create(bool isPaused) {

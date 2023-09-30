@@ -1,6 +1,6 @@
 #include "../CrystalProfile.hpp"
 #include <Geode/modify/PlayLayer.hpp>
-#include "../ImGui/ImGui.hpp"
+#include <imgui-cocos.hpp>
 
 #ifdef GEODE_IS_MACOS
 #include <CoreGraphics/CoreGraphics.h>
