@@ -18,7 +18,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
-CPMAddPackage("gh:matcool/gd-imgui-cocos#2f98cc5")
+CPMAddPackage("gh:matcool/gd-imgui-cocos#3c7f7c2")
 
 if (APPLE)
     target_compile_options(${PROJECT_NAME} PRIVATE -fno-inline)

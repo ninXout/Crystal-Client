@@ -11,10 +11,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
+        config:          
         - name: Windows
           os: windows-latest
-          
+
         - name: macOS
           os: macos-latest
 
@@ -29,6 +29,7 @@ jobs:
         with:
           sdk: nightly
           combine: true
+          build-config: RelWithDebInfo
       
   package:
     name: Package builds
