@@ -31,7 +31,7 @@ class $modify(PlayLayer) {
             const auto cps = static_cast<int>(std::roundf(static_cast<float>(clicksCount) / timeSum));
             timeSum = 0.f;
             clicksCount = 0;
-            if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(std::to_string(cps).c_str());
+            if (getVar<bool>("cps_display")) Display::get()->getDisplay(2)->setString(std::to_string("CPS: " + cps).c_str());
         }
 
 		previousFrame = now;
