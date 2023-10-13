@@ -18,7 +18,7 @@ class $modify(PlayLayer) {
 
         PlayLayer::resetLevel();
 
-        std::string lastDeath = std::to_string((int)deathPercent);
+        std::string lastDeath = "Last Death: " + std::to_string((int)deathPercent) + "%";
         if (getVar<bool>("last_death")) Display::get()->getDisplay(4)->setString(lastDeath.c_str());
     }
 };
