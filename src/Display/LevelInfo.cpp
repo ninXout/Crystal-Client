@@ -32,7 +32,7 @@ class $modify(PlayLayer) {
         } else if (getVar<bool>("hide_ID") && getVar<bool>("level_info_author")) {
             levelInfo = levelName + " by " + levelAuthor;
         } else {
-            levelInfo = levelName + " (" + levelID + ")";
+            levelInfo = levelName + " ( ID:" + levelID + ")";
         }
         
         if (getVar<bool>("level_info")) Display::get()->getDisplay(11)->setString(levelInfo.c_str());
