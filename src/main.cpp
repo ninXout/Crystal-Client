@@ -213,7 +213,7 @@ void CrystalClient::drawGUI() {
 	ImGui::End();
     windowPreBegin(sortIndex);
 	ImGui::Begin("Display", NULL, window_flags);
-	CrystalClient::ImToggleable("Testmode Label", setVar<bool>("testmode_label"));
+	CrystalClient::ImToggleable("Disable Testmode Label", setVar<bool>("testmode_label"));
 	ImGui::PushItemWidth(100);
 	ImGui::InputFloat("Display Scale", setVar<float>("display_scale"));
 	ImGui::InputFloat("Display Opacity", setVar<float>("display_opacity"));
