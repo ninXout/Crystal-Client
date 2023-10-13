@@ -10,7 +10,7 @@ class $modify(PlayLayer) {
 			Display::get()->updateDisplay(i);
 		}
 
-        if (!getVar<bool>("testmode_label")) {
+        if (!getVar<bool>("testmode_label") != true) {
 			if (this->getChildrenCount()) {
 				CCArrayExt<CCNode*> children = this->getChildren();
 				for (auto* child : children) {
