@@ -34,7 +34,7 @@ class $modify(PlayLayer) {
             frames = 0;
             accumulate = 0;
 
-            std::string FPSstring = std::to_string(static_cast<int>(framerate));
+            std::string FPSstring = std::to_string("FPS: " + static_cast<int>(framerate));
 
             if (getVar<bool>("fps_display") && lastTime != static_cast<int>(m_time)) {
                 Display::get()->getDisplay(3)->setString(FPSstring.c_str());
