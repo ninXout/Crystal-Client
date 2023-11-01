@@ -1,65 +1,63 @@
-#pragma once
-
+#include <Geode/Geode.hpp>
 #include <imgui.h>
-#include <cocos2d.h>
-#include <Geode/utils/cocos.hpp>
-#include <unordered_map>
-
-#ifdef GEODE_IS_MACOS
-#include <dispatch/dispatch.h>
-#endif
 
 using namespace geode::prelude;
 
-class CrystalClient {
-protected:
-    ImFont* m_defaultFont;
+// TODO: this saving system kind of sucks, fix it
 
-    static void ImToggleable(const char* label, bool* toggle, std::string tooltip = "N/A", bool no_win = false);
-    static void ImSelectable(const char* label, int* toggle, int value);
-    static void Im4FloatColor(const char* label, std::string name);
-    static void ImExtendedToggleable(const char* str_id, bool* v, std::string tooltip = "N/A", bool no_win = false);
-    static void ImIconEffect(const char* categoryName, std::string saveName);
-    static void ImTextbox(const char* name, std::string* str);
+namespace CrystalClient {
+    inline std::map<std::string, bool> modsMapB = {
+        {"noclip_P1", true},
+        {"noclip_P2", true},
+        {"AC_player1", true},
+        {"AC_player2", true}
+    };
+    inline std::map<std::string, int> modsMapI = {
+        {"AC_pushFrame", 1},
+        {"AC_releaseFrame", 1},
+        {"acc_percentage_decimals", 2}
+    };
+    inline std::map<std::string, float> modsMapF = {
+        {"wave_size", 2.1},
+        {"opacity_wave_trail", 255},
+        {"FPS", 60.0},
+        {"FPS_unfocused", 15.0},
+        {"display_scale", 1.0},
+        {"display_opacity", 200.0},
+        {"display_space", 20.0},
+        {"speed", 1.0},
+        {"BGcolor-red", 0.12f},
+        {"BGcolor-blue", 0.12f},
+        {"BGcolor-green", 0.12f},
+        {"BGcolor-alpha", 1.0f},
+        {"lightColor-red", 0.262715f},
+        {"lightColor-blue", 0.624691f},
+        {"lightColor-green", 0.818605f},
+        {"lightColor-alpha", 1.0f},
+        {"clickbot_volume", 100.0f}
+    };
+    inline std::map<std::string, std::string> modsMapS = {};
 
-    void setupFonts(const char* filepath, float size);
+    inline std::map<std::string, bool> TEMPmodsMapB = {};
+    inline std::map<std::string, int> TEMPmodsMapI = {};
+    inline std::map<std::string, float> TEMPmodsMapF = {
+        {"target_DT", 0.01666666666f}
+    };
 
-public:
-    static CrystalClient* get();
+    //void saveConfig();
+    //void loadConfig();
 
-    void render();
-    void saveToFile();
-    void loadFromFile();
+    template <typename T>
+    T getSavedVar(std::string const& key);
 
-    void drawGUI();
-    void addTheme(bool first);
+    template <typename T>
+    T* setSavedVar(std::string const& key);
 
-    void firstLoad(CCNode* layer);
-    void noImage(CCNode* layer);
-    void noFoldersCB(CCNode* layer);
-    void emptyFoldersCB(CCNode* layer);
+    template <typename T>
+    T getTempVar(std::string const& key);
 
-    static cocos2d::enumKeyCodes shortcutKey(int key);
-    void arrangeText(int arrayLength, PlayLayer* menulay, bool first);
-    void setAnchoredPosition(CCLabelBMFont* label, int anchorPos, CCLayer* layer, bool first);
-    void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV);
-    cocos2d::_ccColor3B getRainbow(float offset);
-    static void addTransparentBG(CCNode* layer);
-    
-    void initPatches();
-    void refreshPatches();
+    template <typename T>
+    T* setTempVar(std::string const& key);
 
-    geode::Patch *scaleHack1;
-    geode::Patch *scaleHack2;
-
-    geode::Patch *objLimit1;
-    geode::Patch *objLimit2;
-    geode::Patch *objLimit3;
-
-    geode::Patch *customObjLimit1;
-    geode::Patch *customObjLimit2;
-    geode::Patch *customObjLimit3;
-
-    std::vector<const char*> plugins;
-    std::vector<bool*> pluginBools;
-};
+    ImVec4 VarToIV4(std::string key);
+}
