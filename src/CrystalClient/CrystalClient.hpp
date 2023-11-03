@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <imgui.h>
+#include "../Utilities/json.hpp"
 
 using namespace geode::prelude;
 
@@ -27,14 +28,18 @@ namespace CrystalClient {
         {"display_space", 20.0},
         {"speed", 1.0},
         {"BGcolor-red", 0.12f},
-        {"BGcolor-blue", 0.12f},
         {"BGcolor-green", 0.12f},
+        {"BGcolor-blue", 0.12f},
         {"BGcolor-alpha", 1.0f},
         {"lightColor-red", 0.262715f},
-        {"lightColor-blue", 0.624691f},
-        {"lightColor-green", 0.818605f},
+        {"lightColor-green", 0.624691f},
+        {"lightColor-blue", 0.818605f},
         {"lightColor-alpha", 1.0f},
-        {"clickbot_volume", 100.0f}
+        {"clickbot_volume", 100.0f},
+        {"noclipColor-red", 1.0f},
+        {"noclipColor-green", 0.0f},
+        {"noclipColor-blue", 0.0f},
+        {"noclipColor-alpha", 1.0f}
     };
     inline std::map<std::string, std::string> modsMapS = {};
 
@@ -44,8 +49,8 @@ namespace CrystalClient {
         {"target_DT", 0.01666666666f}
     };
 
-    //void saveConfig();
-    //void loadConfig();
+    void saveConfig();
+    void loadConfig();
 
     template <typename T>
     T getSavedVar(std::string const& key);
@@ -60,4 +65,6 @@ namespace CrystalClient {
     T* setTempVar(std::string const& key);
 
     ImVec4 VarToIV4(std::string key);
+    ccColor3B VarToCC3B(std::string key);
+    ccColor4B VarToCC4B(std::string key);
 }

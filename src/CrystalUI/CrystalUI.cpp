@@ -150,6 +150,7 @@ void CrystalUI::renderRightColumn() {
 					CrystalUI::toggle("Noclip Player 1", setSavedVar<bool>("noclip_P1"));
 					CrystalUI::toggle("Noclip Player 2", setSavedVar<bool>("noclip_P2"));
 					CrystalUI::toggle("Tint Screen on Death", setSavedVar<bool>("noclip_tint"));
+					CrystalUI::colorPicker("Tint Color", "noclipColor");
 					ImGui::PushItemWidth(100);
 					CrystalUI::inputFloat("##Noclip Accuracy Limit", setSavedVar<float>("accuracy_limit_num"));
 					ImGui::PopItemWidth();
@@ -166,22 +167,20 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Death Effect", setSavedVar<bool>("no_death_effect"), "Removes the player's death effect");
-				CrystalUI::toggleWithMenu("Auto Reset", setSavedVar<bool>("auto_reset"), "Resets the player at a certain percentage");
-				if (ImGui::BeginPopupModal("Auto Reset", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+				CrystalUI::toggleWithMenu("Auto Kill", setSavedVar<bool>("auto_reset"), "Kills the player at a certain percentage");
+				if (ImGui::BeginPopupModal("Auto Kill", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::PushItemWidth(100.f);
-					CrystalUI::inputFloat("Auto Reset Percentage", setSavedVar<float>("auto_reset_num"));
+					CrystalUI::inputFloat("Auto Kill Percentage", setSavedVar<float>("auto_reset_num"));
+					CrystalUI::toggle("Reset Level instead", "reset_instead");
 					ImGui::PopItemWidth();
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
 				}
-
-				CrystalUI::toggle("Respawn Bug Fix", setSavedVar<bool>("respawn_fix"), "Removes the lag when respawning");
-				CrystalUI::toggle("Practice Bug Fix", setSavedVar<bool>("practice_fix"), "Fixes the Practice Mode bug that allows you to hit an orb twice");
 				CrystalUI::toggle("No Rotation", setSavedVar<bool>("no_rotation"), "Stops the player from rotating");
-				CrystalUI::toggle("No Trail", setSavedVar<bool>("no_trail"), "Removes the regular trail");
-				CrystalUI::toggle("Trail Always On", setSavedVar<bool>("always_trail"), "Does the regular trail always visible");
+				CrystalUI::toggle("Trail Always Off", setSavedVar<bool>("no_trail"), "Removes the regular trail");
+				CrystalUI::toggle("Trail Always On", setSavedVar<bool>("always_trail"), "Makes the regular trail visible at all times");
 				CrystalUI::toggleWithMenu("No Wave Pulse", setSavedVar<bool>("no_wave_pulse"), "Stops the wave trail on a player from pulsing");
 				if (ImGui::BeginPopupModal("No Wave Pulse", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::PushItemWidth(100.f);
@@ -192,9 +191,7 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
-				CrystalUI::toggle("No Trail Behind", setSavedVar<bool>("no_wt_behind"), "Removes the regular trail when you are in wave");
 				CrystalUI::toggle("Solid Wave Trail", setSavedVar<bool>("solid_wave"), "Removes the blending from the wave trail");
-				CrystalUI::toggle("Solid Regular Trail", setSavedVar<bool>("solid_trail"), "Removes the blending from the regular trail");
 				CrystalUI::toggle("Invisible Player", setSavedVar<bool>("invis_player"), "Makes the player icon invisible");
 				ImGui::EndChild();
 
@@ -208,8 +205,6 @@ void CrystalUI::renderRightColumn() {
 				ImGui::BeginChild("icontab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
-
-				CrystalUI::toggle("test5", setSavedVar<bool>("test5"));
 
 				if (ImGui::BeginMenu("Player 1")) {
 					CrystalUI::iconEffect("Player Color 1", "P1C1");
@@ -551,15 +546,15 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 void CrystalUI::colorPicker(const char* label, std::string name) {
 	float col[4];
 	col[0] = getSavedVar<float>(name + "-red");
-	col[1] = getSavedVar<float>(name + "-blue");
-	col[2] = getSavedVar<float>(name + "-green"); 
+	col[1] = getSavedVar<float>(name + "-green");
+	col[2] = getSavedVar<float>(name + "-blue"); 
 	col[3] = getSavedVar<float>(name + "-alpha");
 
 	ImGui::ColorEdit4(label, col, ImGuiColorEditFlags_NoInputs);
 
 	*setSavedVar<float>(name + "-red") = col[0];
-	*setSavedVar<float>(name + "-blue") = col[1];
-	*setSavedVar<float>(name + "-green") = col[2];
+	*setSavedVar<float>(name + "-green") = col[1];
+	*setSavedVar<float>(name + "-blue") = col[2];
 	*setSavedVar<float>(name + "-alpha") = col[3];
 }
 
@@ -626,4 +621,11 @@ void CrystalUI::iconEffect(const char* categoryName, std::string saveName) {
 		}
 		ImGui::EndPopup();
 	}
+}
+
+void CrystalUI::hotkey(const char* label) {
+	ImGui::Text(label);
+	ImGui::SameLine();
+	if (waitingForKey) { ImGui::Button("Waiting for keypress..."); }
+	//else { if (ImGui::Button(CCKeyboardDispatcher::keyToString(queuedKey), ImVec2(80, 20))) { waitingForKey = true; } }
 }

@@ -36,42 +36,18 @@ class $modify(CCKeyboardDispatcher) {
 	bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
         if (down && key == KEY_Tab) {
             ImGuiCocos::get().toggle();
+			if (ImGuiCocos::get().isVisible()) {
+				CrystalClient::loadConfig();
+			} else {
+				CrystalClient::saveConfig();
+			}
             return true;
         }
-		/*
-		if (down && ImGuiCocos::get().isVisible()) {
-			switch (key) {
-				default: break;
-				case KEY_One:
-					CrystalUI::selectedTab = 0;
-					break;
-				case KEY_Two:
-					CrystalUI::selectedTab = 1;
-					break;
-				case KEY_Three:
-					CrystalUI::selectedTab = 2;
-					break;
-				case KEY_Four:
-					CrystalUI::selectedTab = 3;
-					break;
-				case KEY_Five:
-					CrystalUI::selectedTab = 4;
-					break;
-				case KEY_Six:
-					CrystalUI::selectedTab = 5;
-					break;
-				case KEY_Seven:
-					CrystalUI::selectedTab = 6;
-					break;
-				case KEY_Eight:
-					CrystalUI::selectedTab = 7;
-					break;
-				case KEY_Nine:
-					CrystalUI::selectedTab = 8;
-					break;
-			}
+		if (down && CrystalUI::waitingForKey) {
+			CrystalUI::queuedKey = key;
+			CrystalUI::waitingForKey = false;
 			return true;
-		}*/
+		}
         return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);
     }
 };

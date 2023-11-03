@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include "Fonts.hpp"
 
+
 using namespace geode::prelude;
 
 namespace CrystalUI {
@@ -15,6 +16,7 @@ namespace CrystalUI {
     void iconEffect(const char* categoryName, std::string saveName);
     void inputInt(const char* name, int* num);
     void inputFloat(const char* name, float* num);
+    void hotkey(const char* label);
 
     void renderLogo();
     void renderUser();
@@ -22,6 +24,8 @@ namespace CrystalUI {
     void renderRightColumn();
     void renderFavorites();
 
+    inline bool waitingForKey = false;
+    inline cocos2d::enumKeyCodes queuedKey = KEY_Escape;
     inline ImFont* font;
     inline int selectedTab = 0;
 }
