@@ -16,7 +16,8 @@ namespace CrystalClient {
     inline std::map<std::string, int> modsMapI = {
         {"AC_pushFrame", 1},
         {"AC_releaseFrame", 1},
-        {"acc_percentage_decimals", 2}
+        {"acc_percentage_decimals", 2},
+        {"noclip_acc_decimals", 2},
     };
     inline std::map<std::string, float> modsMapF = {
         {"wave_size", 2.1},

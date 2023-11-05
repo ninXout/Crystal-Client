@@ -171,7 +171,7 @@ void CrystalUI::renderRightColumn() {
 				if (ImGui::BeginPopupModal("Auto Kill", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::PushItemWidth(100.f);
 					CrystalUI::inputFloat("Auto Kill Percentage", setSavedVar<float>("auto_reset_num"));
-					CrystalUI::toggle("Reset Level instead", "reset_instead");
+					CrystalUI::toggle("Reset Level instead", setSavedVar<bool>("reset_instead"));
 					ImGui::PopItemWidth();
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -193,6 +193,23 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggle("Solid Wave Trail", setSavedVar<bool>("solid_wave"), "Removes the blending from the wave trail");
 				CrystalUI::toggle("Invisible Player", setSavedVar<bool>("invis_player"), "Makes the player icon invisible");
+				CrystalUI::toggle("Flipped Dual Controls", setSavedVar<bool>("flipped_dual"), "Flips the 2 player inputs");
+				CrystalUI::toggle("Mirrored Dual Controls", setSavedVar<bool>("mirrored_dual"), "Mirrors the 2 player inputs");
+				CrystalUI::toggle("StartPos Switcher", setSavedVar<bool>("startpos_switch"), "Allows you to switch between StartPoses while in a level");
+				//CrystalUI::toggle("Frame Stepper", setSavedVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
+				CrystalUI::toggleWithMenu("AutoClicker", setSavedVar<bool>("autoclicker"), "Automatically clicks at a fixed interval");
+				if (ImGui::BeginPopupModal("AutoClicker", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::toggle("Autoclick Player 1", setSavedVar<bool>("AC_player1"));
+					CrystalUI::toggle("Autoclick Player 2", setSavedVar<bool>("AC_player2")); // TODO: make this only on 2player mode
+					ImGui::PushItemWidth(100.f);
+					CrystalUI::inputInt("Push on Frame", setSavedVar<int>("AC_pushFrame"));
+					CrystalUI::inputInt("Release on Frame", setSavedVar<int>("AC_releaseFrame"));
+					ImGui::PopItemWidth();
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
 				ImGui::EndChild();
 
 				break;
@@ -274,11 +291,6 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("Auto LDM", setSavedVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
 				CrystalUI::toggle("Auto Song Downloader", setSavedVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
 				CrystalUI::toggle("Play Song on Level Page", setSavedVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
-				CrystalUI::toggle("Flipped Dual Controls", setSavedVar<bool>("flipped_dual"), "Flips the 2 player inputs");
-				CrystalUI::toggle("Mirrored Dual Controls", setSavedVar<bool>("mirrored_dual"), "Mirrors the 2 player inputs");
-				//CrystalUI::toggle("Smart StartPos [BETA]", setSavedVar<bool>("smart_startpos"), "Automatically sets up all StartPoses in a level");
-				CrystalUI::toggle("StartPos Switcher", setSavedVar<bool>("startpos_switch"), "Allows you to switch between StartPoses while in a level");
-				CrystalUI::toggle("Frame Stepper", setSavedVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
 				CrystalUI::toggle("Load from Last Checkpoint", setSavedVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
 				CrystalUI::toggle("No Glow", setSavedVar<bool>("no_glow"), "Removes all glow from objects in a level");
 				CrystalUI::toggle("No Particles", setSavedVar<bool>("no_particles"), "Removes all the particles");
@@ -286,19 +298,6 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("No Ghost Trail", setSavedVar<bool>("no_ghost"), "Removes the trail that one trigger gives you");
 				CrystalUI::toggle("No Mirror Effect", setSavedVar<bool>("no_mirror"), "Disables all Mirror portals from working");
 				CrystalUI::toggle("Layout Mode", setSavedVar<bool>("layout_mode"), "Shows the layout of a level");
-				CrystalUI::toggleWithMenu("AutoClicker", setSavedVar<bool>("autoclicker"), "Automatically clicks at a fixed interval");
-				if (ImGui::BeginPopupModal("AutoClicker", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Autoclick Player 1", setSavedVar<bool>("AC_player1"));
-					CrystalUI::toggle("Autoclick Player 2", setSavedVar<bool>("AC_player2"));
-					ImGui::PushItemWidth(100.f);
-					CrystalUI::inputInt("Push on Frame", setSavedVar<int>("AC_pushFrame"));
-					CrystalUI::inputInt("Release on Frame", setSavedVar<int>("AC_releaseFrame"));
-					ImGui::PopItemWidth();
-					if (ImGui::Button("Close")) {
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
 
 				ImGui::EndChild();
 
