@@ -111,13 +111,13 @@ void CrystalUI::renderTabs() {
 	ImGui::PopItemWidth();
 	ImGui::Spacing();
 
-	ImVec4 col(0.141176f, 0.141176f, 0.156862f, 1.f);
+	ImVec4 col(0.152941f, 0.152941f, 0.250980f, 1.f);
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
 	std::string tabNames[] = { std::string(ICON_FA_CUBE " Player"), std::string(ICON_FA_PAINT_BRUSH " Icon"), std::string(ICON_FA_LAYER_GROUP " Level"), std::string(ICON_FA_WINDOW_RESTORE " Display"), std::string(ICON_FA_EYE_DROPPER " Customize"), std::string(ICON_FA_LOCK_OPEN " Bypasses"), std::string(ICON_FA_GLOBE " Global"), std::string(ICON_FA_MOUSE_POINTER " Amethyst"), std::string(ICON_FA_KEYBOARD " Keybinds") };
 	for (int i = 0; i < sizeof(tabNames) / sizeof(tabNames[0]); i++) {
 		std::string it = tabNames[i];
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.1, 0.5));
-		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? style->Colors[ImGuiCol_ButtonActive] : col);
+		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? col : ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleColor(ImGuiCol_Text, selectedTab == i ? style->Colors[ImGuiCol_Text] : style->Colors[ImGuiCol_Text]);
 		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) selectedTab = i;
 		ImGui::PopStyleVar();
@@ -140,7 +140,7 @@ void CrystalUI::renderRightColumn() {
 			case 0: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("playertab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -217,7 +217,7 @@ void CrystalUI::renderRightColumn() {
 			case 1: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("icontab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -247,7 +247,7 @@ void CrystalUI::renderRightColumn() {
 			case 2: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -308,7 +308,7 @@ void CrystalUI::renderRightColumn() {
 
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -450,6 +450,21 @@ void CrystalUI::renderRightColumn() {
 	}
 }
 
+void CrystalUI::internalToggle(const char* str_id, bool* v) {
+	ImVec2 p = ImGui::GetCursorScreenPos();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    float height = ImGui::GetFrameHeight();
+    float width = height * 1.55f;
+    float radius = height * 0.50f;
+
+    if (ImGui::InvisibleButton(str_id, ImVec2(width, height)))
+        *v = !*v;
+
+    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? IM_COL32(49, 49, 79, 225) : IM_COL32(19, 19, 32, 255), height * 0.5f);
+    draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, *v ? IM_COL32(166, 165, 224, 255) : IM_COL32(49, 49, 79, 255));
+}
+
 void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no_win) {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	ImVec2 p = ImGui::GetCursorScreenPos();
@@ -473,25 +488,25 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	float height = ImGui::GetFrameHeight() - 5;
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
-	float rounding = 6;
+	float rounding = 0.75;
+
+	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
 
 	ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
 	ImGui::SetItemAllowOverlap();
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y + 5));
-	float oldSize = ImGui::GetFont()->Scale;
-	ImGui::GetFont()->Scale *= 0.8;
-	ImGui::PushFont(ImGui::GetFont());
-	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
-	ImGui::GetFont()->Scale = oldSize;
-	ImGui::PopFont();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 15, p.y + 15));
+	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", str_id);
 
 	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
-	if (ImGui::IsItemHovered()) {
-		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
-		//draw_list->AddRectFilled(p, ImVec2(p.x + width * 0.1, p.y + height), ImGui::GetColorU32(activeColor), height * rounding);
-	}
-	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + width * 0.1, p.y + (height)), ImGui::GetColorU32(*v ? activeColor : ImVec4(0, 0, 0, 0)), height * rounding);
+	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
+
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
+	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
+
+	p = ImGui::GetCursorScreenPos();
+	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));
 }
 
 void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip, bool no_win) {
@@ -510,36 +525,45 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
 		tooltip = "This mod is not available for Windows";
 	} else {
-		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
-		activeColor = *v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f);
+		regularColor = *v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 0.0f);
+		activeColor = *v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	float height = ImGui::GetFrameHeight() - 5;
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
-	float rounding = 6;
+	float rounding = 0.75;
 
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 10, p.y + 5));
-	float oldSize = ImGui::GetFont()->Scale;
-	ImGui::GetFont()->Scale *= 0.8;
-	ImGui::PushFont(ImGui::GetFont());
-	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f), "%s", str_id);
-	ImGui::GetFont()->Scale = oldSize;
-	ImGui::PopFont();
+	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
+
+	ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
+	ImGui::SetItemAllowOverlap();
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 15, p.y + 15));
+	ImGui::TextColored(activeColor, "%s", str_id);
 
 	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
-	if (ImGui::IsItemHovered()) {
-		if (tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
-	}
-	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + width * 0.1, p.y + (height)), ImGui::GetColorU32(*v ? activeColor : ImVec4(0, 0, 0, 0)), height * rounding);
-	
-	ImVec2 center = ImVec2(radius + (*v ? 1 : 0) * (width - radius * 2.0f), radius);
-    ImGui::SameLine();
+	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
-	if (ImGui::InvisibleButton((std::string(str_id) + "_expand").c_str(), ImVec2(20, 20))) {
-		ImGui::OpenPopup(str_id);
-	}
-	draw_list->AddTriangleFilled(ImVec2(p.x + (std::string(str_id).size() * 8) + 20, p.y + 12), ImVec2(p.x + (std::string(str_id).size() * 8) + 20, p.y + 22), ImVec2(p.x + (std::string(str_id).size() * 8) + 30, p.y + 17), ImGui::GetColorU32(*v ? activeColor : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)));
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 420, p.y + 12.5));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.093725f, 0.093725f, 0.168235f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.093725f, 0.093725f, 0.168235f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.482352f, 0.482352f, 0.525490f, 1.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 50);
+	ImGui::Button(ICON_FA_COG, ImVec2(30,30));
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(4);
+
+	if (ImGui::IsItemClicked() && !no_win) ImGui::OpenPopup(str_id);
+
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
+	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
+
+	p = ImGui::GetCursorScreenPos();
+	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));
 }
 
 void CrystalUI::colorPicker(const char* label, std::string name) {
