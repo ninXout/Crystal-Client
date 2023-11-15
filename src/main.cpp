@@ -2,6 +2,7 @@
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 #include "CrystalUI/CrystalUI.hpp"
 #include "CrystalClient/CrystalClient.hpp"
+#include "Mods/Keybind/Keybind.hpp"
 #include <imgui-cocos.hpp>
 #include <imgui.h>
 
@@ -26,10 +27,20 @@ $execute {
 		CrystalUI::renderTabs();
 		CrystalUI::renderUser();
 		CrystalUI::renderRightColumn();
+		//if (ImGui::GetIO().WantCaptureKeyboard) {
+			//CrystalUI::selectedTab = 10;
+		//}
 		ImGui::End();
 		ImGui::PopFont();
     });
 	ImGuiCocos::get().toggle();
+	CrystalClient::loadConfig();
+	Keybinds::keybind.clear();
+	if (CrystalClient::modsMapKEY.size() > 0) {
+		for (auto [k, v] : CrystalClient::modsMapKEY) {
+			Keybinds::keybind.push_back({(cocos2d::enumKeyCodes)k, v});
+		}
+	}
 }
 
 class $modify(CCKeyboardDispatcher) {
@@ -38,6 +49,12 @@ class $modify(CCKeyboardDispatcher) {
             ImGuiCocos::get().toggle();
 			if (ImGuiCocos::get().isVisible()) {
 				CrystalClient::loadConfig();
+				Keybinds::keybind.clear();
+				if (CrystalClient::modsMapKEY.size() > 0) {
+					for (auto [k, v] : CrystalClient::modsMapKEY) {
+						Keybinds::keybind.push_back({(cocos2d::enumKeyCodes)k, v});
+					}
+				}
 			} else {
 				CrystalClient::saveConfig();
 			}

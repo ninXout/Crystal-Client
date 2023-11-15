@@ -2,6 +2,7 @@
 #include "../CrystalClient/CrystalClient.hpp"
 #include "Fonts.hpp"
 #include "ImGuiHelper.hpp"
+#include "../Mods/Keybind/Keybind.hpp"
 #include <iostream>
 #include <cmath>
 
@@ -119,7 +120,11 @@ void CrystalUI::renderTabs() {
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.1, 0.5));
 		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? col : ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleColor(ImGuiCol_Text, selectedTab == i ? style->Colors[ImGuiCol_Text] : style->Colors[ImGuiCol_Text]);
-		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) selectedTab = i;
+		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) {
+			ImGui::GetIO().WantCaptureKeyboard = false;
+			ImGui::SetWindowFocus(NULL);
+			selectedTab = i;
+		}
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(2);
 	}
@@ -147,20 +152,20 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleColor();
 				CrystalUI::toggleWithMenu("Noclip", setSavedVar<bool>("noclip"), "Allows the player to be invincible");
 				if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Noclip Player 1", setSavedVar<bool>("noclip_P1"));
-					CrystalUI::toggle("Noclip Player 2", setSavedVar<bool>("noclip_P2"));
-					CrystalUI::toggle("Tint Screen on Death", setSavedVar<bool>("noclip_tint"));
+					CrystalUI::subToggle("Noclip Player 1", setSavedVar<bool>("noclip_P1"));
+					CrystalUI::subToggle("Noclip Player 2", setSavedVar<bool>("noclip_P2"));
+					CrystalUI::subToggle("Tint Screen on Death", setSavedVar<bool>("noclip_tint"));
 					CrystalUI::colorPicker("Tint Color", "noclipColor");
 					ImGui::PushItemWidth(100);
 					CrystalUI::inputFloat("##Noclip Accuracy Limit", setSavedVar<float>("accuracy_limit_num"));
 					ImGui::PopItemWidth();
 					ImGui::SameLine();
-					CrystalUI::toggle("Noclip Accuracy Limit", setSavedVar<bool>("accuracy_limit"));
+					CrystalUI::subToggle("Noclip Accuracy Limit", setSavedVar<bool>("accuracy_limit"));
 					ImGui::PushItemWidth(100);
 					CrystalUI::inputInt("##Noclip Deaths Limit", setSavedVar<int>("death_limit_num"));
 					ImGui::PopItemWidth();
 					ImGui::SameLine();
-					CrystalUI::toggle("Noclip Deaths Limit", setSavedVar<bool>("death_limit"));
+					CrystalUI::subToggle("Noclip Deaths Limit", setSavedVar<bool>("death_limit"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
@@ -179,6 +184,7 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Rotation", setSavedVar<bool>("no_rotation"), "Stops the player from rotating");
+				CrystalUI::toggle("Practice Bug Fix", setSavedVar<bool>("practice_fix"), "Fixes issues with Practice Mode");
 				CrystalUI::toggle("Trail Always Off", setSavedVar<bool>("no_trail"), "Removes the regular trail");
 				CrystalUI::toggle("Trail Always On", setSavedVar<bool>("always_trail"), "Makes the regular trail visible at all times");
 				CrystalUI::toggleWithMenu("No Wave Pulse", setSavedVar<bool>("no_wave_pulse"), "Stops the wave trail on a player from pulsing");
@@ -445,6 +451,60 @@ void CrystalUI::renderRightColumn() {
 
 				break;
 			}
+			case 8: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("keybindtab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				if (Keybinds::waitingForKeybind) { ImGui::Button("Waiting for keypress..."); }
+				else { if (ImGui::Button(Keybinds::keyToString(Keybinds::currentKey).c_str(), ImVec2(80, 40))) { Keybinds::waitingForKeybind = true; } }
+				ImGui::PushItemWidth(150);
+				ImGui::Combo("Mod to Toggle", &Keybinds::currentMod, Keybinds::modbindings, IM_ARRAYSIZE(Keybinds::modbindings));
+				ImGui::PopItemWidth();
+				if (ImGui::Button("Add Keybind")) {
+					Keybinds::pushKeybind();
+					CrystalClient::modsMapKEY[(int)Keybinds::keybind.back().first] = Keybinds::keybind.back().second;
+				}
+				for (size_t i = 0; i < Keybinds::keybind.size(); i++) {
+					ImGui::AlignTextToFramePadding();
+					ImGui::Text("%s", Keybinds::modvars[Keybinds::keybind[i].second]);
+					ImGui::SameLine();
+					ImGui::Text("%s", Keybinds::keyToString(Keybinds::keybind[i].first).c_str());
+					ImGui::SameLine();
+					if (ImGui::Button(("x##" + std::to_string(i)).c_str())) {
+						CrystalClient::modsMapKEY.erase((int)Keybinds::keybind[i].first);
+						Keybinds::keybind.erase(Keybinds::keybind.begin() + i);
+					}
+					ImGui::Separator();
+				}
+
+				ImGui::EndChild();
+
+				break;
+			}
+			case 10: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				for (auto [k, v] : modsMapB) {
+					if (k.find(getSavedVar<std::string>("search")) != std::string::npos) {
+						CrystalUI::toggle(k.c_str(), &v);
+					}
+				}
+
+				ImGui::EndChild();
+
+				break;
+			}
 		}
 		ImGui::EndChild();
 	}
@@ -463,6 +523,14 @@ void CrystalUI::internalToggle(const char* str_id, bool* v) {
 
     draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? IM_COL32(49, 49, 79, 225) : IM_COL32(19, 19, 32, 255), height * 0.5f);
     draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, *v ? IM_COL32(166, 165, 224, 255) : IM_COL32(49, 49, 79, 255));
+}
+
+void CrystalUI::subToggle(const char* str_id, bool* v) {
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	CrystalUI::internalToggle(str_id, v);
+	ImGui::SameLine();
+	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", str_id);
+	if (ImGui::IsItemClicked()) *v = !*v;
 }
 
 void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no_win) {
@@ -488,7 +556,7 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	float height = ImGui::GetFrameHeight() - 5;
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
-	float rounding = 0.75;
+	float rounding = 0.25;
 
 	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
 
@@ -532,7 +600,7 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	float height = ImGui::GetFrameHeight() - 5;
 	float width = height * 1.55f;
 	float radius = height * 0.50f;
-	float rounding = 0.75;
+	float rounding = 0.25;
 
 	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
 

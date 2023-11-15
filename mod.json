@@ -4,7 +4,7 @@
 	"id": "ninxout.crystal_client",
 	"name": "Crystal Client",
 	"developer": "ninXout",
-	"description": "",
+	"description": "Premium Cross-Platform Modded Client",
     "resources": {
         "files": [
             "resources/blur_shaders/*.glsl"

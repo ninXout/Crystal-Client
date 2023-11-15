@@ -11,6 +11,7 @@ namespace CrystalUI {
 
     void toggle(const char* str_id, bool* v, std::string tooltip = "N/A", bool no_win = false);
     void toggleWithMenu(const char* str_id, bool* v, std::string tooltip = "N/A", bool no_win = false); // TODO: Make the popup a lambda
+    void subToggle(const char* str_id, bool* v);
     void internalToggle(const char* std_id, bool* v);
     void colorPicker(const char* label, std::string name);
     void textbox(const char* name, std::string* str);

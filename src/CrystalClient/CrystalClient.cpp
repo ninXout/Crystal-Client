@@ -8,6 +8,7 @@ void CrystalClient::saveConfig() {
     JSONobj["ints"] = modsMapI;
     JSONobj["floats"] = modsMapF;
     JSONobj["strings"] = modsMapS;
+    JSONobj["keybinds"] = modsMapKEY;
 
     file << JSONobj;
     file.close();
@@ -22,6 +23,7 @@ void CrystalClient::loadConfig() {
         modsMapI = JSONobj.at("ints").get<std::map<std::string, int>>();
         modsMapF = JSONobj.at("floats").get<std::map<std::string, float>>();
         modsMapS = JSONobj.at("strings").get<std::map<std::string, std::string>>();
+        modsMapKEY = JSONobj.at("keybinds").get<std::map<int, int>>();
     }
 
     input.close();

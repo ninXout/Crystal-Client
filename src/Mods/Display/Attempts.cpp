@@ -7,7 +7,7 @@ class $modify(PlayLayer) {
 
         if (!PlayLayer::init(gj)) return false;
 
-        Display::arrangeDisplay(5);
+        Display::updateDisplay(5);
         Display::addDisplayChildren(5, this);
         return true;
     }

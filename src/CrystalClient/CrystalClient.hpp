@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Geode/Geode.hpp>
 #include <imgui.h>
 #include "../Utilities/json.hpp"
@@ -43,6 +45,7 @@ namespace CrystalClient {
         {"noclipColor-alpha", 1.0f}
     };
     inline std::map<std::string, std::string> modsMapS = {};
+    inline std::map<int, int> modsMapKEY = {};
 
     inline std::map<std::string, bool> TEMPmodsMapB = {};
     inline std::map<std::string, int> TEMPmodsMapI = {};
