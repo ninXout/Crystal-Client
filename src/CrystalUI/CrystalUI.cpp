@@ -205,8 +205,8 @@ void CrystalUI::renderRightColumn() {
 				//CrystalUI::toggle("Frame Stepper", setSavedVar<bool>("framestep"), "Allows you to play a level frame by frame (Requires the Framestep keybind to be binded)");
 				CrystalUI::toggleWithMenu("AutoClicker", setSavedVar<bool>("autoclicker"), "Automatically clicks at a fixed interval");
 				if (ImGui::BeginPopupModal("AutoClicker", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Autoclick Player 1", setSavedVar<bool>("AC_player1"));
-					CrystalUI::toggle("Autoclick Player 2", setSavedVar<bool>("AC_player2")); // TODO: make this only on 2player mode
+					CrystalUI::subToggle("Autoclick Player 1", setSavedVar<bool>("AC_player1"));
+					CrystalUI::subToggle("Autoclick Player 2", setSavedVar<bool>("AC_player2")); // TODO: make this only on 2player mode
 					ImGui::PushItemWidth(100.f);
 					CrystalUI::inputInt("Push on Frame", setSavedVar<int>("AC_pushFrame"));
 					CrystalUI::inputInt("Release on Frame", setSavedVar<int>("AC_releaseFrame"));
@@ -261,10 +261,10 @@ void CrystalUI::renderRightColumn() {
 
 				CrystalUI::toggleWithMenu("Hitbox Viewer", setSavedVar<bool>("hitboxes"), "Shows the hitboxes of every object in a level");
 				if (ImGui::BeginPopupModal("Hitbox Viewer", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Show Hitboxes on Death", setSavedVar<bool>("hitbox_on_death"));
-					CrystalUI::toggle("Show Hitbox Trail", setSavedVar<bool>("hitbox_trail"));
-					CrystalUI::toggle("Show Hitboxes in Editor", setSavedVar<bool>("hitboxes_in_editor"));
-					CrystalUI::toggle("Coin Tracker", setSavedVar<bool>("coin_tracker"));
+					CrystalUI::subToggle("Show Hitboxes on Death", setSavedVar<bool>("hitbox_on_death"));
+					CrystalUI::subToggle("Show Hitbox Trail", setSavedVar<bool>("hitbox_trail"));
+					CrystalUI::subToggle("Show Hitboxes in Editor", setSavedVar<bool>("hitboxes_in_editor"));
+					CrystalUI::subToggle("Coin Tracker", setSavedVar<bool>("coin_tracker"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
@@ -281,8 +281,8 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Hide Attempts Label", setSavedVar<bool>("hide_attempts"), "Hides the Attempt label at the beginning of a level");
 				if (ImGui::BeginPopupModal("Hide Attempts Label", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Hide in Normal Mode", setSavedVar<bool>("hide_attempts_normal"));
-					CrystalUI::toggle("Hide in Practice Mode", setSavedVar<bool>("hide_attempts_practice"));
+					CrystalUI::subToggle("Hide in Normal Mode", setSavedVar<bool>("hide_attempts_normal"));
+					CrystalUI::subToggle("Hide in Practice Mode", setSavedVar<bool>("hide_attempts_practice"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
@@ -370,7 +370,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Attempts", setSavedVar<bool>("attempts"), "Displays your attempt count");
 				if (ImGui::BeginPopupModal("Attempts", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Total Attempts", setSavedVar<bool>("total_attempts"));
+					CrystalUI::subToggle("Total Attempts", setSavedVar<bool>("total_attempts"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-5"), displaySelection, IM_ARRAYSIZE(displaySelection));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -379,7 +379,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Jumps", setSavedVar<bool>("jumps"), "Displays your jumps");
 				if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Total Jumps", setSavedVar<bool>("total_jumps"));
+					CrystalUI::subToggle("Total Jumps", setSavedVar<bool>("total_jumps"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-6"), displaySelection, IM_ARRAYSIZE(displaySelection));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -404,7 +404,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Noclip Accuracy", setSavedVar<bool>("noclip_accuracy"), "Displays how accurately you can noclip through a percentage");
 				if (ImGui::BeginPopupModal("Noclip Accuracy", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Red Pulse on Death", setSavedVar<bool>("red_on_accuracy"));
+					CrystalUI::subToggle("Red Pulse on Death", setSavedVar<bool>("red_on_accuracy"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-9"), displaySelection, IM_ARRAYSIZE(displaySelection));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -413,7 +413,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Noclip Deaths", setSavedVar<bool>("noclip_deaths"), "Displays how accurately you can noclip through a death counter");
 				if (ImGui::BeginPopupModal("Noclip Deaths", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Red Pulse on Death", setSavedVar<bool>("red_on_death"));
+					CrystalUI::subToggle("Red Pulse on Death", setSavedVar<bool>("red_on_death"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-10"), displaySelection, IM_ARRAYSIZE(displaySelection));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -422,8 +422,8 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Level Name and ID", setSavedVar<bool>("level_info"), "Displays the level's information");
 				if (ImGui::BeginPopupModal("Level Name and ID", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Hide ID", setSavedVar<bool>("hide_ID"));
-					CrystalUI::toggle("Show Author", setSavedVar<bool>("level_info_author"));
+					CrystalUI::subToggle("Hide ID", setSavedVar<bool>("hide_ID"));
+					CrystalUI::subToggle("Show Author", setSavedVar<bool>("level_info_author"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-11"), displaySelection, IM_ARRAYSIZE(displaySelection));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
