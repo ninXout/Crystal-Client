@@ -38,6 +38,8 @@ CCPoint Display::getDisplayPosition(int index) {
 
     float tr = 0, tl = 0, br = 0, bl = 0, thisLabel;
 
+    if (getSavedVar<bool>("testmode_label")) tl += 1.0f * getSavedVar<float>("display_scale");
+
 	for (int i = 0; i < DISPLAYSIZE; i++) {
 		if (displays[i]) {
             switch (displayPositions[i]) {

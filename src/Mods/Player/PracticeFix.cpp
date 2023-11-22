@@ -82,6 +82,7 @@ struct ObjectCheckpoint {
     double m_rotation;
     double m_yVelocity;
     double m_xVelocity;
+    double m_scale;
     float m_unk2F4;
     float m_unk2F8;
     float m_unk33C;
@@ -112,6 +113,7 @@ ObjectCheckpoint ObjectCheckpoint::create(PlayLayer* pl) {
                 ic.m_rotation = obj->getRotation();
                 ic.m_xVelocity = obj->getSkewX();
                 ic.m_yVelocity = obj->getSkewY();
+                ic.m_scale = obj->getScale();
                 FIELD(m_unk2F4);
                 FIELD(m_unk2F8);
                 //FIELD(m_unk33C);
@@ -143,6 +145,7 @@ void ObjectCheckpoint::apply(PlayLayer* pl) {
                 //obj->setRotation(m_rotation);
                 obj->setSkewX(m_xVelocity);
                 obj->setSkewY(m_yVelocity);
+                obj->setScale(m_scale);
                 FIELD(m_unk2F4);
                 FIELD(m_unk2F8);
             }

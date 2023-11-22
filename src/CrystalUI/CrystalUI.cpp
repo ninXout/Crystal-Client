@@ -291,12 +291,12 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("Practice Music Hack", setSavedVar<bool>("practice_music"), "Plays the normal music in practice mode");
 				CrystalUI::toggle("Freeze Attempts", setSavedVar<bool>("freeze_attempts"), "The attempts doesn't update");
 				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
-				CrystalUI::toggle("Hide Pause Button", setSavedVar<bool>("hide_pause_button"), "Hides the pause button when playing");
+				//CrystalUI::toggle("Hide Pause Button", setSavedVar<bool>("hide_pause_button"), "Hides the pause button when playing");
 				CrystalUI::toggle("Ignore ESC", setSavedVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
 				CrystalUI::toggle("Confirm Quit", setSavedVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
 				CrystalUI::toggle("Auto LDM", setSavedVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
 				CrystalUI::toggle("Auto Song Downloader", setSavedVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
-				CrystalUI::toggle("Play Song on Level Page", setSavedVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
+				//CrystalUI::toggle("Play Song on Level Page", setSavedVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
 				CrystalUI::toggle("Load from Last Checkpoint", setSavedVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
 				CrystalUI::toggle("No Glow", setSavedVar<bool>("no_glow"), "Removes all glow from objects in a level");
 				CrystalUI::toggle("No Particles", setSavedVar<bool>("no_particles"), "Removes all the particles");
