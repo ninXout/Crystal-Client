@@ -2,8 +2,10 @@
 
 // silly goofy fix because it errors if it comes after geode includes
 
+#define CommentType CommentTypeDummy
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreServices/CoreServices.h>
+#undef CommentType
 
 #endif
 
