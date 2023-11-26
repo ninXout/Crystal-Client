@@ -25,6 +25,7 @@ namespace CrystalClient {
         {"wave_size", 2.1},
         {"opacity_wave_trail", 255},
         {"FPS", 60.0},
+        {"TPS", 60.0},
         {"FPS_unfocused", 15.0},
         {"display_scale", 1.0},
         {"display_opacity", 200.0},
@@ -42,7 +43,7 @@ namespace CrystalClient {
         {"noclipColor-red", 1.0f},
         {"noclipColor-green", 0.0f},
         {"noclipColor-blue", 0.0f},
-        {"noclipColor-alpha", 1.0f}
+        {"noclipColor-alpha", 1.0f},
     };
     inline std::map<std::string, std::string> modsMapS = {};
     inline std::map<int, int> modsMapKEY = {};

@@ -451,6 +451,46 @@ void CrystalUI::renderRightColumn() {
 
 				break;
 			}
+			case 6: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("globaltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				CrystalUI::toggleWithMenu("FPS Bypass", setSavedVar<bool>("FPS_bypass"));
+				if (ImGui::BeginPopupModal("FPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::inputFloat("FPS", setSavedVar<float>("FPS"));
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+				CrystalUI::toggleWithMenu("TPS Bypass", setSavedVar<bool>("TPS_bypass"));
+				if (ImGui::BeginPopupModal("TPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::inputFloat("TPS", setSavedVar<float>("TPS"));
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+				CrystalUI::toggleWithMenu("Safe Mode", setSavedVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
+				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::toggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"), "Only enables safe mode when you are cheating");
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+				CrystalUI::toggle("Lock Cursor", setSavedVar<bool>("lock_cursor"), "Locks your cursor to the game window", true);
+				//CrystalUI::toggle("No Transition", setSavedVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
+				//CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
+				//CrystalUI::toggle("Transparent Lists", setSavedVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
+
+				ImGui::EndChild();
+			}
 			case 8: {
 				ImGui::Columns(1, nullptr, false);
 
@@ -471,7 +511,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				for (size_t i = 0; i < Keybinds::keybind.size(); i++) {
 					ImGui::AlignTextToFramePadding();
-					ImGui::Text("%s", Keybinds::modvars[Keybinds::keybind[i].second]);
+					ImGui::Text("%s", Keybinds::modbindings[Keybinds::keybind[i].second]);
 					ImGui::SameLine();
 					ImGui::Text("%s", Keybinds::keyToString(Keybinds::keybind[i].first).c_str());
 					ImGui::SameLine();

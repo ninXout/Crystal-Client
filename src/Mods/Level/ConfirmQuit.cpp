@@ -21,7 +21,7 @@ class $modify(PlayLayer) {
 			);
 		}
         
-        if (shouldQuit) {
+        if (shouldQuit || !getSavedVar<bool>("confirm_quit")) {
 			PlayLayer::onQuit();
 		}
 		

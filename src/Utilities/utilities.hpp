@@ -1,5 +1,9 @@
 #pragma once
 
+#include "../Mods/Display/Display.hpp"
+
+using namespace CrystalClient;
+
 inline double getPercentage() {
     if (!PlayLayer::get()) return 0;
 
@@ -8,4 +12,8 @@ inline double getPercentage() {
     if (ret > 100) ret = 100;
 
     return ret;
+}
+
+inline bool shouldNotSave() {
+    return ((getSavedVar<bool>("safe_mode") && !getSavedVar<bool>("auto_safe_mode")) || (getSavedVar<bool>("safe_mode") && getSavedVar<bool>("auto_safe_mode") && Display::getDisplay(0)->getColor() == ccc3(255,0,0)));
 }

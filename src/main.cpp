@@ -41,6 +41,7 @@ $execute {
 			Keybinds::keybind.push_back({(cocos2d::enumKeyCodes)k, v});
 		}
 	}
+	AppDelegate::get()->setAnimationInterval(1.0 / getSavedVar<float>("FPS"));
 }
 
 class $modify(CCKeyboardDispatcher) {
@@ -57,6 +58,7 @@ class $modify(CCKeyboardDispatcher) {
 				}
 			} else {
 				CrystalClient::saveConfig();
+				AppDelegate::get()->setAnimationInterval(1.0 / getSavedVar<float>("FPS"));
 			}
             return true;
         }

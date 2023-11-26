@@ -548,7 +548,7 @@ class $modify(EditorUI) {
 class $modify(PlayerObject) {
     void playerDestroyed(bool idk) {
         PlayerObject::playerDestroyed(idk);
-        if (!getSavedVar<bool>("hitboxes_in_editor")) return;
+        if (!getSavedVar<bool>("hitbox_on_death")) return;
         s_drawOnDeath = true;
     }
 };
