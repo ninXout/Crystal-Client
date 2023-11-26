@@ -26,5 +26,9 @@ if (APPLE)
     target_compile_options(${PROJECT_NAME} PRIVATE -fno-inline)
 endif()
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    -DCommentType=CommentTypeDummy
+)
+
 target_link_libraries(${PROJECT_NAME} geode-sdk imgui-cocos)
 create_geode_file(${PROJECT_NAME})
