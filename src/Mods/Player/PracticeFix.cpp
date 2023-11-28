@@ -79,126 +79,109 @@ void IconCheckpoint::apply(PlayerObject* pl) {
 
 struct ObjectCheckpoint {
     CCPoint m_position;
-    double m_rotation;
-    double m_yVelocity;
-    double m_xVelocity;
+    double m_rotationX;
+    double m_rotationY;
     double m_scale;
+    bool m_skewX;
+    bool m_skewY;
     float m_unk2F4;
     float m_unk2F8;
     float m_unk33C;
     float m_unk340;
     float m_unk390;
 
-    static ObjectCheckpoint create(PlayLayer*);
-    void apply(PlayLayer*);
+    static ObjectCheckpoint create(GameObject*);
+    void apply(GameObject*);
 };
 
 #define FIELD(var) ic.var = obj->var;
 
-ObjectCheckpoint ObjectCheckpoint::create(PlayLayer* pl) {
+ObjectCheckpoint ObjectCheckpoint::create(GameObject* obj) {
     ObjectCheckpoint ic;
-
-    float xp = pl->m_player1->getPositionX();
-
-	for (int s = GJBaseGameLayer::get()->sectionForPos(xp) - 5; s < GJBaseGameLayer::get()->sectionForPos(xp) + 6; ++s) {
-        if (s < 0)
-            continue;
-        if (s >= pl->m_sectionObjects->count())
-            break;
-        auto section = static_cast<CCArray*>(pl->m_sectionObjects->objectAtIndex(s));
-        for (size_t i = 0; i < section->count(); ++i) {
-            auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-            if (obj != PlayLayer::get()->m_antiCheatObject) {
-                ic.m_position = obj->getPosition();
-                ic.m_rotation = obj->getRotation();
-                ic.m_xVelocity = obj->getSkewX();
-                ic.m_yVelocity = obj->getSkewY();
-                ic.m_scale = obj->getScale();
-                FIELD(m_unk2F4);
-                FIELD(m_unk2F8);
-                //FIELD(m_unk33C);
-                //FIELD(m_unk340);
-                //FIELD(m_unk390);
-            }
-        }
-    }
-
+    ic.m_position = obj->getPosition();
+    ic.m_rotationX = obj->getRotationX();
+    ic.m_rotationY = obj->getRotationY();
+    ic.m_scale = obj->getScale();
+    ic.m_skewX = obj->getSkewX();
+    ic.m_skewY = obj->getSkewY();
+    FIELD(m_unk2F4);
+    FIELD(m_unk2F8);
     return ic;
 }
 
 #undef FIELD
 #define FIELD(var) obj->var = var;
 
-void ObjectCheckpoint::apply(PlayLayer* pl) {
-    float xp = pl->m_player1->getPositionX();
-
-	for (int s = GJBaseGameLayer::get()->sectionForPos(xp) - 5; s < GJBaseGameLayer::get()->sectionForPos(xp) + 6; ++s) {
-        if (s < 0)
-            continue;
-        if (s >= pl->m_sectionObjects->count())
-            break;
-        auto section = static_cast<CCArray*>(pl->m_sectionObjects->objectAtIndex(s));
-        for (size_t i = 0; i < section->count(); ++i) {
-            auto obj = static_cast<GameObject*>(section->objectAtIndex(i));
-            if (obj != PlayLayer::get()->m_antiCheatObject) {
-                obj->setPosition(m_position);
-                //obj->setRotation(m_rotation);
-                obj->setSkewX(m_xVelocity);
-                obj->setSkewY(m_yVelocity);
-                obj->setScale(m_scale);
-                FIELD(m_unk2F4);
-                FIELD(m_unk2F8);
-            }
-        }
-    }
+void ObjectCheckpoint::apply(GameObject* obj) {
+    obj->setPosition(m_position);
+    obj->setRotationX(m_rotationX);
+    obj->setRotationY(m_rotationY);
+    obj->setScale(m_scale);
+    obj->setSkewX(m_skewX);
+    obj->setSkewY(m_skewY);
+    //FIELD(m_unk2F4);
+    //FIELD(m_unk2F8);
 }
 
 #undef FIELD
 
-std::vector<IconCheckpoint> checkpoints_P1;
-std::vector<IconCheckpoint> checkpoints_P2;
-std::vector<ObjectCheckpoint> checkpoints_OBJ;
+struct PlayCheckpoint {
+    IconCheckpoint m_player1;
+    IconCheckpoint m_player2;
+    std::vector<ObjectCheckpoint> m_objects;
 
-class $modify(CheckpointObject) {
-    static CheckpointObject* create() {
-        auto co = CheckpointObject::create();
-        checkpoints_P1.push_back(IconCheckpoint::create(PlayLayer::get()->m_player1));
-        checkpoints_P2.push_back(IconCheckpoint::create(PlayLayer::get()->m_player2));
-        checkpoints_OBJ.push_back(ObjectCheckpoint::create(PlayLayer::get()));
-        return co;
-    }
+    static PlayCheckpoint create(PlayLayer*);
+    void apply(PlayLayer*);
 };
+
+PlayCheckpoint PlayCheckpoint::create(PlayLayer* pl) {
+    PlayCheckpoint pc;
+    pc.m_player1 = IconCheckpoint::create(pl->m_player1);
+    pc.m_player2 = IconCheckpoint::create(pl->m_player2);
+    pc.m_objects = {};
+    CCArrayExt<GameObject*> objects = pl->m_objects;
+    for (auto* obj : objects) {
+        pc.m_objects.push_back(ObjectCheckpoint::create(obj));
+    }
+    return pc;
+}
+
+void PlayCheckpoint::apply(PlayLayer* pl) {
+    m_player1.apply(pl->m_player1);
+    m_player2.apply(pl->m_player2);
+    int index = 0;
+    CCArrayExt<GameObject*> objects = pl->m_objects;
+    for (auto* obj : objects) {
+        m_objects[index].apply(obj);
+        index++;
+    }
+}
+
+std::vector<PlayCheckpoint> g_checkpoints;
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
-        checkpoints_P1.clear();
-        checkpoints_P2.clear();
-        checkpoints_OBJ.clear();
+        g_checkpoints.clear();
 
         if (!PlayLayer::init(gj))
             return false;
 
+        g_checkpoints.push_back(PlayCheckpoint::create(this));
         return true;
     }
 
-    void startGame() {
-        PlayLayer::startGame();
-        if (m_player1) checkpoints_P1.push_back(IconCheckpoint::create(m_player1));
-        if (m_player2) checkpoints_P2.push_back(IconCheckpoint::create(m_player2));
-        if (m_sectionObjects) checkpoints_OBJ.push_back(ObjectCheckpoint::create(this));
+    void markCheckpoint() {
+        PlayLayer::markCheckpoint();
+        g_checkpoints.push_back(PlayCheckpoint::create(PlayLayer::get()));
     }
 
     void resetLevel() {
         PlayLayer::resetLevel();
-        if (checkpoints_P1.size() > 0 && m_player1 && getSavedVar<bool>("practice_fix")) checkpoints_P1.back().apply(m_player1);
-        if (checkpoints_P2.size() > 0 && m_player2 && getSavedVar<bool>("practice_fix")) checkpoints_P2.back().apply(m_player2);
-        if (checkpoints_OBJ.size() > 0 && m_sectionObjects && getSavedVar<bool>("practice_fix")) checkpoints_OBJ.back().apply(this);
+        if (g_checkpoints.size() && getSavedVar<bool>("practice_fix")) g_checkpoints.back().apply(this);
     }
 
     void removeLastCheckpoint() {
         PlayLayer::removeLastCheckpoint();
-        if (checkpoints_P1.size() > 0) checkpoints_P1.pop_back();
-        if (checkpoints_P2.size() > 0) checkpoints_P2.pop_back();
-        if (checkpoints_OBJ.size() > 0) checkpoints_OBJ.pop_back();
+        if (g_checkpoints.size()) g_checkpoints.pop_back();
     }
 };

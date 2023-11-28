@@ -223,27 +223,33 @@ void CrystalUI::renderRightColumn() {
 			case 1: {
 				ImGui::Columns(1, nullptr, false);
 
+				std::vector<std::string> arr = {std::string("Player 1"), std::string("Player 2")};
+				ImGuiHelper::drawTabHorizontally(std::string("iconsubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedSubTab);
+				ImGui::Spacing();
+
 				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("icontab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
-				if (ImGui::BeginMenu("Player 1")) {
-					CrystalUI::iconEffect("Player Color 1", "P1C1");
-					CrystalUI::iconEffect("Player Color 2", "P1C2");
-					CrystalUI::iconEffect("Icon Glow", "P1G");
-					CrystalUI::iconEffect("Regular Trail", "P1R");
-					CrystalUI::iconEffect("Wave Trail", "P1W");
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("Player 2")) {
-					CrystalUI::iconEffect("Player Color 1", "P2C1");
-					CrystalUI::iconEffect("Player Color 2", "P2C2");
-					CrystalUI::iconEffect("Icon Glow", "P2G");
-					CrystalUI::iconEffect("Regular Trail", "P2R");
-					CrystalUI::iconEffect("Wave Trail", "P2W");
-					ImGui::EndMenu();
+				switch (selectedSubTab) {
+					case 0: {
+						CrystalUI::iconEffect("Player Color 1", "P1C1");
+						CrystalUI::iconEffect("Player Color 2", "P1C2");
+						CrystalUI::iconEffect("Icon Glow", "P1G");
+						CrystalUI::iconEffect("Regular Trail", "P1R");
+						CrystalUI::iconEffect("Wave Trail", "P1W");
+						break;
+					}
+					case 1: {
+						CrystalUI::iconEffect("Player Color 1", "P2C1");
+						CrystalUI::iconEffect("Player Color 2", "P2C2");
+						CrystalUI::iconEffect("Icon Glow", "P2G");
+						CrystalUI::iconEffect("Regular Trail", "P2R");
+						CrystalUI::iconEffect("Wave Trail", "P2W");
+						break;
+					}
 				}
 
 				ImGui::EndChild();
@@ -478,7 +484,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggleWithMenu("Safe Mode", setSavedVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
 				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"), "Only enables safe mode when you are cheating");
+					CrystalUI::subToggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
@@ -486,7 +492,7 @@ void CrystalUI::renderRightColumn() {
 				}
 				CrystalUI::toggle("Lock Cursor", setSavedVar<bool>("lock_cursor"), "Locks your cursor to the game window", true);
 				//CrystalUI::toggle("No Transition", setSavedVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
-				//CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
+				CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
 				//CrystalUI::toggle("Transparent Lists", setSavedVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
 
 				ImGui::EndChild();
@@ -759,4 +765,42 @@ void CrystalUI::hotkey(const char* label) {
 	ImGui::SameLine();
 	if (waitingForKey) { ImGui::Button("Waiting for keypress..."); }
 	//else { if (ImGui::Button(CCKeyboardDispatcher::keyToString(queuedKey), ImVec2(80, 20))) { waitingForKey = true; } }
+}
+
+void CrystalUI::subTab(std::string childName, ImVec2 childSize, std::vector<std::string> tabNames, int* selectedSubTab) {
+	int length = tabNames.front().length();
+	int strIndex = 1;
+	for (int i = 1; i < tabNames.size(); i++) {
+		if (length > tabNames.at(i).length()) {
+			length = tabNames.at(i).length();
+			strIndex = i;
+		}
+	}
+
+	ImGui::BeginChild(childName.c_str(), childSize, true, ImGuiWindowFlags_HorizontalScrollbar);
+
+	int minWidth = ImGuiHelper::getTextLength(tabNames.at(strIndex).c_str()).x;
+	int maxWidth = 200;
+
+	int btnWidth = (ImGuiHelper::getWidth() - ImGui::GetStyle().ItemSpacing.x * (tabNames.size())) / tabNames.size();
+	int btnHeight = clamp(ImGuiHelper::getHeight(), 20.f, 60.f);
+	btnWidth = (std::max)(minWidth, (std::min)(btnWidth, maxWidth));
+
+	{
+		ImGui::SetCursorPosX((childSize.x - btnWidth * tabNames.size() - ImGui::GetStyle().ItemSpacing.x) / 2);
+	}
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
+	for (int i = 0; i < tabNames.size(); i++) {
+		std::string it = tabNames.at(i);
+		ImGui::PushStyleColor(ImGuiCol_Button, *selectedSubTab == i ? ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] : ImGui::GetStyle().Colors[ImGuiCol_Button]);
+		ImGui::PushStyleColor(ImGuiCol_Text, *selectedSubTab == i ? ImGui::GetStyle().Colors[ImGuiCol_Text] : ImGui::GetStyle().Colors[ImGuiCol_Text]);
+		ImGui::Button(it.c_str(), ImVec2(btnWidth, btnHeight));
+		if (ImGui::IsItemClicked()) *selectedSubTab = i;
+		ImGui::SameLine();
+		ImGui::PopStyleColor(2);
+	}
+	ImGui::PopStyleVar();
+
+	ImGui::EndChild();
 }

@@ -19,6 +19,7 @@ namespace CrystalUI {
     void inputInt(const char* name, int* num);
     void inputFloat(const char* name, float* num);
     void hotkey(const char* label);
+    void subTab(std::string childName, ImVec2 childSize, std::vector<std::string> tabNames, int* selectedSubTab);
 
     void renderLogo();
     void renderUser();
@@ -30,4 +31,5 @@ namespace CrystalUI {
     inline cocos2d::enumKeyCodes queuedKey = KEY_Escape;
     inline ImFont* font;
     inline int selectedTab = 0;
+    inline int selectedSubTab = 0;
 }

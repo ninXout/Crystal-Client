@@ -15,5 +15,7 @@ inline double getPercentage() {
 }
 
 inline bool shouldNotSave() {
-    return ((getSavedVar<bool>("safe_mode") && !getSavedVar<bool>("auto_safe_mode")) || (getSavedVar<bool>("safe_mode") && getSavedVar<bool>("auto_safe_mode") && Display::getDisplay(0)->getColor() == ccc3(255,0,0)));
+    return (getSavedVar<bool>("noclip") || (getSavedVar<float>("speed") != 1 && getSavedVar<bool>("speedhack")) || getSavedVar<bool>("no_mirror") || getSavedVar<bool>("framestep") || 
+            getSavedVar<bool>("autoclicker") || getSavedVar<bool>("layout_mode") || getSavedVar<bool>("AT_record") || getSavedVar<bool>("AT_replay") || getSavedVar<float>("FPS") > 360.0 ||
+            getSavedVar<bool>("jump_hack"));
 }

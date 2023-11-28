@@ -1,11 +1,6 @@
 #include "Display.hpp"
 #include <Geode/modify/PlayLayer.hpp>
-
-bool isCheating() {
-    return (getSavedVar<bool>("noclip") || getSavedVar<float>("speed") != 1 && getSavedVar<bool>("speedhack") || getSavedVar<bool>("no_mirror") || getSavedVar<bool>("framestep") || 
-            getSavedVar<bool>("autoclicker") || getSavedVar<bool>("layout_mode") || getSavedVar<bool>("AT_record") || getSavedVar<bool>("AT_replay") || getSavedVar<float>("FPS") > 360.0 ||
-            getSavedVar<bool>("jump_hack"));
-}
+#include "../../Utilities/utilities.hpp"
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* gj) {
@@ -20,6 +15,6 @@ class $modify(PlayLayer) {
 
     void update(float dt) {
         PlayLayer::update(dt);
-        if (getSavedVar<bool>("cheat_indicator")) Display::getDisplay(0)->setColor(isCheating() ? ccc3(255, 0, 0) : ccc3(0, 255, 0));
+        if (getSavedVar<bool>("cheat_indicator")) Display::getDisplay(0)->setColor(shouldNotSave() ? ccc3(255, 0, 0) : ccc3(0, 255, 0));
     }
 };
