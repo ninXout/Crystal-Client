@@ -2,9 +2,9 @@
 #include "Display.hpp"
 
 bool isCheating() {
-    return (getVar<bool>("noclip") || getVar<float>("speed") != 1 && getVar<bool>("speedhack") || getVar<bool>("no_mirror") || getVar<bool>("framestep") || 
-            getVar<bool>("autoclicker") || getVar<bool>("layout_mode") || getVar<bool>("AT_record") || getVar<bool>("AT_replay") || getVar<float>("FPS") > 360.0 ||
-            getVar<bool>("jump_hack"));
+    return (getVar<bool>("noclip") || getVar<bool>("speedhack") || getVar<bool>("no_mirror") || getVar<bool>("framestep") || 
+            getVar<bool>("autoclicker") || getVar<bool>("layout_mode") || getVar<bool>("AT_replay") || getVar<float>("FPS") > 360.0 ||
+            getVar<bool>("jump_hack")) || getVar<bool>("hitboxes");
 }
 
 class $modify(PlayLayer) {
