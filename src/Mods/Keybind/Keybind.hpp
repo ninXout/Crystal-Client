@@ -8,8 +8,8 @@ namespace Keybinds {
 
     inline int currentMod = 0;
 
-    inline const char* modbindings[5] = { "Noclip", "Restart Level", "Speedhack", "Hitbox Viewer", "Player 1"};
-    inline const char* modvars[5] = { "noclip", "RESTART_LEVEL", "speedhack", "hitboxes", "PLAYER_1"};
+    inline const char* modbindings[7] = { "Noclip", "Restart Level", "Speedhack", "Hitbox Viewer", "Player 1", "Switcher Left", "Switcher Right"};
+    inline const char* modvars[7] = { "noclip", "RESTART_LEVEL", "speedhack", "hitboxes", "PLAYER_1", "SWITCH_LEFT", "SWITCH_RIGHT"};
 
     inline bool waitingForKeybind = false;
     inline cocos2d::enumKeyCodes currentKey = KEY_A;

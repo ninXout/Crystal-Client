@@ -1,5 +1,6 @@
 #include "Keybind.hpp"
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
+#include "../Player/StartPosSwitcher.hpp"
 
 using namespace CrystalClient;
 
@@ -46,6 +47,10 @@ std::string Keybinds::keyToString(cocos2d::enumKeyCodes key) {
         case KEY_Nine: ret = "9"; break;
         case KEY_Zero: ret = "0"; break;
 
+        KEY_TO_STR(ArrowRight);
+        KEY_TO_STR(ArrowLeft);
+        KEY_TO_STR(ArrowDown);
+
         default: ret = "UNK"; break;
     }
     return ret;
@@ -77,6 +82,8 @@ class $modify(CCKeyboardDispatcher) {
                     GJBaseGameLayer::get()->pushButton(1, true);
                     last_down = true;
                 }
+            } else if (key == k && down && (v == 5 || v == 6) && PlayLayer::get()) {
+                updateIndex(v == 6);
             } else if (key == k && down) *setSavedVar<bool>(Keybinds::modvars[v]) = !getSavedVar<bool>(Keybinds::modvars[v]);
         }
 

@@ -19,6 +19,10 @@ else()
 endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    src/Utilities/DiscordRPC
+)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/Utilities/DiscordRPC/libdiscord-rpc.a)
 
 CPMAddPackage("gh:matcool/gd-imgui-cocos#3c7f7c2")
 

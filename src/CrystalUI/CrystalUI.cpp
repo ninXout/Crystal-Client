@@ -8,6 +8,24 @@
 
 using namespace CrystalClient;
 
+ImVec4 operator+(const ImVec4& a, const ImVec4& b) {
+	ImVec4 vec;
+	vec.w = a.w + b.w;
+	vec.x = a.x + b.x;
+	vec.y = a.y + b.y;
+	vec.z = a.z + b.z;
+	return vec;
+}
+
+ImVec4 operator-(const ImVec4& a, const ImVec4& b) {
+	ImVec4 vec;
+	vec.w = a.w - b.w;
+	vec.x = a.x - b.x;
+	vec.y = a.y - b.y;
+	vec.z = a.z - b.z;
+	return vec;
+}
+
 void CrystalUI::setupFonts() {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -102,7 +120,7 @@ void CrystalUI::renderUser() {
 void CrystalUI::renderTabs() {
 	ImGuiStyle * style = &ImGui::GetStyle();
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, {0,0,0,0});
-	ImGui::BeginChild("tabs", ImVec2(186, 440), true);
+	ImGui::BeginChild("tabs", ImVec2(186, 480), true);
 	ImGui::PopStyleColor();
 
 	ImGui::PushItemWidth(160.f);
@@ -114,10 +132,10 @@ void CrystalUI::renderTabs() {
 
 	ImVec4 col(0.152941f, 0.152941f, 0.250980f, 1.f);
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
-	std::string tabNames[] = { std::string(ICON_FA_CUBE " Player"), std::string(ICON_FA_PAINT_BRUSH " Icon"), std::string(ICON_FA_LAYER_GROUP " Level"), std::string(ICON_FA_WINDOW_RESTORE " Display"), std::string(ICON_FA_EYE_DROPPER " Customize"), std::string(ICON_FA_LOCK_OPEN " Bypasses"), std::string(ICON_FA_GLOBE " Global"), std::string(ICON_FA_MOUSE_POINTER " Amethyst"), std::string(ICON_FA_KEYBOARD " Keybinds") };
+	std::string tabNames[] = { std::string(ICON_FA_CUBE "  Player"), std::string(ICON_FA_PAINT_BRUSH "  Icon"), std::string(ICON_FA_LAYER_GROUP "  Level"), std::string(ICON_FA_FONT "  Displays"), std::string(ICON_FA_EYE_DROPPER "  Customize"), std::string(ICON_FA_LOCK_OPEN "  Bypasses"), std::string(ICON_FA_GLOBE "  Global"), std::string(ICON_FA_WINDOW_RESTORE "  UI"), std::string(ICON_FA_MOUSE_POINTER "  Amethyst"), std::string(ICON_FA_KEYBOARD "  Keybinds") };
 	for (int i = 0; i < sizeof(tabNames) / sizeof(tabNames[0]); i++) {
-		std::string it = tabNames[i];
-		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.1, 0.5));
+		std::string it = std::string("  ") + tabNames[i];
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0.5));
 		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? col : ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleColor(ImGuiCol_Text, selectedTab == i ? style->Colors[ImGuiCol_Text] : style->Colors[ImGuiCol_Text]);
 		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) {
@@ -145,7 +163,7 @@ void CrystalUI::renderRightColumn() {
 			case 0: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("playertab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -227,7 +245,7 @@ void CrystalUI::renderRightColumn() {
 				ImGuiHelper::drawTabHorizontally(std::string("iconsubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedSubTab);
 				ImGui::Spacing();
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("icontab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -259,7 +277,7 @@ void CrystalUI::renderRightColumn() {
 			case 2: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -320,7 +338,7 @@ void CrystalUI::renderRightColumn() {
 
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -457,10 +475,29 @@ void CrystalUI::renderRightColumn() {
 
 				break;
 			}
+			case 5: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("bypasstab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				CrystalUI::toggle("Scale Hack", setSavedVar<bool>("scalehack"), "Bypass the scaling limit for objects");
+				CrystalUI::toggle("Verify Bypass", setSavedVar<bool>("verify"), "Automatically sets levels as Verified");
+				CrystalUI::toggle("Copy Bypass", setSavedVar<bool>("copy_hack"), "Allows you to copy any level");
+				CrystalUI::toggle("Editor Zoom Bypass", setSavedVar<bool>("editor_zoom"), "Bypass the limits on the zoom in the editor");
+				CrystalUI::toggle("Level Edit Bypass", setSavedVar<bool>("level_edit"), "Allows you to edit any level");
+				CrystalUI::toggle("Load Failed Bypass", setSavedVar<bool>("load_failed"), "Bypasses the LOAD FAILED error in levels");
+
+				ImGui::EndChild();
+				break;
+			}
 			case 6: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("globaltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -482,6 +519,24 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
+				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"));
+				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::inputFloat("Speed", setSavedVar<float>("speed"));
+					CrystalUI::subToggle("Change Audio Speed", setSavedVar<bool>("speedhack_audio"));
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+				if (getSavedVar<bool>("speedhack")) {
+					CCScheduler::get()->setTimeScale(getSavedVar<float>("speed"));
+					//FMODAudioEngine::sharedEngine()->m_globalChannel->setPitch(getSavedVar<float>("speed"));
+					//FMODAudioEngine::sharedEngine()->m_currentSoundChannel->setPitch(getSavedVar<float>("speed"));
+				} else {
+					CCScheduler::get()->setTimeScale(1.0f);
+					//FMODAudioEngine::sharedEngine()->m_globalChannel->setPitch(1.0f);
+					//FMODAudioEngine::sharedEngine()->m_currentSoundChannel->setPitch(1.0f);
+				}
 				CrystalUI::toggleWithMenu("Safe Mode", setSavedVar<bool>("safe_mode"), "Stops progress on levels to prevent accidental cheating");
 				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"));
@@ -494,13 +549,16 @@ void CrystalUI::renderRightColumn() {
 				//CrystalUI::toggle("No Transition", setSavedVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
 				CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
 				//CrystalUI::toggle("Transparent Lists", setSavedVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
+				CrystalUI::toggle("Discord Rich Presence", setSavedVar<bool>("discord_rpc"), "Displays your current activity on your Discord profile");
 
 				ImGui::EndChild();
+
+				break;
 			}
-			case 8: {
+			case 9: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("keybindtab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -535,7 +593,7 @@ void CrystalUI::renderRightColumn() {
 			case 10: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.063725f, 0.063725f, 0.138235f, 1));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -556,18 +614,22 @@ void CrystalUI::renderRightColumn() {
 	}
 }
 
-void CrystalUI::internalToggle(const char* str_id, bool* v) {
+void CrystalUI::internalToggle(const char* str_id, bool* v, bool no_win) {
 	ImVec2 p = ImGui::GetCursorScreenPos();
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+	#ifdef GEODE_IS_MACOS
+		no_win = false;
+	#endif
 
     float height = ImGui::GetFrameHeight();
     float width = height * 1.55f;
     float radius = height * 0.50f;
 
-    if (ImGui::InvisibleButton(str_id, ImVec2(width, height)))
-        *v = !*v;
+	if (ImGui::InvisibleButton(str_id, ImVec2(width, height)))
+		*v = !*v;
 
-    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? IM_COL32(49, 49, 79, 225) : IM_COL32(19, 19, 32, 255), height * 0.5f);
+	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? IM_COL32(49, 49, 79, 225) : IM_COL32(19, 19, 32, 255), height * 0.5f);
     draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, *v ? IM_COL32(166, 165, 224, 255) : IM_COL32(49, 49, 79, 255));
 }
 
@@ -610,14 +672,14 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	ImGui::SetItemAllowOverlap();
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 15, p.y + 15));
-	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", str_id);
+	ImGui::TextColored(no_win ? ImVec4(1.0f, 1.0f, 1.0f, 0.5f) : (*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), "%s", str_id);
 
 	if (ImGui::IsItemClicked() && !no_win) *v = !*v;
 	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
-	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
+	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v, no_win);
 
 	p = ImGui::GetCursorScreenPos();
 	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));
@@ -661,10 +723,10 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 420, p.y + 12.5));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.093725f, 0.093725f, 0.168235f, 1.f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.093725f, 0.093725f, 0.168235f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.482352f, 0.482352f, 0.525490f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_Text, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.368627f, 0.368627f, 0.368627f, 0.f));
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 50);
 	ImGui::Button(ICON_FA_COG, ImVec2(30,30));
 	ImGui::PopStyleVar();
