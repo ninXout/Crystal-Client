@@ -94,24 +94,68 @@ float* CrystalClient::setTempVar<float>(std::string const& key) {
 }
 
 ImVec4 CrystalClient::VarToIV4(std::string key) {
-    float newr = getSavedVar<float>(key + "-red");
-    float newg = getSavedVar<float>(key + "-green");
-    float newb = getSavedVar<float>(key + "-blue");
-    float newa = getSavedVar<float>(key + "-alpha");
-    return ImVec4(newr, newg, newb, newa);
+    int r, g, b;
+	std::sscanf(getSavedVar<std::string>(key).c_str(), "%02x%02x%02x", &r, &g, &b);
+	return ImVec4(r / 255.f, g / 255.f, b / 255.f, 1.f);
+}
+
+inline std::string decToHexa(float n) {
+    char hexaDeciNum[2];
+
+    int real = std::round(n * 255.f);
+ 
+    int i = 0;
+    while (real != 0) {
+        int temp = 0;
+        temp = real % 16;
+ 
+        if (temp < 10) {
+            hexaDeciNum[i] = temp + 48;
+            i++;
+        } else {
+            hexaDeciNum[i] = temp + 55;
+            i++;
+        }
+ 
+        real = real / 16;
+    }
+ 
+    std::string hexCode = "";
+    if (i == 2) {
+        hexCode.push_back(hexaDeciNum[0]);
+        hexCode.push_back(hexaDeciNum[1]);
+    } else if (i == 1) {
+        hexCode = "0";
+        hexCode.push_back(hexaDeciNum[0]);
+    } else if (i == 0) {
+        hexCode = "00";
+    }  
+ 
+    return hexCode;
+}
+
+void CrystalClient::IV4toVar(ImVec4 col, std::string key) {
+    if ((col.x >= 0 && col.x <= 1.f)
+        && (col.y >= 0 && col.y <= 1.f)
+        && (col.z >= 0 && col.z <= 1.f)) {
+ 
+        std::string hexCode = "";
+        hexCode += decToHexa(col.x);
+        hexCode += decToHexa(col.y);
+        hexCode += decToHexa(col.z);
+ 
+        *setSavedVar<std::string>(key) = hexCode;
+    }
 }
 
 ccColor3B CrystalClient::VarToCC3B(std::string key) {
-    float newr = getSavedVar<float>(key + "-red") * 255;
-    float newg = getSavedVar<float>(key + "-green") * 255;
-    float newb = getSavedVar<float>(key + "-blue") * 255;
-    return ccc3(newr, newg, newb);
+    int r, g, b;
+	std::sscanf(getSavedVar<std::string>(key).c_str(), "%02x%02x%02x", &r, &g, &b);
+    return ccc3(r, g, b);
 }
 
 ccColor4B CrystalClient::VarToCC4B(std::string key) {
-    float newr = getSavedVar<float>(key + "-red") * 255;
-    float newg = getSavedVar<float>(key + "-green") * 255;
-    float newb = getSavedVar<float>(key + "-blue") * 255;
-    float newa = getSavedVar<float>(key + "-alpha") * 255;
-    return ccc4(newr, newg, newb, newa);
+    int r, g, b;
+	std::sscanf(getSavedVar<std::string>(key).c_str(), "%02x%02x%02x", &r, &g, &b);
+    return ccc4(r, g, b, 1.f);
 }

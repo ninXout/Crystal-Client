@@ -35,12 +35,12 @@ void ImGuiHelper::drawTabHorizontally(std::string childName, ImVec2 childSize, s
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5); // round buttons
 	for (int i = 0; i < tabNames.size(); i++) {
 		std::string it = tabNames.at(i);
-		ImGui::PushStyleColor(ImGuiCol_Button, selectedSubTab == i ? ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] : ImGui::GetStyle().Colors[ImGuiCol_Button]);
-		ImGui::PushStyleColor(ImGuiCol_Text, selectedSubTab == i ? ImGui::GetStyle().Colors[ImGuiCol_Text] : ImGui::GetStyle().Colors[ImGuiCol_Text]);
-
+		ImGui::PushStyleColor(ImGuiCol_Button, selectedSubTab == i ? ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] : rgbaToVec4(0,93,180,255));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_Text]);
 
 		if (ImGui::Button(it.c_str(), ImVec2(btnWidth, btnHeight))) selectedSubTab = i;
 		ImGui::SameLine();
+
 		ImGui::PopStyleColor(2);
 
 	}

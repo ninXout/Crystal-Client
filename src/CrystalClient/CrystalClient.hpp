@@ -45,7 +45,12 @@ namespace CrystalClient {
         {"noclipColor-blue", 0.0f},
         {"noclipColor-alpha", 1.0f},
     };
-    inline std::map<std::string, std::string> modsMapS = {};
+    inline std::map<std::string, std::string> modsMapS = {
+        {"BGcolor", "111119"},
+        {"lightColor", "00a2d6"},
+        {"veryLightColor", "00ace0"},
+        {"darkColor", "02020a"}
+    };
     inline std::map<int, int> modsMapKEY = {};
 
     inline std::map<std::string, bool> TEMPmodsMapB = {};
@@ -72,4 +77,5 @@ namespace CrystalClient {
     ImVec4 VarToIV4(std::string key);
     ccColor3B VarToCC3B(std::string key);
     ccColor4B VarToCC4B(std::string key);
+    void IV4toVar(ImVec4 col, std::string key);
 }

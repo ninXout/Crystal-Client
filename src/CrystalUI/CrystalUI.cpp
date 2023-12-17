@@ -26,6 +26,24 @@ ImVec4 operator-(const ImVec4& a, const ImVec4& b) {
 	return vec;
 }
 
+ImVec4 operator*(const ImVec4& a, float b) {
+	ImVec4 vec;
+	vec.w = a.w;
+	vec.x = a.x * b;
+	vec.y = a.y * b;
+	vec.z = a.z * b;
+	return vec;
+}
+
+ImVec4 operator/(const ImVec4& a, float b) {
+	ImVec4 vec;
+	vec.w = a.w;
+	vec.x = a.x / b;
+	vec.y = a.y / b;
+	vec.z = a.z / b;
+	return vec;
+}
+
 void CrystalUI::setupFonts() {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -53,14 +71,8 @@ void CrystalUI::setupTheme() {
 	ImGuiStyle * style = &ImGui::GetStyle();
 	ImVec4* colors = ImGui::GetStyle().Colors;
 
-	*setSavedVar<float>("darkColor-red") = (getSavedVar<float>("lightColor-red") * 0.5f);
-	*setSavedVar<float>("darkColor-green") = (getSavedVar<float>("lightColor-green") * 0.5f);
-	*setSavedVar<float>("darkColor-blue") = (getSavedVar<float>("lightColor-blue") * 0.5f);
-	*setSavedVar<float>("darkColor-alpha") = getSavedVar<float>("lightColor-alpha");
-	*setSavedVar<float>("veryLightColor-red") = (getSavedVar<float>("lightColor-red") * 1.5f);
-	*setSavedVar<float>("veryLightColor-green") = (getSavedVar<float>("lightColor-green") * 1.5f);
-	*setSavedVar<float>("veryLightColor-blue") = (getSavedVar<float>("lightColor-blue") * 1.5f);
-	*setSavedVar<float>("veryLightColor-alpha") = getSavedVar<float>("lightColor-alpha");
+	CrystalClient::IV4toVar(CrystalClient::VarToIV4("BGcolor") - ImVec4((15.f / 255.f), (15.f / 255.f), (15.f / 255.f), 0.f), "darkColor");
+	CrystalClient::IV4toVar(CrystalClient::VarToIV4("lightColor") + ImVec4(0.f, (10.f / 255.f), (10.f / 255.f), 0.f), "veryLightColor");
 
 	style->FrameRounding = 2.0f;
 	style->GrabRounding = 2.0f;
@@ -80,7 +92,6 @@ void CrystalUI::setupTheme() {
 	colors[ImGuiCol_FrameBgActive] = CrystalClient::VarToIV4("lightColor");
 	colors[ImGuiCol_PlotHistogram] = CrystalClient::VarToIV4("lightColor");
 	colors[ImGuiCol_Button] = CrystalClient::VarToIV4("lightColor");
-	colors[ImGuiCol_ButtonHovered] = CrystalClient::VarToIV4("veryLightColor");
 	colors[ImGuiCol_ButtonActive] = CrystalClient::VarToIV4("lightColor");
 	colors[ImGuiCol_Header] = CrystalClient::VarToIV4("darkColor");
 	colors[ImGuiCol_HeaderHovered] = CrystalClient::VarToIV4("lightColor");
@@ -137,7 +148,7 @@ void CrystalUI::renderTabs() {
 		std::string it = std::string("  ") + tabNames[i];
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0.5));
 		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? col : ImVec4(0, 0, 0, 0));
-		ImGui::PushStyleColor(ImGuiCol_Text, selectedTab == i ? style->Colors[ImGuiCol_Text] : style->Colors[ImGuiCol_Text]);
+		ImGui::PushStyleColor(ImGuiCol_Text, style->Colors[ImGuiCol_Text]);
 		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) {
 			ImGui::GetIO().WantCaptureKeyboard = false;
 			ImGui::SetWindowFocus(NULL);
@@ -475,6 +486,17 @@ void CrystalUI::renderRightColumn() {
 
 				break;
 			}
+			case 4: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("customizetab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				ImGui::EndChild();
+			}
 			case 5: {
 				ImGui::Columns(1, nullptr, false);
 
@@ -624,13 +646,13 @@ void CrystalUI::internalToggle(const char* str_id, bool* v, bool no_win) {
 
     float height = ImGui::GetFrameHeight();
     float width = height * 1.55f;
-    float radius = height * 0.50f;
+    float radius = height * 0.475f;
 
 	if (ImGui::InvisibleButton(str_id, ImVec2(width, height)))
 		*v = !*v;
 
-	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? IM_COL32(49, 49, 79, 225) : IM_COL32(19, 19, 32, 255), height * 0.5f);
-    draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, *v ? IM_COL32(166, 165, 224, 255) : IM_COL32(49, 49, 79, 255));
+	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), *v ? ImGui::ColorConvertFloat4ToU32(CrystalClient::VarToIV4("lightColor")) : ImGui::ColorConvertFloat4ToU32(((CrystalClient::VarToIV4("BGcolor") * 2.f) + CrystalClient::VarToIV4("lightColor")) / 3.f), height * 0.5f);
+    draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, ImGui::ColorConvertFloat4ToU32(CrystalClient::VarToIV4("BGcolor")));
 }
 
 void CrystalUI::subToggle(const char* str_id, bool* v) {
@@ -639,6 +661,27 @@ void CrystalUI::subToggle(const char* str_id, bool* v) {
 	ImGui::SameLine();
 	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", str_id);
 	if (ImGui::IsItemClicked()) *v = !*v;
+}
+
+void CrystalUI::subToggleWithMenu(const char* str_id, bool* v) {
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	CrystalUI::internalToggle(str_id, v);
+	ImGui::SameLine();
+	ImGui::TextColored(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", str_id);
+	if (ImGui::IsItemClicked()) *v = !*v;
+
+	ImGui::SameLine();
+	//ImGui::SetCursorScreenPos(ImVec2(p.x + 450, p.y + 12.5));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_Text, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.368627f, 0.368627f, 0.368627f, 0.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 50);
+	ImGui::Button(ICON_FA_COG, ImVec2(30,30));
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(4);
+
+	if (ImGui::IsItemClicked()) ImGui::OpenPopup(str_id);
 }
 
 void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no_win) {
@@ -678,7 +721,7 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
 	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v, no_win);
 
 	p = ImGui::GetCursorScreenPos();
@@ -722,7 +765,7 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 420, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 450, p.y + 12.5));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -735,26 +778,61 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	if (ImGui::IsItemClicked() && !no_win) ImGui::OpenPopup(str_id);
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
 	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
 
 	p = ImGui::GetCursorScreenPos();
 	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));
 }
 
+inline std::string decToHexa(float n) {
+    char hexaDeciNum[2];
+
+    int real = n;
+ 
+    int i = 0;
+    while (real != 0) {
+        int temp = 0;
+        temp = real % 16;
+ 
+        if (temp < 10) {
+            hexaDeciNum[i] = temp + 48;
+            i++;
+        } else {
+            hexaDeciNum[i] = temp + 55;
+            i++;
+        }
+ 
+        real = real / 16;
+    }
+ 
+    std::string hexCode = "";
+    if (i == 2) {
+        hexCode.push_back(hexaDeciNum[0]);
+        hexCode.push_back(hexaDeciNum[1]);
+    } else if (i == 1) {
+        hexCode = "0";
+        hexCode.push_back(hexaDeciNum[0]);
+    } else if (i == 0) {
+        hexCode = "00";
+    }  
+ 
+    return hexCode;
+}
+
 void CrystalUI::colorPicker(const char* label, std::string name) {
 	float col[4];
-	col[0] = getSavedVar<float>(name + "-red");
-	col[1] = getSavedVar<float>(name + "-green");
-	col[2] = getSavedVar<float>(name + "-blue"); 
-	col[3] = getSavedVar<float>(name + "-alpha");
+	std::sscanf(getSavedVar<std::string>(name).c_str(), "%2f%2f%2f", &col[0], &col[1], &col[2]);
+	col[3] = 1.f; // alpha but we dont even store it so whatever
 
 	ImGui::ColorEdit4(label, col, ImGuiColorEditFlags_NoInputs);
 
-	*setSavedVar<float>(name + "-red") = col[0];
-	*setSavedVar<float>(name + "-green") = col[1];
-	*setSavedVar<float>(name + "-blue") = col[2];
-	*setSavedVar<float>(name + "-alpha") = col[3];
+	std::string hexCode = "";
+	hexCode += decToHexa(col[0]);
+	hexCode += decToHexa(col[1]);
+	hexCode += decToHexa(col[2]);
+
+	*setSavedVar<std::string>(name) = hexCode;
 }
 
 void CrystalUI::textbox(const char* name, std::string* str) {
@@ -797,7 +875,7 @@ void CrystalUI::inputFloat(const char* name, float* num) {
 void CrystalUI::iconEffect(const char* categoryName, std::string saveName) {
 	CrystalUI::toggleWithMenu(categoryName, setSavedVar<bool>(saveName));
 	if (ImGui::BeginPopupModal(categoryName, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-		CrystalUI::toggleWithMenu("Static", setSavedVar<bool>(saveName + "_static"));
+		CrystalUI::subToggleWithMenu("Static", setSavedVar<bool>(saveName + "_static"));
 		if (ImGui::BeginPopupModal("Static", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 			colorPicker("Static Color", saveName + "_static");
 			if (ImGui::Button("Close")) {
@@ -805,7 +883,7 @@ void CrystalUI::iconEffect(const char* categoryName, std::string saveName) {
 			}
 			ImGui::EndPopup();
 		}
-		CrystalUI::toggleWithMenu("Fade", setSavedVar<bool>(saveName + "_fade"));
+		CrystalUI::subToggleWithMenu("Fade", setSavedVar<bool>(saveName + "_fade"));
 		if (ImGui::BeginPopupModal("Fade", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 			colorPicker("Fade Color 1", saveName + "_fade1");
 			colorPicker("Fade Color 2", saveName + "_fade2");
@@ -814,7 +892,7 @@ void CrystalUI::iconEffect(const char* categoryName, std::string saveName) {
 			}
 			ImGui::EndPopup();
 		}
-		CrystalUI::toggle("Rainbow", setSavedVar<bool>(saveName + "_rainbow"));
+		CrystalUI::subToggle("Rainbow", setSavedVar<bool>(saveName + "_rainbow"));
 		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
 		}

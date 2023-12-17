@@ -10,6 +10,14 @@ using namespace geode::prelude;
 using namespace CrystalClient;
 
 $execute {
+	CrystalClient::loadConfig();
+	Keybinds::keybind.clear();
+	if (CrystalClient::modsMapKEY.size() > 0) {
+		for (auto [k, v] : CrystalClient::modsMapKEY) {
+			Keybinds::keybind.push_back({(cocos2d::enumKeyCodes)k, v});
+		}
+	}
+	AppDelegate::get()->setAnimationInterval(1.0 / getSavedVar<float>("FPS"));
 	ImGuiCocos::get().setup([] {
         ImGuiCocos::get().setInputMode(ImGuiCocos::InputMode::Blocking);
         CrystalUI::setupFonts();
@@ -34,14 +42,6 @@ $execute {
 		ImGui::PopFont();
     });
 	ImGuiCocos::get().toggle();
-	CrystalClient::loadConfig();
-	Keybinds::keybind.clear();
-	if (CrystalClient::modsMapKEY.size() > 0) {
-		for (auto [k, v] : CrystalClient::modsMapKEY) {
-			Keybinds::keybind.push_back({(cocos2d::enumKeyCodes)k, v});
-		}
-	}
-	AppDelegate::get()->setAnimationInterval(1.0 / getSavedVar<float>("FPS"));
 }
 
 class $modify(CCKeyboardDispatcher) {
