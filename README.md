@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/CrystalMethREAL" alt="Logo" width="70" height="70"></img>
+    <img src="./assets/main" alt="Logo" width="70" height="70"></img>
 </p>
 
 <div align="center">
