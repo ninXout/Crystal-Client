@@ -1,6 +1,9 @@
-# Crystal Client
-The **biggest** mod client for Mac. Comes with a very accurate macro bot called **Amethyst** and 80+ new mods and features, all organized in an easy to use dropdown GUI.
+<div align="center">
 
+  # Crystal Client
+  ### Crystal Client - Big mod menu that supports both Mac and Windows!
+  <a href="https://github.com/TobyAdd/GDH" target="_blank" rel="noreferrer"> <img src="https://github.com/TobyAdd/GDH/assets/66429886/d57d610d-5738-45ce-8c06-862389d0655a" alt="GDH Menu Screen" title="GDH Menu"/> </a>
+</div>
 ## Support Server
 If you need any help with Crystal, want to suggest some upcoming features, or want to boost the server for access to betas, join my [Discord server](https://discord.gg/xV5dekWHTd)
 
