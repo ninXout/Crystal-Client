@@ -1,6 +1,4 @@
-<p align="center">
-    <img src="./assets/main" alt="crystal-patch-1" width="70" height="70"></img>
-</p>
+
 
 <div align="center">
 
