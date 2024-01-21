@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./assets/ResonanceStoreIcon.png" alt="Logo" width="70" height="70"></img>
+</p>
+
 <div align="center">
 
   # Crystal Client
