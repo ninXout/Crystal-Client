@@ -1,5 +1,7 @@
-![crystalicon](https://github.com/ninXout/Crystal-Client/assets/157250217/ed9242d7-53dd-487e-a827-97847a1a685a)
 
+<p align="center">
+    <img src=".![crystalicon](https://github.com/ninXout/Crystal-Client/assets/157250217/ed9242d7-53dd-487e-a827-97847a1a685a)" alt="Logo" width="70" height="70"></img>
+</p>
 
 <div align="center">
 
