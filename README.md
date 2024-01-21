@@ -1,3 +1,4 @@
+![crystalicon](https://github.com/ninXout/Crystal-Client/assets/157250217/ed9242d7-53dd-487e-a827-97847a1a685a)
 
 
 <div align="center">
