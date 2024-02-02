@@ -326,7 +326,7 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}*/
-				//CrystalUI::toggle("Practice Music Hack", setSavedVar<bool>("practice_music"), "Plays the normal music in practice mode");
+				CrystalUI::toggle("Practice Music Hack", setSavedVar<bool>("practice_music"), "Plays the normal music in practice mode");
 				/*
 				CrystalUI::toggle("Freeze Attempts", setSavedVar<bool>("freeze_attempts"), "The attempts doesn't update");
 				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
@@ -534,6 +534,16 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
+				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"));
+				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					ImGui::SliderFloat("Speed", setSavedVar<float>("speed"), 0.001, 10.000); // CHANGE TO TEXT INPUT
+					//CrystalUI::subToggle("Change Audio Speed", setSavedVar<bool>("speedhack_audio"));
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+
 /*
 				CrystalUI::toggleWithMenu("FPS Bypass", setSavedVar<bool>("FPS_bypass"));
 				if (ImGui::BeginPopupModal("FPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -551,24 +561,6 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
-				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"));
-				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::inputFloat("Speed", setSavedVar<float>("speed"));
-					CrystalUI::subToggle("Change Audio Speed", setSavedVar<bool>("speedhack_audio"));
-					if (ImGui::Button("Close")) {
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
-				if (getSavedVar<bool>("speedhack")) {
-					CCScheduler::get()->setTimeScale(getSavedVar<float>("speed"));
-					//FMODAudioEngine::sharedEngine()->m_globalChannel->setPitch(getSavedVar<float>("speed"));
-					//FMODAudioEngine::sharedEngine()->m_currentSoundChannel->setPitch(getSavedVar<float>("speed"));
-				} else {
-					CCScheduler::get()->setTimeScale(1.0f);
-					//FMODAudioEngine::sharedEngine()->m_globalChannel->setPitch(1.0f);
-					//FMODAudioEngine::sharedEngine()->m_currentSoundChannel->setPitch(1.0f);
-				}
 				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"));
 					if (ImGui::Button("Close")) {
@@ -585,6 +577,20 @@ void CrystalUI::renderRightColumn() {
 				ImGui::EndChild();
 
 				break;
+			}
+			case 8: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("amethysttab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
+				CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
+
+				ImGui::EndChild();
 			}
 			case 9: {
 				ImGui::Columns(1, nullptr, false);

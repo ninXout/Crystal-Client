@@ -17,6 +17,8 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Level/SafeMode.cpp
     src/Mods/Bypass/UnlockAll.cpp
     src/Mods/Bypass/InstantComplete.cpp
+    src/Mods/Global/Speedhack.cpp
+    src/Mods/Amethyst/Amethyst.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})
