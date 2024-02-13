@@ -27,6 +27,8 @@ protected:
 public:
     static CrystalClient* get();
 
+    void toggle();
+
     void render();
     void saveToFile();
     void loadFromFile();

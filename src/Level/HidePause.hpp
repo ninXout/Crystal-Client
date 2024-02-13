@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CrystalProfile.hpp"
-#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/binding/PauseLayer.hpp>
 
-inline PauseLayer* thelayer;
+inline PauseLayer* thelayer = nullptr;

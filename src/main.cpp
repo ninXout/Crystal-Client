@@ -3,7 +3,7 @@
 #include "Hacks.hpp"
 #include "./Icon/Icon.hpp"
 #include <random>
-#include "./ImGui/ImGui.hpp"
+#include <imgui-cocos.hpp>
 #include "Shortcuts.hpp"
 #include "CrystalProfile.hpp"
 #include <Geode/Geode.hpp>
@@ -47,11 +47,12 @@ $execute {
 	loadConfigFromFile();
 	Shortcuts::get()->refreshKeybinds(false);
     ImGuiCocos::get().setup([] {
+        ImGuiCocos::get().setInputMode(ImGuiCocos::InputMode::Blocking);
         CrystalClient::get()->addTheme(true);
     }).draw([] {
         CrystalClient::get()->drawGUI();
     });
-    ImGuiCocos::get().toggle();
+    CrystalClient::get()->toggle();
 
 	CrystalClient::get()->initPatches();
 
@@ -436,13 +437,13 @@ void CrystalClient::drawGUI() {
     windowPreBegin(sortIndex);
 	ImGui::Begin("Shortcuts", NULL, window_flags);
     if (ImGui::Button("Open Songs Folder")) {
-        system("open ~/Library/Caches");
+		geode::utils::file::openFolder(geode::dirs::getSaveDir());
     }
     if (ImGui::Button("Open Crystal Folder")) {
-        //system(conf.c_str());
+		geode::utils::file::openFolder(Mod::get()->getConfigDir());
     }
     if (ImGui::Button("Open Resources Folder")) {
-        system("open Resources");
+		geode::utils::file::openFolder(geode::dirs::getGameDir() / "Resources");
     }
     if (ImGui::Button("Open GD Settings")) {
         OptionsLayer::addToCurrentScene(false);

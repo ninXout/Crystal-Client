@@ -155,6 +155,11 @@ void Shortcuts::updateVariables() {
 
 class $modify(CCKeyboardDispatcher) {
     bool dispatchKeyboardMSG(enumKeyCodes key, bool down) {
+        if (down && key == KEY_Tab) {
+            CrystalClient::get()->toggle();
+            return true;
+        }
+
         Shortcuts::get()->updateKeybinds(key, down, true);
 
         return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down);

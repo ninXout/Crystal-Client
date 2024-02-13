@@ -401,3 +401,33 @@ void CrystalClient::emptyFoldersCB(CCNode* layer) {
 		alert->show();
 	}
 }
+
+#include <imgui-cocos.hpp>
+#include "../Level/HidePause.hpp"
+#include "../Display/Display.hpp"
+
+void CrystalClient::toggle() {
+	if (!ImGuiCocos::get().isVisible()) {
+#ifdef GEODE_IS_MACOS
+		PlatformToolbox::showCursor();
+#endif
+		CrystalClient::get()->addTheme(false);
+	} else {
+		CrystalClient::get()->refreshPatches();
+		if (getTempVar<float>("target_DT"))
+			CCApplication::sharedApplication()->setAnimationInterval(getTempVar<float>("target_DT"));
+		Shortcuts::get()->refreshKeybinds(true);
+		saveConfigToFile();
+		if (PlayLayer::get()) {
+			for (int i = 0; i < 14; i++) {
+				Display::get()->updateDisplay(i);
+			}
+		}
+		if (PlayLayer::get() && thelayer && getTempVar<bool>("is-paused")) thelayer->setVisible(!getVar<bool>("hide_pause"));
+#ifdef GEODE_IS_MACOS
+		if (PlayLayer::get() && !getTempVar<bool>("is-paused") && !PlayLayer::get()->m_hasLevelCompleteMenu) PlatformToolbox::hideCursor();
+#endif
+	}
+
+	ImGuiCocos::get().toggle();
+}
