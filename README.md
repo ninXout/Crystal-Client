@@ -28,9 +28,9 @@
 
   *NOTES*
 
-If YOU ignored any or all of the rules for a question, we are never going to respond to your problem.
+If YOU ignored any or all of the rules for a question, we won't respond to your problem.
 <br>
-We cant fix your problems instantly, so if your problem isnt resolved, don't blame us for it.
+We can't fix your problems instantly, so if your problem isn't resolved, don't blame us for it.
 
 </div>
 
@@ -42,6 +42,7 @@ We cant fix your problems instantly, so if your problem isnt resolved, don't bla
 ### **[Mat](https://github.com/matcool):** For providing the ImGUI library that works with Mac.
 ### **[Camila314](https://github.com/camila314):** For helping with EVERY MOD I have done and guiding me through a lot of the mod making process.
 ### **[TaurusParker](https://github.com/TaurusParker):** Rewriting the entire README!
+### **Scrahe**, for fixing some grammar issues in the README.
 ### **YourInnerDemons**, For making a lot of the logos, art and the trailer.
 ### **Seaze, InkZie, tallensuired, nomn, and Zen1th**, for beta testing.
 
