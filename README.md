@@ -1,4 +1,6 @@
-# 2.2 SUPPORT IS BEING DEVELOPED. CRYSTAL CLIENT DOES NOT WORK ON 2.2 YET!
+> # NOTE 
+> 2.2 support *is* here, but is not as stable as Crystal Client was previously.  
+> Over time, Crystal Client will become more supported and remain actively maintained.
 
 <p align="center">
     <img src="https://github.com/ninXout/Crystal-Client/assets/157250217/ed9242d7-53dd-487e-a827-97847a1a685a" width="70" height="70"></img>
