@@ -180,7 +180,6 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 				CrystalUI::toggleWithMenu("Noclip", setSavedVar<bool>("noclip"), "Allows the player to be invincible");
-				/*
 				if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Noclip Player 1", setSavedVar<bool>("noclip_P1"));
 					CrystalUI::subToggle("Noclip Player 2", setSavedVar<bool>("noclip_P2"));
@@ -202,6 +201,7 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Death Effect", setSavedVar<bool>("no_death_effect"), "Removes the player's death effect");
+				/*
 				CrystalUI::toggleWithMenu("Auto Kill", setSavedVar<bool>("auto_reset"), "Kills the player at a certain percentage");
 				if (ImGui::BeginPopupModal("Auto Kill", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::PushItemWidth(100.f);
@@ -327,14 +327,14 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}*/
 				CrystalUI::toggle("Practice Music Hack", setSavedVar<bool>("practice_music"), "Plays the normal music in practice mode");
+				CrystalUI::toggle("Auto LDM", setSavedVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
+				CrystalUI::toggle("Auto Song Downloader", setSavedVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
+				CrystalUI::toggle("Ignore ESC", setSavedVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
+				CrystalUI::toggle("Confirm Quit", setSavedVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
 				/*
 				CrystalUI::toggle("Freeze Attempts", setSavedVar<bool>("freeze_attempts"), "The attempts doesn't update");
 				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
 				//CrystalUI::toggle("Hide Pause Button", setSavedVar<bool>("hide_pause_button"), "Hides the pause button when playing");
-				CrystalUI::toggle("Ignore ESC", setSavedVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
-				CrystalUI::toggle("Confirm Quit", setSavedVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
-				CrystalUI::toggle("Auto LDM", setSavedVar<bool>("auto_ldm"), "Immediately turns on LDM on all levels (if there is one)");
-				CrystalUI::toggle("Auto Song Downloader", setSavedVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
 				//CrystalUI::toggle("Play Song on Level Page", setSavedVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
 				CrystalUI::toggle("Load from Last Checkpoint", setSavedVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
 				CrystalUI::toggle("No Glow", setSavedVar<bool>("no_glow"), "Removes all glow from objects in a level");
@@ -514,9 +514,9 @@ void CrystalUI::renderRightColumn() {
 
 				CrystalUI::toggle("Unlock All", setSavedVar<bool>("iconhack"), "Unlocks all icons and colors");
 				CrystalUI::toggle("Instant Complete", setSavedVar<bool>("instant_complete"), "Instantly complete a level with all coins upon entering");
+				CrystalUI::toggle("Verify Bypass", setSavedVar<bool>("verify"), "Automatically sets levels as Verified");
 				/*
 				CrystalUI::toggle("Scale Hack", setSavedVar<bool>("scalehack"), "Bypass the scaling limit for objects");
-				CrystalUI::toggle("Verify Bypass", setSavedVar<bool>("verify"), "Automatically sets levels as Verified");
 				CrystalUI::toggle("Copy Bypass", setSavedVar<bool>("copy_hack"), "Allows you to copy any level");
 				CrystalUI::toggle("Editor Zoom Bypass", setSavedVar<bool>("editor_zoom"), "Bypass the limits on the zoom in the editor");
 				CrystalUI::toggle("Level Edit Bypass", setSavedVar<bool>("level_edit"), "Allows you to edit any level");
@@ -536,7 +536,7 @@ void CrystalUI::renderRightColumn() {
 
 				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"));
 				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					ImGui::SliderFloat("Speed", setSavedVar<float>("speed"), 0.001, 10.000); // CHANGE TO TEXT INPUT
+					ImGui::InputFloat("Speed", setSavedVar<float>("speed")); // CHANGE TO TEXT INPUT
 					//CrystalUI::subToggle("Change Audio Speed", setSavedVar<bool>("speedhack_audio"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -567,13 +567,13 @@ void CrystalUI::renderRightColumn() {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
-				}
+				}*/
 				CrystalUI::toggle("Lock Cursor", setSavedVar<bool>("lock_cursor"), "Locks your cursor to the game window", true);
 				//CrystalUI::toggle("No Transition", setSavedVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
-				CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
+				//CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
 				//CrystalUI::toggle("Transparent Lists", setSavedVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
-				CrystalUI::toggle("Discord Rich Presence", setSavedVar<bool>("discord_rpc"), "Displays your current activity on your Discord profile");
-*/
+				//CrystalUI::toggle("Discord Rich Presence", setSavedVar<bool>("discord_rpc"), "Displays your current activity on your Discord profile");
+
 				ImGui::EndChild();
 
 				break;
@@ -587,8 +587,8 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
-				CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
-				CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
+				//CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
+				//CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
 
 				ImGui::EndChild();
 			}
@@ -840,17 +840,17 @@ inline std::string decToHexa(float n) {
 
 void CrystalUI::colorPicker(const char* label, std::string name) {
 	float col[4];
-	std::sscanf(getSavedVar<std::string>(name).c_str(), "%2f%2f%2f", &col[0], &col[1], &col[2]);
-	col[3] = 1.f; // alpha but we dont even store it so whatever
+	col[0] = getSavedVar<float>(name + "-red");
+	col[1] = getSavedVar<float>(name + "-green");
+	col[2] = getSavedVar<float>(name + "-blue"); 
+	col[3] = getSavedVar<float>(name + "-alpha");
 
 	ImGui::ColorEdit4(label, col, ImGuiColorEditFlags_NoInputs);
 
-	std::string hexCode = "";
-	hexCode += decToHexa(col[0]);
-	hexCode += decToHexa(col[1]);
-	hexCode += decToHexa(col[2]);
-
-	*setSavedVar<std::string>(name) = hexCode;
+	*setSavedVar<float>(name + "-red") = col[0];
+	*setSavedVar<float>(name + "-green") = col[1];
+	*setSavedVar<float>(name + "-blue") = col[2];
+	*setSavedVar<float>(name + "-alpha") = col[3];
 }
 
 void CrystalUI::textbox(const char* name, std::string* str) {

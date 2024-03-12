@@ -12,12 +12,20 @@ add_library(${PROJECT_NAME} SHARED
     src/CrystalUI/CrystalUI.cpp
     src/CrystalUI/Blur.cpp
     src/CrystalUI/ImGuiHelper.cpp
-    src/Mods/Player/noclip.cpp
+    src/Mods/Player/Noclip.cpp
+    src/Mods/Player/NoDeathEffect.cpp
+    src/Mods/Player/NoWavePulse.cpp
     src/Mods/Level/PracticeMusic.cpp
     src/Mods/Level/SafeMode.cpp
+    src/Mods/Level/AutoLDM.cpp
+    src/Mods/Level/AutoSongDownloader.cpp
+    src/Mods/Level/ConfirmQuit.cpp
+    src/Mods/Level/IgnoreESC.cpp
     src/Mods/Bypass/UnlockAll.cpp
     src/Mods/Bypass/InstantComplete.cpp
+    src/Mods/Bypass/VerifyHack.cpp
     src/Mods/Global/Speedhack.cpp
+    src/Mods/Global/LockCursor.cpp
     src/Mods/Amethyst/Amethyst.cpp
 )
 
@@ -29,8 +37,8 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
-# CPMAddPackage("gh:ninXout/gd-imgui-cocos#6f014e3")
-add_subdirectory(../../GitHub/gd-imgui-cocos ${CMAKE_CURRENT_BINARY_DIR}/gd-imgui-cocos_build)
+CPMAddPackage("gh:matcool/gd-imgui-cocos#5bc72d6")
+# add_subdirectory(../../GitHub/gd-imgui-cocos ${CMAKE_CURRENT_BINARY_DIR}/gd-imgui-cocos_build) # for local edits
 target_link_libraries(${PROJECT_NAME} imgui-cocos)
 
 setup_geode_mod(${PROJECT_NAME})

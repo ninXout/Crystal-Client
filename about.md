@@ -1,5 +1,5 @@
 # Crystal
-The **biggest** mod client for Mac and Windows. Comes with a very accurate macro bot called **Amethyst** and 90+ new mods and features, all organized in an easy to use dropdown GUI. 
+The **biggest** mod client for Mac (and Windows/Android soon). Comes with around 10+ mods and features with many more on the way, all organized in an easy to use GUI. 
 
 Click TAB to open and close the mod menu.
 

@@ -1,11 +1,11 @@
 {
 	"geode": "2.0.0-beta.12",
 	"gd": "2.200",
-	"version": "v5.0.0-alpha.1",
+	"version": "v5.0.0-alpha.2",
 	"id": "ninxout.crystal_client",
 	"name": "Crystal Client",
 	"developer": "ninXout",
-	"description": "Premium Cross-Platform Modded Client",
+	"description": "The Best MacOS Modded Client",
     "resources": {
         "files": [
             "resources/blur_shaders/*.glsl"

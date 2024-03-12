@@ -227,6 +227,7 @@ void cleanupPostProcess() {
 #include <Geode/modify/GameManager.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <Geode/modify/CCNode.hpp>
+#include <Geode/modify/MenuLayer.hpp>
 #include <imgui-cocos.hpp>
 
 class $modify(CCNode) {
@@ -314,5 +315,16 @@ class $modify(CCScheduler) {
 
         if (blurTimer == 0.f)
             return;
+    }
+};
+
+class $modify(MenuLayer) {
+    bool init() {
+        if (!MenuLayer::init()) return false;
+
+        cleanupPostProcess();
+        setupPostProcess();
+
+        return true;
     }
 };

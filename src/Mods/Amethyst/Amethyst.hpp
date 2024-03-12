@@ -1,18 +1,24 @@
 #pragma once
 
 #include "../../CrystalClient/CrystalClient.hpp"
+#include "../../Utilities/GDReplayFormat/gdr/gdr.hpp"
 
 using namespace CrystalClient;
 
-struct AmethystAction {
-    bool player1;
-    int frame; // total dt * 240 (until i introduce bypass)
-    int button;
-    bool pressed;
-};
-
 namespace Amethyst {
-    inline std::vector<AmethystAction> actions;
-    inline std::vector<float> checkpoints;
-    inline float totalDT;
+    struct AmethystInput : gdr::Input {
+        AmethystInput() = default;
+
+        AmethystInput(int frame, int button, bool player2, bool down)
+            : Input(frame, button, player2, down) {}   
+    };
+
+    struct AmethystMacro : gdr::Replay<AmethystMacro, AmethystInput> {
+        AmethystMacro() : Replay("Amethyst", "1.0") {}
+    };
+
+    inline std::vector<double> checkpoints;
+    inline double totalTime;
+
+    inline AmethystMacro macro;
 }

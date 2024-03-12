@@ -1,5 +1,3 @@
-# 2.2 SUPPORT IS BEING DEVELOPED. CRYSTAL CLIENT DOES NOT WORK ON 2.2 YET!
-
 <p align="center">
     <img src="https://github.com/ninXout/Crystal-Client/assets/157250217/ed9242d7-53dd-487e-a827-97847a1a685a" width="70" height="70"></img>
 </p>
@@ -7,7 +5,7 @@
 <div align="center">
 
   # Crystal Client
-  ### Free Cross-Platform Mod Menu
+  ### The Best Free MacOS Mod Menu
   ![image](https://github.com/ninXout/Crystal-Client/assets/157250217/e3269a33-b5cc-497e-a094-ee1543c301bc)
 </div>
 
