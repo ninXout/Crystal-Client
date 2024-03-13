@@ -183,6 +183,7 @@ void CrystalUI::renderRightColumn() {
 				if (ImGui::BeginPopupModal("Noclip", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Noclip Player 1", setSavedVar<bool>("noclip_P1"));
 					CrystalUI::subToggle("Noclip Player 2", setSavedVar<bool>("noclip_P2"));
+					//CrystalUI::subToggle("Only Spikes", setSavedVar<bool>("nospike"));
 					CrystalUI::subToggle("Tint Screen on Death", setSavedVar<bool>("noclip_tint"));
 					CrystalUI::colorPicker("Tint Color", "noclipColor");
 					ImGui::PushItemWidth(100);
@@ -308,15 +309,6 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
-				CrystalUI::toggle("No Progress Bar", setSavedVar<bool>("no_progress_bar"), "Removes the progress bar, and centers the percentage text");
-				CrystalUI::toggleWithMenu("Accurate Percentage", setSavedVar<bool>("acc_percentage"), "Adds decimals to the percentage text");
-				if (ImGui::BeginPopupModal("Accurate Percentage", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::inputInt("Percentage Decimal Points", setSavedVar<int>("acc_percentage_decimals"));
-					if (ImGui::Button("Close")) {
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
 				CrystalUI::toggleWithMenu("Hide Attempts Label", setSavedVar<bool>("hide_attempts"), "Hides the Attempt label at the beginning of a level");
 				if (ImGui::BeginPopupModal("Hide Attempts Label", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Hide in Normal Mode", setSavedVar<bool>("hide_attempts_normal"));
@@ -331,9 +323,9 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("Auto Song Downloader", setSavedVar<bool>("auto_song_download"), "Immediately downloads the song for every level");
 				CrystalUI::toggle("Ignore ESC", setSavedVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
 				CrystalUI::toggle("Confirm Quit", setSavedVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
+				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
 				/*
 				CrystalUI::toggle("Freeze Attempts", setSavedVar<bool>("freeze_attempts"), "The attempts doesn't update");
-				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
 				//CrystalUI::toggle("Hide Pause Button", setSavedVar<bool>("hide_pause_button"), "Hides the pause button when playing");
 				//CrystalUI::toggle("Play Song on Level Page", setSavedVar<bool>("play_song_level_page"), "Adds a button so you can listen the level's song without entering on it");
 				CrystalUI::toggle("Load from Last Checkpoint", setSavedVar<bool>("load_from_last_CP"), "At the end of a practice mode run, restart from the last checkpoint when you click its button");
@@ -361,7 +353,6 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleColor();
 				
 				//CrystalUI::toggle("Testmode Label", setSavedVar<bool>("testmode_label"));
-				/*
 				ImGui::PushItemWidth(100);
 				CrystalUI::inputFloat("Display Scale", setSavedVar<float>("display_scale"));
 				CrystalUI::inputFloat("Display Opacity", setSavedVar<float>("display_opacity"));
@@ -418,7 +409,7 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
-				CrystalUI::toggleWithMenu("Jumps", setSavedVar<bool>("jumps"), "Displays your jumps");
+				/*CrystalUI::toggleWithMenu("Jumps", setSavedVar<bool>("jumps"), "Displays your jumps");
 				if (ImGui::BeginPopupModal("Jumps", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Total Jumps", setSavedVar<bool>("total_jumps"));
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-6"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -426,7 +417,7 @@ void CrystalUI::renderRightColumn() {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
-				}
+				}*/
 				CrystalUI::toggleWithMenu("Run From", setSavedVar<bool>("run_from"), "Displays the percentage you started from");
 				if (ImGui::BeginPopupModal("Run From", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::Combo("Position", setSavedVar<int>("label_pos-7"), displaySelection, IM_ARRAYSIZE(displaySelection));
@@ -486,7 +477,7 @@ void CrystalUI::renderRightColumn() {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
-				}*/
+				}
 
 				ImGui::EndChild();
 
@@ -515,9 +506,9 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("Unlock All", setSavedVar<bool>("iconhack"), "Unlocks all icons and colors");
 				CrystalUI::toggle("Instant Complete", setSavedVar<bool>("instant_complete"), "Instantly complete a level with all coins upon entering");
 				CrystalUI::toggle("Verify Bypass", setSavedVar<bool>("verify"), "Automatically sets levels as Verified");
+				CrystalUI::toggle("Copy Bypass", setSavedVar<bool>("copy_hack"), "Allows you to copy any level");
 				/*
 				CrystalUI::toggle("Scale Hack", setSavedVar<bool>("scalehack"), "Bypass the scaling limit for objects");
-				CrystalUI::toggle("Copy Bypass", setSavedVar<bool>("copy_hack"), "Allows you to copy any level");
 				CrystalUI::toggle("Editor Zoom Bypass", setSavedVar<bool>("editor_zoom"), "Bypass the limits on the zoom in the editor");
 				CrystalUI::toggle("Level Edit Bypass", setSavedVar<bool>("level_edit"), "Allows you to edit any level");
 				CrystalUI::toggle("Load Failed Bypass", setSavedVar<bool>("load_failed"), "Bypasses the LOAD FAILED error in levels");
@@ -919,7 +910,7 @@ void CrystalUI::iconEffect(const char* categoryName, std::string saveName) {
 }
 
 void CrystalUI::hotkey(const char* label) {
-	ImGui::Text(label);
+	ImGui::Text("%s", label);
 	ImGui::SameLine();
 	if (waitingForKey) { ImGui::Button("Waiting for keypress..."); }
 	//else { if (ImGui::Button(CCKeyboardDispatcher::keyToString(queuedKey), ImVec2(80, 20))) { waitingForKey = true; } }

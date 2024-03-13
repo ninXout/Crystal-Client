@@ -29,6 +29,10 @@ class $modify(PlayLayer) {
 
     GameObject* antiCheatObject;
 
+	inline bool noSpikeCheck(GameObject* g) {
+		return true; // later :D
+	}
+
     void destroyPlayer(PlayerObject* p, GameObject* g) {
         if (m_fields->antiCheatObject == nullptr && g != nullptr && g->getRealPosition().x == 0.f && g->getRealPosition().y == p->getRealPosition().y) m_fields->antiCheatObject = g;
         if (g == m_fields->antiCheatObject)
@@ -48,15 +52,17 @@ class $modify(PlayLayer) {
 		}
         *setTempVar<bool>("would_die") = true;
         if (getSavedVar<bool>("noclip") && !getSavedVar<bool>("noclip_P2") && getSavedVar<bool>("noclip_P1")) {
-			if (p == m_player2) PlayLayer::destroyPlayer(p,g);
+			if (p == m_player2 && noSpikeCheck(g)) PlayLayer::destroyPlayer(p,g);
 		}
 		if (getSavedVar<bool>("noclip") && getSavedVar<bool>("noclip_P2") && !getSavedVar<bool>("noclip_P1")) {
-			if (p == m_player1) PlayLayer::destroyPlayer(p,g);
+			if (p == m_player1 && noSpikeCheck(g)) PlayLayer::destroyPlayer(p,g);
 
 		} 
 		if (!getSavedVar<bool>("noclip") || (getSavedVar<bool>("noclip") && !getSavedVar<bool>("noclip_P1") && !getSavedVar<bool>("noclip_P2"))) {
-			dead = true; // lazy again :P
-            PlayLayer::destroyPlayer(p,g);
+			if (noSpikeCheck(g)) {
+				dead = true; // lazy again :P
+				PlayLayer::destroyPlayer(p,g);
+			}
 		}
     }
 

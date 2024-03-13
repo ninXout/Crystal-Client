@@ -21,9 +21,25 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Level/AutoSongDownloader.cpp
     src/Mods/Level/ConfirmQuit.cpp
     src/Mods/Level/IgnoreESC.cpp
+    src/Mods/Level/HidePauseMenu.cpp
     src/Mods/Bypass/UnlockAll.cpp
     src/Mods/Bypass/InstantComplete.cpp
     src/Mods/Bypass/VerifyHack.cpp
+    src/Mods/Bypass/CopyHack.cpp
+    src/Mods/Display/Display.cpp
+    src/Mods/Display/Attempts.cpp
+    src/Mods/Display/BestRun.cpp
+    src/Mods/Display/CheatIndicator.cpp
+    src/Mods/Display/Clock.cpp
+    src/Mods/Display/CPS.cpp
+    src/Mods/Display/CustomMessage.cpp
+    src/Mods/Display/FPS.cpp
+    src/Mods/Display/LastDeath.cpp
+    src/Mods/Display/LevelInfo.cpp
+    src/Mods/Display/MacroStatus.cpp
+    src/Mods/Display/NoclipAccuracy.cpp
+    src/Mods/Display/NoclipDeaths.cpp
+    src/Mods/Display/RunFrom.cpp
     src/Mods/Global/Speedhack.cpp
     src/Mods/Global/LockCursor.cpp
     src/Mods/Amethyst/Amethyst.cpp
