@@ -18,6 +18,7 @@ class $modify(GameManager) {
 
 class $modify(GameStatsManager) {
     bool isItemUnlocked(UnlockType type, int num) {
+        if (type == UnlockType::GJItem && num == 17 && getSavedVar<bool>("practice_music")) return true;
         if (getSavedVar<bool>("iconhack")) return true;
         return GameStatsManager::isItemUnlocked(type, num);
     }

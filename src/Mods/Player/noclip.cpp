@@ -34,9 +34,11 @@ class $modify(PlayLayer) {
 	}
 
     void destroyPlayer(PlayerObject* p, GameObject* g) {
-        if (m_fields->antiCheatObject == nullptr && g != nullptr && g->getRealPosition().x == 0.f && g->getRealPosition().y == p->getRealPosition().y) m_fields->antiCheatObject = g;
-        if (g == m_fields->antiCheatObject)
-            return PlayLayer::destroyPlayer(p,g);
+		if (!m_fields->antiCheatObject)
+            m_fields->antiCheatObject = g;
+
+		if (m_fields->antiCheatObject == g) return PlayLayer::destroyPlayer(p,g);
+            
         if (getSavedVar<bool>("accuracy_limit")) {
 			auto accu = (float)(getTempVar<float>("frames") - getTempVar<float>("noclipped_frames")) / (float)getTempVar<float>("frames");
 			if (accu * 100 <= getSavedVar<float>("accuracy_limit_num")) {
@@ -50,7 +52,6 @@ class $modify(PlayLayer) {
 				resetLevel();
 			}
 		}
-        *setTempVar<bool>("would_die") = true;
         if (getSavedVar<bool>("noclip") && !getSavedVar<bool>("noclip_P2") && getSavedVar<bool>("noclip_P1")) {
 			if (p == m_player2 && noSpikeCheck(g)) PlayLayer::destroyPlayer(p,g);
 		}
@@ -64,6 +65,7 @@ class $modify(PlayLayer) {
 				PlayLayer::destroyPlayer(p,g);
 			}
 		}
+		*setTempVar<bool>("would_die") = true;
     }
 
     void resetLevel() {

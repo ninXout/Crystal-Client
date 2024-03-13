@@ -8,7 +8,7 @@ class $modify(LevelInfoLayer) {
 		if (!LevelInfoLayer::init(p0, p1))
 			return false;
 
-		if (this->m_songWidget->m_downloadBtn->isVisible()) {
+		if (this->m_songWidget->m_downloadBtn->isVisible() && getSavedVar<bool>("auto_song_download")) {
 			this->m_songWidget->onDownload(nullptr);
 		}
 
@@ -18,7 +18,7 @@ class $modify(LevelInfoLayer) {
 	void levelDownloadFinished(GJGameLevel *level) {
 		LevelInfoLayer::levelDownloadFinished(level);
 
-		if (this->m_songWidget->m_downloadBtn->isVisible()) {
+		if (this->m_songWidget->m_downloadBtn->isVisible() && getSavedVar<bool>("auto_song_download")) {
 			this->m_songWidget->onDownload(nullptr);
 		}
 	}
