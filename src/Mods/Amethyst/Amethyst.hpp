@@ -14,7 +14,7 @@ namespace Amethyst {
     };
 
     struct AmethystMacro : gdr::Replay<AmethystMacro, AmethystInput> {
-        AmethystMacro() : Replay("Amethyst", "1.0") {}
+        AmethystMacro() : Replay("Amethyst", "2.0") {}
     };
 
     inline std::vector<double> checkpoints;

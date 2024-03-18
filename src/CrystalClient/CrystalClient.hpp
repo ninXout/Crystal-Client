@@ -45,6 +45,7 @@ namespace CrystalClient {
         {"noclipColor-green", 0.0f},
         {"noclipColor-blue", 0.0f},
         {"noclipColor-alpha", 1.0f},
+        {"physics", 60.f}
     };
     inline std::map<std::string, std::string> modsMapS = {
         {"BGcolor", "111119"},

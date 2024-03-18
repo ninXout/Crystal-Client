@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Player/Noclip.cpp
     src/Mods/Player/NoDeathEffect.cpp
     src/Mods/Player/NoWavePulse.cpp
+    src/Mods/Player/InstantRespawn.cpp
     src/Mods/Level/PracticeMusic.cpp
     src/Mods/Level/SafeMode.cpp
     src/Mods/Level/AutoLDM.cpp
@@ -22,6 +23,7 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Level/ConfirmQuit.cpp
     src/Mods/Level/IgnoreESC.cpp
     src/Mods/Level/HidePauseMenu.cpp
+    src/Mods/Level/NoShader.cpp
     src/Mods/Bypass/UnlockAll.cpp
     src/Mods/Bypass/InstantComplete.cpp
     src/Mods/Bypass/VerifyHack.cpp
@@ -42,7 +44,12 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Display/RunFrom.cpp
     src/Mods/Global/Speedhack.cpp
     src/Mods/Global/LockCursor.cpp
+    src/Mods/Global/NoTransition.cpp
+    src/Mods/Global/TransparentBG.cpp
+    src/Mods/Global/TransparentLists.cpp
+    src/Mods/Global/PhysicsBypass.cpp
     src/Mods/Amethyst/Amethyst.cpp
+    src/Mods/UI/ListButtons.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})

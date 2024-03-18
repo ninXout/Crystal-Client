@@ -202,6 +202,7 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Death Effect", setSavedVar<bool>("no_death_effect"), "Removes the player's death effect");
+				//CrystalUI::toggle("Instant Respawn", setSavedVar<bool>("instant_respawn"), "Instantly respawn after a death");
 				/*
 				CrystalUI::toggleWithMenu("Auto Kill", setSavedVar<bool>("auto_reset"), "Kills the player at a certain percentage");
 				if (ImGui::BeginPopupModal("Auto Kill", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -256,7 +257,7 @@ void CrystalUI::renderRightColumn() {
 				ImGui::Columns(1, nullptr, false);
 
 				std::vector<std::string> arr = {std::string("Player 1"), std::string("Player 2")};
-				ImGuiHelper::drawTabHorizontally(std::string("iconsubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedSubTab);
+				ImGuiHelper::drawTabHorizontally(std::string("iconsubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedIconSubTab);
 				ImGui::Spacing();
 
 				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
@@ -266,7 +267,7 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleColor();
 
 				/*
-				switch (selectedSubTab) {
+				switch (selectedIconSubTab) {
 					case 0: {
 						CrystalUI::iconEffect("Player Color 1", "P1C1");
 						CrystalUI::iconEffect("Player Color 2", "P1C2");
@@ -324,6 +325,7 @@ void CrystalUI::renderRightColumn() {
 				CrystalUI::toggle("Ignore ESC", setSavedVar<bool>("ignore_esc"), "Stops quitting the level when pressing ESC");
 				CrystalUI::toggle("Confirm Quit", setSavedVar<bool>("confirm_quit"), "Displays a popup to confirm before quitting a level");
 				CrystalUI::toggle("Hide Pause Menu", setSavedVar<bool>("hide_pause"), "Hides the pause menu when pausing the game");
+				CrystalUI::toggle("No Shaders", setSavedVar<bool>("no_shader"), "Removes shader effects");
 				/*
 				CrystalUI::toggle("Freeze Attempts", setSavedVar<bool>("freeze_attempts"), "The attempts doesn't update");
 				//CrystalUI::toggle("Hide Pause Button", setSavedVar<bool>("hide_pause_button"), "Hides the pause button when playing");
@@ -486,11 +488,27 @@ void CrystalUI::renderRightColumn() {
 			case 4: {
 				ImGui::Columns(1, nullptr, false);
 
+				std::vector<std::string> arr = {std::string("Colors"), std::string("Window")};
+				ImGuiHelper::drawTabHorizontally(std::string("customizesubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedCustomSubTab);
+				ImGui::Spacing();
+
 				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("customizetab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
+
+				switch (selectedCustomSubTab) {
+					case 0: {
+						CrystalUI::colorPicker("BG Color", "BGcolor");
+						CrystalUI::colorPicker("Accent Color", "lightColor");
+						break;
+					}
+					case 1: {
+						
+						break;
+					}
+				}
 
 				ImGui::EndChild();
 			}
@@ -525,9 +543,17 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
-				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"));
+				/*CrystalUI::toggleWithMenu("Physics Bypass", setSavedVar<bool>("physics_bypass"), "Change the speed of the game");
+				if (ImGui::BeginPopupModal("Physics Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					ImGui::InputFloat("Physics TPS", setSavedVar<float>("physics"));
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}*/
+				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"), "Change the speed of the game");
 				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					ImGui::InputFloat("Speed", setSavedVar<float>("speed")); // CHANGE TO TEXT INPUT
+					ImGui::InputFloat("Speed", setSavedVar<float>("speed"));
 					//CrystalUI::subToggle("Change Audio Speed", setSavedVar<bool>("speedhack_audio"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
@@ -552,22 +578,39 @@ void CrystalUI::renderRightColumn() {
 					}
 					ImGui::EndPopup();
 				}
+				*/
+				CrystalUI::toggleWithMenu("Safe Mode", setSavedVar<bool>("safe_mode"), "Prevent progress on levels (for when using hacks)");
 				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"));
+					CrystalUI::subToggle("Count Clean Noclip", setSavedVar<bool>("count_clean_noclip"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
-				}*/
+				}
 				CrystalUI::toggle("Lock Cursor", setSavedVar<bool>("lock_cursor"), "Locks your cursor to the game window", true);
 				//CrystalUI::toggle("No Transition", setSavedVar<bool>("no_transition"), "Removes the fade transition when switching menus", true);
-				//CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
+				CrystalUI::toggle("Transparent BG", setSavedVar<bool>("transparent_BG"), "Removes the blue tint on the gradient background");
 				//CrystalUI::toggle("Transparent Lists", setSavedVar<bool>("transparent_lists"), "Removes the hardcoded brown on lists");
 				//CrystalUI::toggle("Discord Rich Presence", setSavedVar<bool>("discord_rpc"), "Displays your current activity on your Discord profile");
 
 				ImGui::EndChild();
 
 				break;
+			}
+			case 7: {
+				ImGui::Columns(1, nullptr, false);
+
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleVar(7, 15.f);
+				ImGui::BeginChild("uitab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
+				ImGui::PopStyleVar();
+				ImGui::PopStyleColor();
+
+				//CrystalUI::toggle("Demon List Button", setSavedVar<bool>("demonlist_button"), "Adds a demon list button to the Search Menu");
+				//CrystalUI::toggle("Challenge List Button", setSavedVar<bool>("challengelist_button"), "Adds a challenge list button to the Search Menu");
+
+				ImGui::EndChild();
 			}
 			case 8: {
 				ImGui::Columns(1, nullptr, false);

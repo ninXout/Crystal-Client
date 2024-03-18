@@ -32,5 +32,6 @@ namespace CrystalUI {
     inline cocos2d::enumKeyCodes queuedKey = KEY_Escape;
     inline ImFont* font;
     inline int selectedTab = 0;
-    inline int selectedSubTab = 0;
+    inline int selectedIconSubTab = 0;
+    inline int selectedCustomSubTab = 0;
 }
