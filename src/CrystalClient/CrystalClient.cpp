@@ -157,3 +157,10 @@ ccColor4B CrystalClient::VarToCC4B(std::string key) {
     float newa = getSavedVar<float>(key + "-alpha") * 255;
     return ccc4(newr, newg, newb, newa);
 }
+
+ImVec4 CrystalClient::getDefaultColor(std::string key) {
+    if (key == "BGcolor") return ImVec4(0.113725f, 0.113725f, 0.188235f, 1.f);
+    if (key == "lightColor") return ImVec4(0.262715f, 0.624691f, 0.818605f, 1.f);
+    if (key == "noclipColor") return ImVec4(1.f, 0.f, 0.f, 1.f);
+    return ImVec4(0,0,0,1.f);
+}

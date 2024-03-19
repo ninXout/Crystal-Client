@@ -2,6 +2,7 @@
 #include "../CrystalClient/CrystalClient.hpp"
 #include "Fonts.hpp"
 #include "ImGuiHelper.hpp"
+#include "../Mods/Amethyst/Amethyst.hpp"
 //#include "../Mods/Keybind/Keybind.hpp"
 #include <iostream>
 #include <cmath>
@@ -42,6 +43,15 @@ ImVec4 operator/(const ImVec4& a, float b) {
 	vec.y = a.y / b;
 	vec.z = a.z / b;
 	return vec;
+}
+
+bool operator==(const ImVec4& a, const ImVec4& b) {
+	bool wb, xb, yb, zb;
+	wb = static_cast<int>(a.w * 255.f) == static_cast<int>(b.w * 255.f);
+	xb = static_cast<int>(a.x * 255.f) == static_cast<int>(b.x * 255.f);
+	yb = static_cast<int>(a.y * 255.f) == static_cast<int>(b.y * 255.f);
+	zb = static_cast<int>(a.z * 255.f) == static_cast<int>(b.z * 255.f);
+	return (wb && xb && yb && zb);
 }
 
 void CrystalUI::setupFonts() {
@@ -202,6 +212,7 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Death Effect", setSavedVar<bool>("no_death_effect"), "Removes the player's death effect");
+				CrystalUI::toggle("Practice Bug Fix", setSavedVar<bool>("practice_fix"), "Fixes issues with Practice Mode");
 				//CrystalUI::toggle("Instant Respawn", setSavedVar<bool>("instant_respawn"), "Instantly respawn after a death");
 				/*
 				CrystalUI::toggleWithMenu("Auto Kill", setSavedVar<bool>("auto_reset"), "Kills the player at a certain percentage");
@@ -216,7 +227,6 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 				CrystalUI::toggle("No Rotation", setSavedVar<bool>("no_rotation"), "Stops the player from rotating");
-				CrystalUI::toggle("Practice Bug Fix", setSavedVar<bool>("practice_fix"), "Fixes issues with Practice Mode");
 				CrystalUI::toggle("Trail Always Off", setSavedVar<bool>("no_trail"), "Removes the regular trail");
 				CrystalUI::toggle("Trail Always On", setSavedVar<bool>("always_trail"), "Makes the regular trail visible at all times");
 				CrystalUI::toggleWithMenu("No Wave Pulse", setSavedVar<bool>("no_wave_pulse"), "Stops the wave trail on a player from pulsing");
@@ -500,8 +510,8 @@ void CrystalUI::renderRightColumn() {
 
 				switch (selectedCustomSubTab) {
 					case 0: {
-						CrystalUI::colorPicker("BG Color", "BGcolor");
-						CrystalUI::colorPicker("Accent Color", "lightColor");
+						CrystalUI::mainColorPicker("BG Color", "BGcolor", "The dark background color of the menu");
+						CrystalUI::mainColorPicker("Accent Color", "lightColor", "The light accent color of the menu");
 						break;
 					}
 					case 1: {
@@ -561,24 +571,6 @@ void CrystalUI::renderRightColumn() {
 					ImGui::EndPopup();
 				}
 
-/*
-				CrystalUI::toggleWithMenu("FPS Bypass", setSavedVar<bool>("FPS_bypass"));
-				if (ImGui::BeginPopupModal("FPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::inputFloat("FPS", setSavedVar<float>("FPS"));
-					if (ImGui::Button("Close")) {
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
-				CrystalUI::toggleWithMenu("TPS Bypass", setSavedVar<bool>("TPS_bypass"));
-				if (ImGui::BeginPopupModal("TPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::inputFloat("TPS", setSavedVar<float>("TPS"));
-					if (ImGui::Button("Close")) {
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
-				*/
 				CrystalUI::toggleWithMenu("Safe Mode", setSavedVar<bool>("safe_mode"), "Prevent progress on levels (for when using hacks)");
 				if (ImGui::BeginPopupModal("Safe Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					CrystalUI::subToggle("Auto Safe Mode", setSavedVar<bool>("auto_safe_mode"));
@@ -610,6 +602,8 @@ void CrystalUI::renderRightColumn() {
 				//CrystalUI::toggle("Demon List Button", setSavedVar<bool>("demonlist_button"), "Adds a demon list button to the Search Menu");
 				//CrystalUI::toggle("Challenge List Button", setSavedVar<bool>("challengelist_button"), "Adds a challenge list button to the Search Menu");
 
+				CrystalUI::toggle("Platformer Practice", setSavedVar<bool>("platformer_practice"), "Adds back practice mode to platformer mode");
+
 				ImGui::EndChild();
 			}
 			case 8: {
@@ -621,8 +615,39 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
-				//CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
-				//CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
+				CrystalUI::toggleWithMenu("Amethyst", setSavedVar<bool>("amethyst"), "Macro Bot!!! :D");
+				if (ImGui::BeginPopupModal("Amethyst", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
+					CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
+					CrystalUI::textbox("Macro Name", &fileName);
+					ImGui::SameLine();
+					if (ImGui::Button("Export")) {
+						std::ofstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr"), std::ios::binary);
+						auto data = Amethyst::macro.exportData(false);
+
+						f.write(reinterpret_cast<const char *>(data.data()), data.size());
+						f.close();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Import")) {
+						std::ifstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr"), std::ios::binary);
+
+						f.seekg(0, std::ios::end);
+						size_t fileSize = f.tellg();
+						f.seekg(0, std::ios::beg);
+
+						std::vector<std::uint8_t> macroData(fileSize);
+
+						f.read(reinterpret_cast<char *>(macroData.data()), fileSize);
+						f.close();
+
+						Amethyst::macro = Amethyst::AmethystMacro::importData(macroData);
+					}
+					if (ImGui::Button("Close")) {
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
 
 				ImGui::EndChild();
 			}
@@ -832,6 +857,63 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	ImGui::SameLine();
 	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
 	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
+
+	p = ImGui::GetCursorScreenPos();
+	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));
+}
+
+void CrystalUI::mainColorPicker(const char* str_id, std::string name, std::string tooltip, bool no_win) {
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	ImVec2 p = ImGui::GetCursorScreenPos();
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+	bool colorIt = !(VarToIV4(name) == getDefaultColor(name));
+
+	#ifdef GEODE_IS_MACOS
+		no_win = false;
+	#endif
+
+	ImVec4 regularColor;
+	ImVec4 activeColor;
+	if (no_win) {
+		regularColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		activeColor = ImVec4(0.85f, 0.85f, 0.85f, 0.25f);
+		tooltip = "This mod is not available for Windows";
+	} else {
+		regularColor = colorIt ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 0.0f);
+		activeColor = colorIt ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f);
+	}
+
+	float height = ImGui::GetFrameHeight() - 5;
+	float width = height * 1.55f;
+	float radius = height * 0.50f;
+	float rounding = 0.25;
+
+	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
+
+	ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
+	ImGui::SetItemAllowOverlap();
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 15, p.y + 15));
+	ImGui::TextColored(no_win ? ImVec4(1.0f, 1.0f, 1.0f, 0.5f) : (colorIt ? colors[ImGuiCol_ButtonActive] : ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), "%s", str_id);
+
+	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
+
+	ImGui::SameLine();
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
+
+	float col[4];
+	col[0] = getSavedVar<float>(name + "-red");
+	col[1] = getSavedVar<float>(name + "-green");
+	col[2] = getSavedVar<float>(name + "-blue"); 
+	col[3] = getSavedVar<float>(name + "-alpha");
+
+	ImGui::ColorEdit4((std::string("###") + str_id + "-picker").c_str(), col, ImGuiColorEditFlags_NoInputs);
+
+	*setSavedVar<float>(name + "-red") = col[0];
+	*setSavedVar<float>(name + "-green") = col[1];
+	*setSavedVar<float>(name + "-blue") = col[2];
+	*setSavedVar<float>(name + "-alpha") = col[3];
 
 	p = ImGui::GetCursorScreenPos();
 	ImGui::SetCursorScreenPos(ImVec2(p.x, p.y + 10));

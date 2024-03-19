@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Player/NoDeathEffect.cpp
     src/Mods/Player/NoWavePulse.cpp
     src/Mods/Player/InstantRespawn.cpp
+    src/Mods/Player/PracticeFix.cpp
     src/Mods/Level/PracticeMusic.cpp
     src/Mods/Level/SafeMode.cpp
     src/Mods/Level/AutoLDM.cpp
@@ -50,6 +51,7 @@ add_library(${PROJECT_NAME} SHARED
     src/Mods/Global/PhysicsBypass.cpp
     src/Mods/Amethyst/Amethyst.cpp
     src/Mods/UI/ListButtons.cpp
+    src/Mods/UI/PlatformerPractice.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})

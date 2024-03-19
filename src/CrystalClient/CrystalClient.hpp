@@ -14,7 +14,8 @@ namespace CrystalClient {
         {"noclip_P2", true},
         {"noclip_tint", true},
         {"AC_player1", true},
-        {"AC_player2", true}
+        {"AC_player2", true},
+        {"practice_fix", true}
     };
     inline std::map<std::string, int> modsMapI = {
         {"AC_pushFrame", 1},
@@ -77,6 +78,7 @@ namespace CrystalClient {
     T* setTempVar(std::string const& key);
 
     ImVec4 VarToIV4(std::string key);
+    ImVec4 getDefaultColor(std::string key);
     ccColor3B VarToCC3B(std::string key);
     ccColor4B VarToCC4B(std::string key);
     void IV4toVar(ImVec4 col, std::string key);

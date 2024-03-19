@@ -21,6 +21,8 @@ namespace CrystalUI {
     void inputFloat(const char* name, float* num);
     void hotkey(const char* label);
     void subTab(std::string childName, ImVec2 childSize, std::vector<std::string> tabNames, int* selectedSubTab);
+    void mainColorPicker(const char* str_id, std::string name, std::string tooltip, bool no_win = false);
+    //void mainButton(const char* str_id, std::function<void> func, std::string tooltip, bool no_win = false);
 
     void renderLogo();
     void renderUser();
@@ -31,6 +33,7 @@ namespace CrystalUI {
     inline bool waitingForKey = false;
     inline cocos2d::enumKeyCodes queuedKey = KEY_Escape;
     inline ImFont* font;
+    inline std::string fileName;
     inline int selectedTab = 0;
     inline int selectedIconSubTab = 0;
     inline int selectedCustomSubTab = 0;
