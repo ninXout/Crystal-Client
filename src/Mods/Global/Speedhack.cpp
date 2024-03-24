@@ -7,12 +7,12 @@ float leftOver = 0.f;
 
 class $modify(CCScheduler) {
     void update(float dt) {
-        if ((!getSavedVar<bool>("AT-record") && !getSavedVar<bool>("AT-replay")) || !PlayLayer::get()) 
+        if ((!getSavedVar<bool>("AT-record") && !getSavedVar<bool>("AT-replay") && !getSavedVar<bool>("TPS_bypass")) || !PlayLayer::get()) 
             return CCScheduler::update(dt * (getSavedVar<bool>("speedhack") ? getSavedVar<float>("speed") : 1.f));
 
         using namespace std::literals;
 
-        float dt2 = (1.f / 60.f);
+        float dt2 = (1.f / getSavedVar<float>("TPS"));
 
         dt *= (getSavedVar<bool>("speedhack") ? getSavedVar<float>("speed") : 1.f);
 

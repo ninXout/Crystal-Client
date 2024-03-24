@@ -17,8 +17,8 @@ namespace Amethyst {
         AmethystMacro() : Replay("Amethyst", "2.0") {}
     };
 
-    inline std::vector<double> checkpoints;
-    inline double totalTime;
+    inline std::vector<uint32_t> checkpoints;
+    inline uint32_t frame;
 
     inline AmethystMacro macro;
 }

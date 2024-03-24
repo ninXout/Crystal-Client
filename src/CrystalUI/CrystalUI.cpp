@@ -553,14 +553,14 @@ void CrystalUI::renderRightColumn() {
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 
-				/*CrystalUI::toggleWithMenu("Physics Bypass", setSavedVar<bool>("physics_bypass"), "Change the speed of the game");
-				if (ImGui::BeginPopupModal("Physics Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					ImGui::InputFloat("Physics TPS", setSavedVar<float>("physics"));
+				CrystalUI::toggleWithMenu("TPS Bypass", setSavedVar<bool>("TPS_bypass"), "Change the tick speed of the game");
+				if (ImGui::BeginPopupModal("TPS Bypass", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					ImGui::InputFloat("TPS", setSavedVar<float>("TPS"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
 					ImGui::EndPopup();
-				}*/
+				}
 				CrystalUI::toggleWithMenu("Speedhack", setSavedVar<bool>("speedhack"), "Change the speed of the game");
 				if (ImGui::BeginPopupModal("Speedhack", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 					ImGui::InputFloat("Speed", setSavedVar<float>("speed"));
@@ -617,10 +617,10 @@ void CrystalUI::renderRightColumn() {
 
 				CrystalUI::toggleWithMenu("Amethyst", setSavedVar<bool>("amethyst"), "Macro Bot!!! :D");
 				if (ImGui::BeginPopupModal("Amethyst", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-					CrystalUI::toggle("Record", setSavedVar<bool>("AT-record"));
-					CrystalUI::toggle("Replay", setSavedVar<bool>("AT-replay"));
+					CrystalUI::subToggle("Record", setSavedVar<bool>("AT-record"));
+					CrystalUI::subToggle("Replay", setSavedVar<bool>("AT-replay"));
 					CrystalUI::textbox("Macro Name", &fileName);
-					ImGui::SameLine();
+					//ImGui::SameLine();
 					if (ImGui::Button("Export")) {
 						std::ofstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr"), std::ios::binary);
 						auto data = Amethyst::macro.exportData(false);
@@ -629,6 +629,13 @@ void CrystalUI::renderRightColumn() {
 						f.close();
 					}
 					ImGui::SameLine();
+					if (ImGui::Button("Export JSON")) {
+						std::ofstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr.json"), std::ios::binary);
+						auto data = Amethyst::macro.exportData(true);
+
+						f.write(reinterpret_cast<const char *>(data.data()), data.size());
+						f.close();
+					}
 					if (ImGui::Button("Import")) {
 						std::ifstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr"), std::ios::binary);
 
@@ -642,6 +649,33 @@ void CrystalUI::renderRightColumn() {
 						f.close();
 
 						Amethyst::macro = Amethyst::AmethystMacro::importData(macroData);
+
+						*setSavedVar<float>("TPS") = Amethyst::macro.framerate;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Import JSON")) {
+						std::ifstream f(Mod::get()->getConfigDir() / "macros" / (fileName + ".gdr.json"), std::ios::binary);
+
+						f.seekg(0, std::ios::end);
+						size_t fileSize = f.tellg();
+						f.seekg(0, std::ios::beg);
+
+						std::vector<std::uint8_t> macroData(fileSize);
+
+						f.read(reinterpret_cast<char *>(macroData.data()), fileSize);
+						f.close();
+
+						Amethyst::macro = Amethyst::AmethystMacro::importData(macroData);
+
+						*setSavedVar<float>("TPS") = Amethyst::macro.framerate;
+					}
+					if (ImGui::Button("Open Macros Folder")) {
+						auto folder = Mod::get()->getConfigDir().append("Macros");
+						utils::file::openFolder(folder);
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Clear Loaded Macro")) {
+						Amethyst::macro = Amethyst::AmethystMacro();
 					}
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();

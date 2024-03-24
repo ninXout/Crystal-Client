@@ -18,7 +18,7 @@ inline bool shouldNotSave() {
     bool noclipCheck = getSavedVar<bool>("noclip");
     if (getSavedVar<bool>("count_clean_noclip") && (getTempVar<int>("noclip_deaths") == 0)) noclipCheck = false;
     bool regularChecks = (noclipCheck || (getSavedVar<float>("speed") != 1 && getSavedVar<bool>("speedhack")) || getSavedVar<bool>("no_mirror") || getSavedVar<bool>("framestep") || 
-            getSavedVar<bool>("autoclicker") || getSavedVar<bool>("layout_mode") || getSavedVar<bool>("AT_record") || getSavedVar<bool>("AT_replay") || getSavedVar<float>("FPS") > 360.0 ||
+            getSavedVar<bool>("autoclicker") || getSavedVar<bool>("layout_mode") || getSavedVar<bool>("AT-record") || getSavedVar<bool>("AT-replay") || getSavedVar<float>("TPS") > 360.0 ||
             getSavedVar<bool>("jump_hack"));
     return regularChecks;
 }

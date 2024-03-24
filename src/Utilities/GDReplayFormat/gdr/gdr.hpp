@@ -8,11 +8,6 @@
 
 namespace gdr {
 
-static uint32_t frameForTime(double time)
-{
-	return static_cast<uint32_t>(time * 240);
-}
-
 using namespace nlohmann;
 
 struct Bot {
@@ -80,6 +75,8 @@ class Replay {
 	float gameVersion;
 	float version = 1.0;
 
+	float framerate = 240.f;
+
 	int seed = 0;
     int coins = 0;
 
@@ -90,6 +87,11 @@ class Replay {
 
 	std::vector<InputType> inputs;
 
+	uint32_t frameForTime(double time)
+	{
+		return static_cast<uint32_t>(time * (double)framerate);
+	}
+
 	virtual void parseExtension(json::object_t obj) {}
 	virtual json::object_t saveExtension() const {
 		return {};
@@ -98,7 +100,7 @@ class Replay {
 	Replay(std::string const& botName, std::string const& botVersion)
 		: botInfo(botName, botVersion) {}
 
-	static Self importData(std::vector<uint8_t> const& data) {
+	static Self importData(std::vector<uint8_t> const& data, bool importInputs = true) {
 		Self replay;
 		json replayJson;
 
@@ -120,7 +122,13 @@ class Replay {
 		replay.seed = replayJson["seed"];
 		replay.coins = replayJson["coins"];
 		replay.ldm = replayJson["ldm"];
+		
+		if(replayJson.contains("framerate"))
+			replay.framerate = replayJson["framerate"];
 		replay.parseExtension(replayJson.get<json::object_t>());
+
+		if(!importInputs)
+			return replay;
 
 		for (json const& inputJson : replayJson["inputs"]) {
 			InputType input;
@@ -141,7 +149,7 @@ class Replay {
 		replayJson["gameVersion"] = gameVersion;
 		replayJson["description"] = description;
 		replayJson["version"] = version;
-		replayJson["duration"] = inputs[inputs.size() - 1].frame;
+		replayJson["duration"] = duration;
 		replayJson["bot"]["name"] = botInfo.name;
 		replayJson["bot"]["version"] = botInfo.version;
 		replayJson["level"]["id"] = levelInfo.id;
@@ -150,6 +158,7 @@ class Replay {
 		replayJson["seed"] = seed;
 		replayJson["coins"] = coins;
 		replayJson["ldm"] = ldm;
+		replayJson["framerate"] = framerate;
 
 		for (InputType const& input : inputs) {
 			json inputJson = input.saveExtension();

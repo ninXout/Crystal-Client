@@ -42,6 +42,7 @@ $execute {
 		ImGui::PopFont();
     });
 	ImGuiCocos::get().toggle();
+	ghc::filesystem::create_directory(Mod::get()->getConfigDir().append("Macros"));
 }
 
 class $modify(CCKeyboardDispatcher) {
