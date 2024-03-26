@@ -9,51 +9,6 @@
 
 using namespace CrystalClient;
 
-ImVec4 operator+(const ImVec4& a, const ImVec4& b) {
-	ImVec4 vec;
-	vec.w = a.w + b.w;
-	vec.x = a.x + b.x;
-	vec.y = a.y + b.y;
-	vec.z = a.z + b.z;
-	return vec;
-}
-
-ImVec4 operator-(const ImVec4& a, const ImVec4& b) {
-	ImVec4 vec;
-	vec.w = a.w - b.w;
-	vec.x = a.x - b.x;
-	vec.y = a.y - b.y;
-	vec.z = a.z - b.z;
-	return vec;
-}
-
-ImVec4 operator*(const ImVec4& a, float b) {
-	ImVec4 vec;
-	vec.w = a.w;
-	vec.x = a.x * b;
-	vec.y = a.y * b;
-	vec.z = a.z * b;
-	return vec;
-}
-
-ImVec4 operator/(const ImVec4& a, float b) {
-	ImVec4 vec;
-	vec.w = a.w;
-	vec.x = a.x / b;
-	vec.y = a.y / b;
-	vec.z = a.z / b;
-	return vec;
-}
-
-bool operator==(const ImVec4& a, const ImVec4& b) {
-	bool wb, xb, yb, zb;
-	wb = static_cast<int>(a.w * 255.f) == static_cast<int>(b.w * 255.f);
-	xb = static_cast<int>(a.x * 255.f) == static_cast<int>(b.x * 255.f);
-	yb = static_cast<int>(a.y * 255.f) == static_cast<int>(b.y * 255.f);
-	zb = static_cast<int>(a.z * 255.f) == static_cast<int>(b.z * 255.f);
-	return (wb && xb && yb && zb);
-}
-
 void CrystalUI::setupFonts() {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -61,7 +16,9 @@ void CrystalUI::setupFonts() {
 
 	ImFontConfig cfg;
 	cfg.FontDataOwnedByAtlas = false;
-	io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 18, &cfg);
+	//io.Fonts->AddFontFromFileTTF((Mod::get()->getResourcesDir() / "comfortaa.ttf").string().c_str(), 22.0f, &cfg);
+	//io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 18, &cfg);
+	getTempVar<bool>("af-version") ? font = io.Fonts->AddFontFromFileTTF((Mod::get()->getResourcesDir() / "comfortaa.ttf").string().c_str(), 22.0f, &cfg) : font = io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 18, &cfg);
 
 	static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 	ImFontConfig iconCFG;
@@ -72,7 +29,8 @@ void CrystalUI::setupFonts() {
 
 	ImFontConfig bigFontCfg;
 	bigFontCfg.FontDataOwnedByAtlas = false;
-	font = io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 24, &bigFontCfg);
+	//font = io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 24, &bigFontCfg);
+	getTempVar<bool>("af-version") ? font = io.Fonts->AddFontFromFileTTF((Mod::get()->getResourcesDir() / "comfortaa.ttf").string().c_str(), 26.0f, &bigFontCfg) : font = io.Fonts->AddFontFromMemoryTTF((void*)poppinsFont, sizeof(poppinsFont), 24, &bigFontCfg);
 	io.Fonts->AddFontFromMemoryTTF((void*)fontAwesome, sizeof(fontAwesome), 18, &iconCFG, icons_ranges);
     io.Fonts->Build();
 }
@@ -119,12 +77,12 @@ void CrystalUI::renderLogo() {
 		ImGui::SameLine();
 
 		ImGui::SetCursorPosY(11);
-		ImGui::TextUnformatted("Crystal Client");
+		ImGui::TextUnformatted(getTempVar<bool>("af-version") ? "Rise Client" : "Crystal Client");
 		ImGui::PopFont();
 
 		ImGui::EndChild();
 
-		if (ImGui::IsItemClicked(1)) {}
+		if (ImGui::IsItemClicked(true)) {}
 
 		ImGui::EndGroup();
 	}
@@ -144,20 +102,22 @@ void CrystalUI::renderTabs() {
 	ImGui::BeginChild("tabs", ImVec2(186, 480), true);
 	ImGui::PopStyleColor();
 
-	ImGui::PushItemWidth(160.f);
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
-	textbox((std::string(" ") + ICON_FA_SEARCH" Search").c_str(), setSavedVar<std::string>("search"));
-	ImGui::PopStyleVar();
-	ImGui::PopItemWidth();
-	ImGui::Spacing();
+	if (!getTempVar<bool>("af-version")) {
+		ImGui::PushItemWidth(160.f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
+		textbox((std::string(ICON_FA_SEARCH" Search")).c_str(), setSavedVar<std::string>("search"));
+		ImGui::PopStyleVar();
+		ImGui::PopItemWidth();
+		ImGui::Spacing();
+	}
 
-	ImVec4 col(0.152941f, 0.152941f, 0.250980f, 1.f);
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
-	std::string tabNames[] = { std::string(ICON_FA_CUBE "  Player"), std::string(ICON_FA_PAINT_BRUSH "  Icon"), std::string(ICON_FA_LAYER_GROUP "  Level"), std::string(ICON_FA_FONT "  Displays"), std::string(ICON_FA_EYE_DROPPER "  Customize"), std::string(ICON_FA_LOCK_OPEN "  Bypasses"), std::string(ICON_FA_GLOBE "  Global"), std::string(ICON_FA_WINDOW_RESTORE "  UI"), std::string(ICON_FA_MOUSE_POINTER "  Amethyst"), std::string(ICON_FA_KEYBOARD "  Keybinds") };
-	for (int i = 0; i < sizeof(tabNames) / sizeof(tabNames[0]); i++) {
+	if (!getTempVar<bool>("af-version")) ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10);
+	std::vector<std::string> tabNames = { std::string(ICON_FA_CUBE "  Player"), std::string(ICON_FA_PAINT_BRUSH "  Icon"), std::string(ICON_FA_LAYER_GROUP "  Level"), std::string(ICON_FA_FONT "  Displays"), std::string(ICON_FA_EYE_DROPPER "  Customize"), std::string(ICON_FA_LOCK_OPEN "  Bypasses"), std::string(ICON_FA_GLOBE "  Global"), std::string(ICON_FA_WINDOW_RESTORE "  UI"), std::string(ICON_FA_MOUSE_POINTER "  Amethyst"), std::string(ICON_FA_KEYBOARD "  Keybinds") };
+	if (getTempVar<bool>("af-version")) tabNames = { std::string(ICON_FA_USER_SHIELD "  Combat"), std::string(ICON_FA_RUNNING "  Movement"), std::string(ICON_FA_USER "  Player"), std::string(ICON_FA_DESKTOP "  Render"), std::string(ICON_FA_GHOST "  Ghost"), std::string(ICON_FA_ELLIPSIS_H "  Other"), std::string(ICON_FA_PAINT_BRUSH "  Scripts"), std::string(ICON_FA_CALCULATOR "  Statistics"), std::string(ICON_FA_MOUSE_POINTER "  Pathfinder"), std::string(ICON_FA_KEYBOARD "  Hotkeys") };
+	for (int i = 0; i < tabNames.size(); i++) {
 		std::string it = std::string("  ") + tabNames[i];
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0.5));
-		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? col : ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, selectedTab == i ? CrystalClient::VarToIV4("lightColor") : ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleColor(ImGuiCol_Text, style->Colors[ImGuiCol_Text]);
 		if (ImGui::Button(it.c_str(), ImVec2(160, 40))) {
 			ImGui::GetIO().WantCaptureKeyboard = false;
@@ -167,7 +127,7 @@ void CrystalUI::renderTabs() {
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(2);
 	}
-	ImGui::PopStyleVar();
+	if (!getTempVar<bool>("af-version")) ImGui::PopStyleVar();
 
 	ImGui::EndChild();
 }
@@ -184,7 +144,7 @@ void CrystalUI::renderRightColumn() {
 			case 0: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("playertab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -196,16 +156,16 @@ void CrystalUI::renderRightColumn() {
 					//CrystalUI::subToggle("Only Spikes", setSavedVar<bool>("nospike"));
 					CrystalUI::subToggle("Tint Screen on Death", setSavedVar<bool>("noclip_tint"));
 					CrystalUI::colorPicker("Tint Color", "noclipColor");
+					CrystalUI::subToggle("Noclip Accuracy Limit", setSavedVar<bool>("accuracy_limit"));
+					ImGui::SameLine();
 					ImGui::PushItemWidth(100);
 					CrystalUI::inputFloat("##Noclip Accuracy Limit", setSavedVar<float>("accuracy_limit_num"));
 					ImGui::PopItemWidth();
+					CrystalUI::subToggle("Noclip Deaths Limit", setSavedVar<bool>("death_limit"));
 					ImGui::SameLine();
-					CrystalUI::subToggle("Noclip Accuracy Limit", setSavedVar<bool>("accuracy_limit"));
 					ImGui::PushItemWidth(100);
 					CrystalUI::inputInt("##Noclip Deaths Limit", setSavedVar<int>("death_limit_num"));
 					ImGui::PopItemWidth();
-					ImGui::SameLine();
-					CrystalUI::subToggle("Noclip Deaths Limit", setSavedVar<bool>("death_limit"));
 					if (ImGui::Button("Close")) {
 						ImGui::CloseCurrentPopup();
 					}
@@ -270,7 +230,7 @@ void CrystalUI::renderRightColumn() {
 				ImGuiHelper::drawTabHorizontally(std::string("iconsubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedIconSubTab);
 				ImGui::Spacing();
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("icontab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -303,7 +263,7 @@ void CrystalUI::renderRightColumn() {
 			case 2: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -358,7 +318,7 @@ void CrystalUI::renderRightColumn() {
 
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -502,7 +462,7 @@ void CrystalUI::renderRightColumn() {
 				ImGuiHelper::drawTabHorizontally(std::string("customizesubtab"), ImVec2(ImGuiHelper::getWidth(), 50), arr, selectedCustomSubTab);
 				ImGui::Spacing();
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("customizetab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -525,7 +485,7 @@ void CrystalUI::renderRightColumn() {
 			case 5: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("bypasstab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -547,7 +507,7 @@ void CrystalUI::renderRightColumn() {
 			case 6: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("globaltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -593,7 +553,7 @@ void CrystalUI::renderRightColumn() {
 			case 7: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("uitab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -609,7 +569,7 @@ void CrystalUI::renderRightColumn() {
 			case 8: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("amethysttab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -688,7 +648,7 @@ void CrystalUI::renderRightColumn() {
 			case 9: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("keybindtab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -726,7 +686,7 @@ void CrystalUI::renderRightColumn() {
 			case 10: {
 				ImGui::Columns(1, nullptr, false);
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - ImVec4(0.05, 0.05, 0.05, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, CrystalClient::VarToIV4("BGcolor") - CrystalClient::getOffsetColor());
 				ImGui::PushStyleVar(7, 15.f);
 				ImGui::BeginChild("leveltab", ImVec2(ImGuiHelper::getWidth(), ImGuiHelper::getHeight()), true);
 				ImGui::PopStyleVar();
@@ -820,7 +780,7 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	float radius = height * 0.50f;
 	float rounding = 0.25;
 
-	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
+	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth(), p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg] + ImVec4(0.03921568627f, 0.03921568627f, 0.03921568627f, 0.f)), height * rounding);
 
 	ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
 	ImGui::SetItemAllowOverlap();
@@ -832,7 +792,7 @@ void CrystalUI::toggle(const char* str_id, bool* v, std::string tooltip, bool no
 	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 520, p.y + 12.5));
 	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v, no_win);
 
 	p = ImGui::GetCursorScreenPos();
@@ -864,7 +824,7 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	float radius = height * 0.50f;
 	float rounding = 0.25;
 
-	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth() - 10, p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg]), height * rounding);
+	draw_list->AddRectFilled(ImVec2(p.x, p.y + 5), ImVec2(p.x + ImGuiHelper::getWidth(), p.y + (height * 2)), ImGui::GetColorU32(colors[ImGuiCol_WindowBg] + ImVec4(0.03921568627f, 0.03921568627f, 0.03921568627f, 0.f)), height * rounding);
 
 	ImGui::InvisibleButton(str_id, ImVec2(width + 7, height));
 	ImGui::SetItemAllowOverlap();
@@ -876,7 +836,7 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	if (ImGui::IsItemHovered() && tooltip != "N/A") ImGui::SetTooltip("%s", tooltip.c_str());
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 450, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 470, p.y + 12.5));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CrystalClient::VarToIV4("BGcolor") + ImVec4(0.02f, 0.02f, 0.02f, 0.f));
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -889,7 +849,7 @@ void CrystalUI::toggleWithMenu(const char* str_id, bool* v, std::string tooltip,
 	if (ImGui::IsItemClicked() && !no_win) ImGui::OpenPopup(str_id);
 
 	ImGui::SameLine();
-	ImGui::SetCursorScreenPos(ImVec2(p.x + 500, p.y + 12.5));
+	ImGui::SetCursorScreenPos(ImVec2(p.x + 520, p.y + 12.5));
 	CrystalUI::internalToggle((std::string(str_id) + "_toggle").c_str(), v);
 
 	p = ImGui::GetCursorScreenPos();
@@ -1024,7 +984,7 @@ void CrystalUI::inputInt(const char* name, int* num) {
 	ImGui::PushStyleVar(12, 0.f);
 	ImGui::InputInt(name, num, 0);
 	ImVec2 p = ImGui::GetCursorScreenPos();
-	draw_list->AddRectFilled(ImVec2(p.x + 1, p.y - 3.f), ImVec2(p.x + ImGui::CalcItemWidth(), p.y - 5.f), ImGui::GetColorU32(CrystalClient::VarToIV4("lightColor")), 6);
+	//draw_list->AddRectFilled(ImVec2(p.x + 1, p.y - 3.f), ImVec2(p.x + ImGui::CalcItemWidth(), p.y - 5.f), ImGui::GetColorU32(CrystalClient::VarToIV4("lightColor")), 6);
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor();
 }
@@ -1035,7 +995,7 @@ void CrystalUI::inputFloat(const char* name, float* num) {
 	ImGui::PushStyleVar(12, 0.f);
 	ImGui::InputFloat(name, num, 0);
 	ImVec2 p = ImGui::GetCursorScreenPos();
-	draw_list->AddRectFilled(ImVec2(p.x + 1, p.y - 3.f), ImVec2(p.x + ImGui::CalcItemWidth(), p.y - 5.f), ImGui::GetColorU32(CrystalClient::VarToIV4("lightColor")), 6);
+	//draw_list->AddRectFilled(ImVec2(p.x + 1, p.y - 3.f), ImVec2(p.x + ImGui::CalcItemWidth(), p.y - 5.f), ImGui::GetColorU32(CrystalClient::VarToIV4("lightColor")), 6);
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor();
 }

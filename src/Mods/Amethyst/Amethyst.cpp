@@ -22,8 +22,8 @@ class $modify(PlayLayer) {
         macro.levelInfo.name = gj->m_levelName;
 
         Amethyst::frame = 0.f;
-        if (getSavedVar<bool>("AT-record")) macro.inputs.clear();
-        if (getSavedVar<bool>("AT-replay")) {
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-record")) macro.inputs.clear();
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-replay")) {
             static_cast<GJBaseGameLayer*>(PlayLayer::get())->handleButton(false, 0, true);
             static_cast<GJBaseGameLayer*>(PlayLayer::get())->handleButton(false, 0, false);
         }
@@ -41,13 +41,13 @@ class $modify(PlayLayer) {
 
         actionsIndex = 0;
 
-        if (getSavedVar<bool>("AT-replay")) {
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-replay")) {
             Amethyst::frame = 0.f;
             static_cast<GJBaseGameLayer*>(PlayLayer::get())->handleButton(false, 0, true);
             static_cast<GJBaseGameLayer*>(PlayLayer::get())->handleButton(false, 0, false);
         }
 
-        if (getSavedVar<bool>("AT-record") && m_isPracticeMode) {
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-record") && m_isPracticeMode) {
             frame = checkpoints.back();
 
             while (macro.inputs.size() > 0 && macro.inputs.back().frame >= frame) {
@@ -76,7 +76,7 @@ class $modify(GJBaseGameLayer) {
     void handleButton(bool push, int button, bool player1) {
         GJBaseGameLayer::handleButton(push, button, player1);
 
-        if (getSavedVar<bool>("AT-record")) {
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-record")) {
             macro.inputs.push_back(AmethystInput(frame, button, !player1, push));
             log::debug("recorded at {}", frame);
         }
@@ -88,7 +88,7 @@ class $modify(GJBaseGameLayer) {
         if (hasStarted) Amethyst::frame += static_cast<uint32_t>(dt * (double)macro.framerate);
         //log::debug("current game frame: {}", static_cast<uint32_t>(PlayLayer::get()->m_gameState.m_unk1e0 * (double)macro.framerate));
 
-        if (getSavedVar<bool>("AT-replay") && macro.inputs.size() > 0) {
+        if (getSavedVar<bool>("amethyst") && getSavedVar<bool>("AT-replay") && macro.inputs.size() > 0) {
             if (macro.inputs[actionsIndex].frame <= (frame)) {
                 GJBaseGameLayer::handleButton(macro.inputs[actionsIndex].down, macro.inputs[actionsIndex].button, !macro.inputs[actionsIndex].player2);
                 log::debug("played at {}", macro.inputs[actionsIndex].frame);

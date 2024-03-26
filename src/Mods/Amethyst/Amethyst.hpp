@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../CrystalClient/CrystalClient.hpp"
-#include "../../Utilities/GDReplayFormat/gdr/gdr.hpp"
+#include <gdr/gdr.hpp>
 
 using namespace CrystalClient;
 

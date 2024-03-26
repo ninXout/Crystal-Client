@@ -159,8 +159,19 @@ ccColor4B CrystalClient::VarToCC4B(std::string key) {
 }
 
 ImVec4 CrystalClient::getDefaultColor(std::string key) {
-    if (key == "BGcolor") return ImVec4(0.113725f, 0.113725f, 0.188235f, 1.f);
-    if (key == "lightColor") return ImVec4(0.262715f, 0.624691f, 0.818605f, 1.f);
+    if (key == "BGcolor") {
+        if (getTempVar<bool>("af-version")) return ImVec4(0.14117647058f, 0.15686274509f, 0.18823529411f, 1.f);
+        return ImVec4(0.113725f, 0.113725f, 0.188235f, 1.f);
+    }
+    if (key == "lightColor") {
+        if (getTempVar<bool>("af-version")) return ImVec4(0.0862745098f, 0.53725490196f, 0.97647058823f, 1.f);
+        return ImVec4(0.262715f, 0.624691f, 0.818605f, 1.f);
+    }
     if (key == "noclipColor") return ImVec4(1.f, 0.f, 0.f, 1.f);
     return ImVec4(0,0,0,1.f);
+}
+
+ImVec4 CrystalClient::getOffsetColor() {
+    if (getTempVar<bool>("af-version")) return {0.f, 0.f, 0.f, 0.f};
+    return {0.05, 0.05, 0.05, 0.f};
 }

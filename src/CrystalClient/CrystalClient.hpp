@@ -79,6 +79,7 @@ namespace CrystalClient {
 
     ImVec4 VarToIV4(std::string key);
     ImVec4 getDefaultColor(std::string key);
+    ImVec4 getOffsetColor();
     ccColor3B VarToCC3B(std::string key);
     ccColor4B VarToCC4B(std::string key);
     void IV4toVar(ImVec4 col, std::string key);

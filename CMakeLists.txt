@@ -66,4 +66,7 @@ CPMAddPackage("gh:matcool/gd-imgui-cocos#5bc72d6")
 # add_subdirectory(../../GitHub/gd-imgui-cocos ${CMAKE_CURRENT_BINARY_DIR}/gd-imgui-cocos_build) # for local edits
 target_link_libraries(${PROJECT_NAME} imgui-cocos)
 
+CPMAddPackage("gh:maxnut/GDReplayFormat#4950cc2")
+target_link_libraries(${PROJECT_NAME} libGDR)
+
 setup_geode_mod(${PROJECT_NAME})

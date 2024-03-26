@@ -38,3 +38,48 @@ namespace CrystalUI {
     inline int selectedIconSubTab = 0;
     inline int selectedCustomSubTab = 0;
 }
+
+inline ImVec4 operator+(const ImVec4& a, const ImVec4& b) {
+	ImVec4 vec;
+	vec.w = a.w + b.w;
+	vec.x = a.x + b.x;
+	vec.y = a.y + b.y;
+	vec.z = a.z + b.z;
+	return vec;
+}
+
+inline ImVec4 operator-(const ImVec4& a, const ImVec4& b) {
+	ImVec4 vec;
+	vec.w = a.w - b.w;
+	vec.x = a.x - b.x;
+	vec.y = a.y - b.y;
+	vec.z = a.z - b.z;
+	return vec;
+}
+
+inline ImVec4 operator*(const ImVec4& a, float b) {
+	ImVec4 vec;
+	vec.w = a.w;
+	vec.x = a.x * b;
+	vec.y = a.y * b;
+	vec.z = a.z * b;
+	return vec;
+}
+
+inline ImVec4 operator/(const ImVec4& a, float b) {
+	ImVec4 vec;
+	vec.w = a.w;
+	vec.x = a.x / b;
+	vec.y = a.y / b;
+	vec.z = a.z / b;
+	return vec;
+}
+
+inline bool operator==(const ImVec4& a, const ImVec4& b) {
+	bool wb, xb, yb, zb;
+	wb = static_cast<int>(a.w * 255.f) == static_cast<int>(b.w * 255.f);
+	xb = static_cast<int>(a.x * 255.f) == static_cast<int>(b.x * 255.f);
+	yb = static_cast<int>(a.y * 255.f) == static_cast<int>(b.y * 255.f);
+	zb = static_cast<int>(a.z * 255.f) == static_cast<int>(b.z * 255.f);
+	return (wb && xb && yb && zb);
+}

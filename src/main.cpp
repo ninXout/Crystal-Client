@@ -18,6 +18,22 @@ $execute {
 		}
 	}
 	//AppDelegate::get()->setAnimationInterval(1.0 / getSavedVar<float>("FPS"));
+
+	// AF check
+
+	ImVec4 AFcolor;
+	*setTempVar<bool>("af-version") = true;
+	AFcolor = CrystalClient::getDefaultColor("BGcolor");
+
+	std::time_t tp = std::time(NULL);
+    std::tm* ts = std::localtime(&tp);
+	*setTempVar<bool>("af-version") = (ts->tm_mon == 3 && ts->tm_mday == 1);
+
+	if (!getTempVar<bool>("af-version") && CrystalClient::VarToIV4("BGcolor") == AFcolor) CrystalClient::IV4toVar(CrystalClient::getDefaultColor("BGcolor"), "BGcolor");
+	if (!getTempVar<bool>("af-version") && CrystalClient::VarToIV4("lightColor") == AFcolor) CrystalClient::IV4toVar(CrystalClient::getDefaultColor("lightColor"), "lightColor");
+
+	// actual setup
+
 	ImGuiCocos::get().setup([] {
         ImGuiCocos::get().setInputMode(ImGuiCocos::InputMode::Blocking);
         CrystalUI::setupFonts();
